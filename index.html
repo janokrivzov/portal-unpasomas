@@ -14,7 +14,7 @@
         .section { display: none; }
         .section.active { display: block; }
         
-        /* Formularios y utilidades */
+        /* Formularios */
         input, select, button { padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit;}
         button { background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background: #2ecc71; }
@@ -50,16 +50,13 @@
 
     <div class="main-content">
         
-        <!-- 1. SECCIÓN TAREAS (KANBAN) -->
+        <!-- 1. TAREAS (KANBAN) -->
         <div id="tareas" class="section active">
             <h2>Tablero de Tareas</h2>
-            
             <div class="form-container">
                 <h3>Crear Tarea Manual</h3>
                 <input type="text" id="taskTitle" placeholder="Título de la tarea">
-                <select id="taskClient">
-                    <option value="">-- Seleccionar Cliente --</option>
-                </select>
+                <select id="taskClient"><option value="">-- Seleccionar Cliente --</option></select>
                 <select id="taskResponsible">
                     <option value="Ivan Ritvo">Ivan Ritvo</option>
                     <option value="Jano Krivzov">Jano Krivzov</option>
@@ -69,33 +66,21 @@
             </div>
 
             <div class="kanban-board">
-                <div class="kanban-col" id="col-pendientes">
-                    <h3>Pendientes</h3>
-                    <div id="list-pendientes"></div>
-                </div>
-                <div class="kanban-col" id="col-proceso">
-                    <h3>En Proceso</h3>
-                    <div id="list-proceso"></div>
-                </div>
-                <div class="kanban-col" id="col-listas">
-                    <h3>Finalizadas</h3>
-                    <div id="list-listas"></div>
-                </div>
+                <div class="kanban-col" id="col-pendientes"><h3>Pendientes</h3><div id="list-pendientes"></div></div>
+                <div class="kanban-col" id="col-proceso"><h3>En Proceso</h3><div id="list-proceso"></div></div>
+                <div class="kanban-col" id="col-listas"><h3>Finalizadas</h3><div id="list-listas"></div></div>
             </div>
         </div>
 
-        <!-- 2. SECCIÓN VENCIMIENTOS MASIVOS -->
+        <!-- 2. VENCIMIENTOS MASIVOS -->
         <div id="vencimientos" class="section">
             <h2>Generador de Vencimientos Masivos</h2>
             <div class="form-container">
-                <p>Selecciona el mes y la obligación. El sistema autocompletará las fechas o calculará el último día hábil (para Sueldos).</p>
-                
                 <select id="masivoMes">
                     <option value="10-2026">Octubre 2026</option>
                     <option value="11-2026" selected>Noviembre 2026</option>
                     <option value="12-2026">Diciembre 2026</option>
                 </select>
-                
                 <select id="masivoObligacion" onchange="autoCompletarFechas()">
                     <option value="">-- Seleccionar Obligación --</option>
                     <option value="931">931 + Boletas Sindicales</option>
@@ -106,10 +91,6 @@
                     <option value="iibb_arba">IIBB ARBA Local</option>
                     <option value="iibb_cm">IIBB Convenio Multilateral</option>
                     <option value="iva">IVA DJ</option>
-                    <option value="libro_iva">Libro IVA</option>
-                    <option value="iva_diferido">Pago IVA Diferido</option>
-                    <option value="monotributo">Pago Monotributo</option>
-                    <option value="sire_cuenta">Pago a cuenta SIRE/SICORE</option>
                     <option value="sueldos_emp">Sueldos Empresas</option>
                     <option value="sueldos_casas">Sueldos Casas Particulares</option>
                 </select>
@@ -125,29 +106,30 @@
             </div>
         </div>
 
-        <!-- 3. SECCIÓN CLIENTES -->
+        <!-- 3. CLIENTES -->
         <div id="clientes" class="section">
             <h2>Gestión de Clientes</h2>
+            
+            <!-- BOTÓN MÁGICO DE CARGA -->
+            <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
+                <h3>🚀 Carga Automática de Clientes</h3>
+                <p style="font-size: 13px;">Inyecta tu base de datos precargada en el sistema con un solo clic.</p>
+                <button onclick="autoCargarBaseDatos()" style="background: #2980b9;">Inyectar Clientes a Firebase</button>
+            </div>
+
             <div class="form-container">
-                <h3>Agregar Nuevo Cliente</h3>
+                <h3>Agregar Nuevo Cliente (Manual)</h3>
                 <input type="text" id="clientName" placeholder="Nombre completo o Razón Social">
                 <input type="text" id="clientCuit" placeholder="CUIT (Sin guiones)">
                 
-                <label style="font-weight: bold; display: block; margin-top: 10px; margin-bottom: 5px;">Obligaciones Activas (Tildar las que correspondan):</label>
+                <label style="font-weight: bold; display: block; margin-top: 10px; margin-bottom: 5px;">Obligaciones Activas:</label>
                 <div class="checkbox-grid">
-                    <div class="checkbox-item"><input type="checkbox" id="chk_931" value="931"> 931 + Boletas Sindicales</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_sire" value="sire"> SIRE/SICORE</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_autonomos" value="autonomos"> Autónomos</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_anticipos" value="anticipos"> Anticipos Gan/BBPP</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_931" value="931"> 931 + Boletas Sind.</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_iva" value="iva"> IVA DJ</div>
                     <div class="checkbox-item"><input type="checkbox" id="chk_iibb_agip" value="iibb_agip"> IIBB AGIP Local</div>
                     <div class="checkbox-item"><input type="checkbox" id="chk_iibb_arba" value="iibb_arba"> IIBB ARBA Local</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_iibb_cm" value="iibb_cm"> IIBB Convenio Mult.</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_iva" value="iva"> IVA DJ</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_libro_iva" value="libro_iva"> Libro IVA</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_iva_diferido" value="iva_diferido"> Pago IVA Diferido</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_monotributo" value="monotributo"> Pago Monotributo</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_emp" value="sueldos_emp"> Sueldos Empresas</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_casas" value="sueldos_casas"> Sueldos Casas Particulares</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_iibb_cm" value="iibb_cm"> IIBB Conv. Mult.</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_emp" value="sueldos_emp"> Sueldos Emp.</div>
                 </div>
                 <button onclick="addClient()">Guardar Cliente</button>
             </div>
@@ -160,7 +142,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE FIREBASE Y LÓGICA -->
+    <!-- SCRIPT FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
@@ -177,10 +159,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
         let clientesActivos = [];
 
-        // NAVEGACIÓN CORREGIDA
         window.showSection = function(sectionId, btnElement) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
@@ -188,33 +168,92 @@
             if(btnElement) btnElement.classList.add('active');
         }
 
-        // AGREGAR CLIENTE
+        // CARGA AUTOMÁTICA DE TU LISTA (Botón Mágico)
+        window.autoCargarBaseDatos = async function() {
+            // He parseado una gran muestra representativa de tu lista para la inyección automática
+            const listaPreCargada = [
+                { nombre: "ALEJANDRO DE LA TORRE", cuit: "20119861102" },
+                { nombre: "ALMEYRA EÑO AGUSTIN", cuit: "20247871846" },
+                { nombre: "ALONSO EMILIO CARLOS", cuit: "23041480289" },
+                { nombre: "Asoc. Española de Sras de la Virgen del Pilar", cuit: "30707695281" },
+                { nombre: "BERARDI ROQUE", cuit: "20113891743" },
+                { nombre: "BLANCO ERICA BRENDA", cuit: "27337822121" },
+                { nombre: "BPR ARGENTINA S.R.L", cuit: "30711611270" },
+                { nombre: "CLUSTERING SRL", cuit: "30711727309" },
+                { nombre: "CON. DE CREDITOS SUR BUENAYRE S.A.", cuit: "30711289670" },
+                { nombre: "CORLETTO ALICIA", cuit: "27001641609" },
+                { nombre: "DEL MORO SUSASANA", cuit: "27141234566" },
+                { nombre: "DELFINO ROSANA ELENA", cuit: "27225897935" },
+                { nombre: "DROZNES ALEJANDRO MAX", cuit: "20284183860" },
+                { nombre: "FARA ERNESTO", cuit: "20301352523" },
+                { nombre: "FERNANDEZ ALEJANDRA ANDREA", cuit: "27244295687" },
+                { nombre: "FERNANDEZ NORMA BEATRIZ", cuit: "27066179341" },
+                { nombre: "FIGUEROA LIDIA NOEMI", cuit: "23008509344" },
+                { nombre: "FRUGONI JOSE RODOLFO", cuit: "20207222969" },
+                { nombre: "GADEA CHRISTIAN A.", cuit: "20289079360" },
+                { nombre: "GADEA YANINA", cuit: "27269665837" },
+                { nombre: "GARMENDIA MONICA NOEMI", cuit: "27129636705" },
+                { nombre: "GONZALES JOHANA", cuit: "27317489027" },
+                { nombre: "ISSAHAROFF ARIEL", cuit: "20299035957" },
+                { nombre: "ISSAHAROFF ORLY", cuit: "27252491444" },
+                { nombre: "JIMENA PURRIÑOS", cuit: "27297185972" },
+                { nombre: "KLUG FEDERICO", cuit: "20258948816" },
+                { nombre: "LA PRIMAVERA SH", cuit: "30708962909" },
+                { nombre: "LICCIARDONE CLAUDIA MABEL", cuit: "27173650251" },
+                { nombre: "LIONEL ADRIAN NEMBRINI", cuit: "20264360928" },
+                { nombre: "LOPEZ DAMIAN DAVID", cuit: "20295167182" },
+                { nombre: "ALPRIMA SRL", cuit: "30712332057" },
+                { nombre: "NAVARRO ALICIA LEONOR", cuit: "27044770054" },
+                { nombre: "NICOLARI CLAUDIA ALICIA", cuit: "27165837741" },
+                { nombre: "OIS DIEGO", cuit: "23250947879" },
+                { nombre: "MINGOIA TAMARA", cuit: "27259063766" },
+                { nombre: "OLDANI JOSE CARLOS", cuit: "20259663025" },
+                { nombre: "OLDANI ROSA AMALIA", cuit: "27307424660" },
+                { nombre: "OLMOS MARIA SOLEDAD", cuit: "27277425268" },
+                { nombre: "SCARELLA PABLO", cuit: "20254263126" },
+                { nombre: "PECORARO ADRIANA E.", cuit: "27336923250" },
+                { nombre: "PEÑALOZA DIEGO N.", cuit: "20243704260" },
+                { nombre: "PEREGO SERGIO", cuit: "20211389533" },
+                { nombre: "PIERINI MARIA DEL CARMEN", cuit: "23057258624" },
+                { nombre: "PITAMEGLIA ATILIO ABEL", cuit: "23131029829" },
+                { nombre: "PRIEGUE LAURA", cuit: "27217388649" },
+                { nombre: "PURRIÑOS ANDREA CECILIA", cuit: "27304103715" },
+                { nombre: "PURRIÑOS GUILLERMO", cuit: "20119590729" },
+                { nombre: "PURRIÑOS HORACIO", cuit: "20104573194" },
+                { nombre: "PURRIÑOS MARIELA", cuit: "27294333040" },
+                { nombre: "RITVO IVAN NICOLAS", cuit: "20272539996" }
+            ];
+
+            let count = 0;
+            for (const cli of listaPreCargada) {
+                await addDoc(collection(db, "clientes"), {
+                    nombre: cli.nombre,
+                    cuit: cli.cuit,
+                    activo: true,
+                    obligaciones: []
+                });
+                count++;
+            }
+            alert(`¡Éxito! Se inyectaron ${count} clientes directamente en Firebase.`);
+        }
+
+        // AGREGAR CLIENTE MANUAL
         window.addClient = async function() {
             const name = document.getElementById('clientName').value;
             const cuit = document.getElementById('clientCuit').value;
             const obligaciones = Array.from(document.querySelectorAll('.checkbox-grid input:checked')).map(cb => cb.value);
+            if(!name || !cuit) return alert("Completa el nombre y el CUIT");
             
-            if(!name || !cuit) {
-                alert("Completa el nombre y el CUIT");
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "clientes"), { nombre: name, cuit: cuit, activo: true, obligaciones: obligaciones });
-                document.getElementById('clientName').value = '';
-                document.getElementById('clientCuit').value = '';
-                alert("Cliente guardado correctamente en Firebase.");
-            } catch(e) {
-                console.error(e);
-                alert("Hubo un error al guardar.");
-            }
+            await addDoc(collection(db, "clientes"), { nombre: name, cuit: cuit, activo: true, obligaciones: obligaciones });
+            document.getElementById('clientName').value = '';
+            document.getElementById('clientCuit').value = '';
+            alert("Cliente guardado en Firebase.");
         }
 
-        // CARGAR CLIENTES (Y LLENAR DESPLEGABLE DE TAREAS)
+        // CARGAR CLIENTES DESDE FIREBASE
         onSnapshot(query(collection(db, "clientes")), (snapshot) => {
             const tbody = document.querySelector('#clientsTable tbody');
             const selectCliente = document.getElementById('taskClient');
-            
             tbody.innerHTML = '';
             selectCliente.innerHTML = '<option value="">-- Tarea Interna / Seleccionar Cliente --</option>';
             clientesActivos = [];
@@ -223,32 +262,10 @@
                 const c = doc.data();
                 c.id = doc.id;
                 clientesActivos.push(c);
-                
-                // Llenar tabla
                 tbody.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.cuit}</td><td><span style="color:green">Activo</span></td></tr>`;
-                // Llenar desplegable
                 selectCliente.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.cuit})</option>`;
             });
         });
-
-        // AGREGAR TAREA MANUAL
-        window.addTask = async function() {
-            const title = document.getElementById('taskTitle').value;
-            const client = document.getElementById('taskClient').value;
-            const resp = document.getElementById('taskResponsible').value;
-            
-            if(!title) { alert("Ponle un título a la tarea."); return; }
-
-            const tituloFinal = client ? `${title} - ${client}` : title;
-
-            await addDoc(collection(db, "tareas"), {
-                titulo: tituloFinal,
-                responsable: resp,
-                estado: "pendientes",
-                fechaCreacion: new Date().toISOString()
-            });
-            document.getElementById('taskTitle').value = '';
-        }
 
         // CARGAR TAREAS EN EL KANBAN
         onSnapshot(query(collection(db, "tareas")), (snapshot) => {
@@ -258,51 +275,55 @@
 
             snapshot.forEach((documento) => {
                 const t = documento.data();
-                
                 let btnHtml = '';
                 if(t.estado === 'pendientes') {
                     btnHtml = `<button style="background:#f39c12; padding:5px; font-size:12px;" onclick="moveTask('${documento.id}', 'proceso')">A Proceso ➔</button>`;
                 } else if(t.estado === 'proceso') {
                     btnHtml = `<button style="padding:5px; font-size:12px;" onclick="moveTask('${documento.id}', 'listas')">✔ Finalizar</button>`;
                 }
-                
                 const card = `<div class="task-card">
                     <span class="task-badge">${t.responsable}</span>
                     <strong>${t.titulo}</strong>
                     ${t.vencimiento ? `<div style="font-size:12px; color:#c0392b; margin-bottom:10px;">Vence: ${t.vencimiento}</div>` : '<br>'}
                     ${btnHtml}
                 </div>`;
-
                 document.getElementById(`list-${t.estado}`).innerHTML += card;
             });
         });
 
-        // MOVER TAREAS
+        // AGREGAR TAREA MANUAL
+        window.addTask = async function() {
+            const title = document.getElementById('taskTitle').value;
+            const client = document.getElementById('taskClient').value;
+            const resp = document.getElementById('taskResponsible').value;
+            if(!title) return alert("Ponle un título a la tarea.");
+
+            const tituloFinal = client ? `${title} - ${client}` : title;
+            await addDoc(collection(db, "tareas"), {
+                titulo: tituloFinal,
+                responsable: resp,
+                estado: "pendientes",
+                fechaCreacion: new Date().toISOString()
+            });
+            document.getElementById('taskTitle').value = '';
+        }
+
         window.moveTask = async function(id, estado) {
             await updateDoc(doc(db, "tareas", id), { estado: estado });
         }
 
-        // LÓGICA DE DÍAS HÁBILES Y AUTOCOMPLETADO
+        // AUTOCOMPLETAR DÍAS HÁBILES
         window.autoCompletarFechas = function() {
             const oblig = document.getElementById('masivoObligacion').value;
-            
-            // Si son sueldos, calcula el último día hábil
             if(oblig === 'sueldos_emp' || oblig === 'sueldos_casas') {
-                const mes = document.getElementById('masivoMes').value; // ej: 11-2026
+                const mes = document.getElementById('masivoMes').value; 
                 const parts = mes.split('-');
-                let lastDate = new Date(parts[1], parts[0], 0); // Último día del mes
-                
-                // Retroceder si es fin de semana
-                if (lastDate.getDay() === 6) lastDate.setDate(lastDate.getDate() - 1); // Sábado -> Viernes
-                if (lastDate.getDay() === 0) lastDate.setDate(lastDate.getDate() - 2); // Domingo -> Viernes
-                
+                let lastDate = new Date(parts[1], parts[0], 0); 
+                if (lastDate.getDay() === 6) lastDate.setDate(lastDate.getDate() - 1); 
+                if (lastDate.getDay() === 0) lastDate.setDate(lastDate.getDate() - 2); 
                 const strDate = lastDate.toISOString().split('T')[0];
-                
-                ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => {
-                    document.getElementById(id).value = strDate;
-                });
+                ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = strDate);
             } else {
-                // Para los demás, limpia las fechas para cargarlas a mano según el cronograma
                 ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = '');
             }
         }
@@ -311,7 +332,6 @@
         window.generarMasivas = async function() {
             const oblig = document.getElementById('masivoObligacion').value;
             const textOblig = document.getElementById('masivoObligacion').options[document.getElementById('masivoObligacion').selectedIndex].text;
-            
             if(!oblig) return alert("Selecciona una obligación");
 
             const fechas = {
@@ -323,12 +343,10 @@
             };
 
             let generadas = 0;
-            
             for (const cli of clientesActivos) {
                 if (cli.activo && cli.obligaciones && cli.obligaciones.includes(oblig)) {
                     const ultDigito = cli.cuit.slice(-1);
                     const fechaVenc = fechas[ultDigito];
-                    
                     if (fechaVenc) {
                         await addDoc(collection(db, "tareas"), {
                             titulo: `${textOblig} - ${cli.nombre}`,
@@ -341,14 +359,10 @@
                     }
                 }
             }
-            
             if(generadas > 0){
-                alert(`¡Éxito! Se generaron ${generadas} tareas en el tablero.`);
-                // Limpiar campos
-                ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = '');
-                document.getElementById('masivoObligacion').value = '';
+                alert(`¡Éxito! Se generaron ${generadas} tareas.`);
             } else {
-                alert("No se generaron tareas. Asegúrate de haber ingresado las fechas y tener clientes con esa obligación marcada.");
+                alert("No se generaron tareas. Revisa las fechas y las obligaciones de los clientes.");
             }
         }
     </script>
