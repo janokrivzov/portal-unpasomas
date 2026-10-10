@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intranet - Estudio Contable</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { margin-top: 0; font-size: 20px; text-align: center; border-bottom: 1px solid #34495e; padding-bottom: 15px; }
+        .menu-btn { background: none; border: none; color: #ecf0f1; padding: 15px 10px; text-align: left; font-size: 16px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
+        .menu-btn:hover, .menu-btn.active { background: #34495e; }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        /* Kanban */
+        .kanban-board { display: flex; gap: 20px; }
+        .kanban-col { background: #e2e4e6; border-radius: 5px; width: 33%; padding: 15px; min-height: 400px; }
+        .kanban-col h3 { text-align: center; margin-top: 0; color: #333; }
+        .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; cursor: pointer; }
+        .task-card strong { display: block; color: #2980b9; margin-bottom: 5px; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; background: #3498db; color: white; margin-top: 8px;}
+        
+        /* Forms & Buttons */
+        input, select, button { padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2ecc71; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 500px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Un Paso Más</h2>
+        <button class="menu-btn active" onclick="showSection('tareas')">Tablero Tareas</button>
+        <button class="menu-btn" onclick="showSection('clientes')">Nuevo Cliente</button>
+    </div>
+
+    <div class="main-content">
+        <!-- SECCIÓN TAREAS -->
+        <div id="tareas" class="section active">
+            <h2>Tablero de Tareas</h2>
+            <div class="form-container" style="margin-bottom: 20px;">
+                <input type="text" id="taskTitle" placeholder="Nombre de la tarea (Ej: IVA - Alejandro)">
+                <select id="taskResponsible">
+                    <option value="Ivan Ritvo">Ivan Ritvo</option>
+                    <option value="Jano Krivzov">Jano Krivzov</option>
+                    <option value="Un Paso Mas">Un Paso Mas</option>
+                </select>
+                <button onclick="addTask()">Agregar Tarea</button>
+            </div>
+
+            <div class="kanban-board">
+                <div class="kanban-col" id="col-pendientes">
+                    <h3>Pendientes</h3>
+                    <div id="list-pendientes"></div>
+                </div>
+                <div class="kanban-col" id="col-proceso">
+                    <h3>En Proceso</h3>
+                    <div id="list-proceso"></div>
+                </div>
+                <div class="kanban-col" id="col-listas">
+                    <h3>Listas</h3>
+                    <div id="list-listas"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN CLIENTES -->
+        <div id="clientes" class="section">
+            <h2>Agregar Nuevo Cliente</h2>
+            <div class="form-container">
+                <input type="text" id="clientName" placeholder="Nombre completo o Razón Social">
+                <input type="text" id="clientCuit" placeholder="CUIT">
+                <button onclick="addClient()">Guardar Cliente en Firebase</button>
+                <div id="client-msg" style="color: #27ae60; font-weight: bold; margin-top: 10px; display: none;">¡Cliente guardado exitosamente!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE & LÓGICA -->
+    <script type="module">
+        // Importar funciones de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        // TU LLAVE MAESTRA
+        const firebaseConfig = {
+            apiKey: "AIzaSyCUGSTBjTNr-FSOqcysoMvUc4kKMh0Ekg0",
+            authDomain: "un-paso-mas-dashboard.firebaseapp.com",
+            projectId: "un-paso-mas-dashboard",
+            storageBucket: "un-paso-mas-dashboard.firebasestorage.app",
+            messagingSenderId: "1050531286195",
+            appId: "1:1050531286195:web:6de2675628ffba633134c6"
+        };
+
+        // Iniciar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Funciones de navegación
+        window.showSection = function(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // GUARDAR UN CLIENTE NUEVO
+        window.addClient = async function() {
+            const name = document.getElementById('clientName').value;
+            const cuit = document.getElementById('clientCuit').value;
+            
+            if(!name || !cuit) { alert("Completa los datos"); return; }
+
+            try {
+                await addDoc(collection(db, "clientes"), {
+                    nombre: name,
+                    cuit: cuit,
+                    fechaCreacion: new Date()
+                });
+                document.getElementById('clientName').value = '';
+                document.getElementById('clientCuit').value = '';
+                document.getElementById('client-msg').style.display = 'block';
+                setTimeout(() => document.getElementById('client-msg').style.display = 'none', 3000);
+            } catch (e) {
+                console.error("Error al guardar: ", e);
+                alert("Error al conectar con la base de datos.");
+            }
+        }
+
+        // GUARDAR UNA TAREA NUEVA
+        window.addTask = async function() {
+            const title = document.getElementById('taskTitle').value;
+            const resp = document.getElementById('taskResponsible').value;
+            
+            if(!title) { alert("Ponle un nombre a la tarea"); return; }
+
+            try {
+                await addDoc(collection(db, "tareas"), {
+                    titulo: title,
+                    responsable: resp,
+                    estado: "pendientes",
+                    fechaCreacion: new Date()
+                });
+                document.getElementById('taskTitle').value = '';
+            } catch (e) {
+                console.error("Error al guardar tarea: ", e);
+            }
+        }
+
+        // LEER LAS TAREAS EN TIEMPO REAL
+        const q = query(collection(db, "tareas"));
+        onSnapshot(q, (snapshot) => {
+            document.getElementById('list-pendientes').innerHTML = '';
+            document.getElementById('list-proceso').innerHTML = '';
+            document.getElementById('list-listas').innerHTML = '';
+
+            snapshot.forEach((documento) => {
+                const data = documento.data();
+                const taskId = documento.id;
+                
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.innerHTML = `
+                    <strong>${data.titulo}</strong>
+                    <span>Resp: ${data.responsable}</span><br>
+                    <button style="margin-top:10px; padding:5px; font-size:12px; background:#f39c12" onclick="moveTask('${taskId}', 'proceso')">▶ A Proceso</button>
+                    <button style="margin-top:5px; padding:5px; font-size:12px;" onclick="moveTask('${taskId}', 'listas')">✔ Lista</button>
+                `;
+
+                if(data.estado === "pendientes") document.getElementById('list-pendientes').appendChild(card);
+                if(data.estado === "proceso") document.getElementById('list-proceso').appendChild(card);
+                if(data.estado === "listas") {
+                    card.innerHTML = `<strong>${data.titulo}</strong><span>Resp: ${data.responsable}</span>`; // Sin botones si ya está lista
+                    document.getElementById('list-listas').appendChild(card);
+                }
+            });
+        });
+
+        // MOVER TAREA DE COLUMNA
+        window.moveTask = async function(id, nuevoEstado) {
+            const tareaRef = doc(db, "tareas", id);
+            await updateDoc(tareaRef, { estado: nuevoEstado });
+        }
+    </script>
+</body>
+</html>
