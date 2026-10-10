@@ -18,15 +18,20 @@
         .kanban-board { display: flex; gap: 20px; }
         .kanban-col { background: #e2e4e6; border-radius: 5px; width: 33%; padding: 15px; min-height: 400px; }
         .kanban-col h3 { text-align: center; margin-top: 0; color: #333; }
-        .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; cursor: pointer; }
+        .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; }
         .task-card strong { display: block; color: #2980b9; margin-bottom: 5px; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; background: #3498db; color: white; margin-top: 8px;}
         
-        /* Forms & Buttons */
+        /* Formularios y utilidades */
         input, select, button { padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         button { background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background: #2ecc71; }
-        .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 500px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 14px;}
+        .checkbox-item input { width: auto; margin: 0; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #34495e; color: white; }
     </style>
 </head>
 <body>
@@ -34,23 +39,16 @@
     <div class="sidebar">
         <h2>Un Paso Más</h2>
         <button class="menu-btn active" onclick="showSection('tareas')">Tablero Tareas</button>
-        <button class="menu-btn" onclick="showSection('clientes')">Nuevo Cliente</button>
+        <button class="menu-btn" onclick="showSection('calendario')">Calendario</button>
+        <button class="menu-btn" onclick="showSection('vencimientos')">Vencimientos Masivos</button>
+        <button class="menu-btn" onclick="showSection('clientes')">Gestión Clientes</button>
     </div>
 
     <div class="main-content">
-        <!-- SECCIÓN TAREAS -->
+        
+        <!-- SECCIÓN TAREAS (KANBAN) -->
         <div id="tareas" class="section active">
             <h2>Tablero de Tareas</h2>
-            <div class="form-container" style="margin-bottom: 20px;">
-                <input type="text" id="taskTitle" placeholder="Nombre de la tarea (Ej: IVA - Alejandro)">
-                <select id="taskResponsible">
-                    <option value="Ivan Ritvo">Ivan Ritvo</option>
-                    <option value="Jano Krivzov">Jano Krivzov</option>
-                    <option value="Un Paso Mas">Un Paso Mas</option>
-                </select>
-                <button onclick="addTask()">Agregar Tarea</button>
-            </div>
-
             <div class="kanban-board">
                 <div class="kanban-col" id="col-pendientes">
                     <h3>Pendientes</h3>
@@ -67,25 +65,77 @@
             </div>
         </div>
 
+        <!-- SECCIÓN CALENDARIO -->
+        <div id="calendario" class="section">
+            <h2>Calendario de Vencimientos</h2>
+            <div class="form-container">
+                <p><i>El calendario interactivo mostrará las tareas pendientes por fecha a medida que se generen en los Vencimientos Masivos.</i></p>
+                <!-- Aquí se inyectará el calendario dinámico -->
+                <div id="calendar-view" style="display:grid; grid-template-columns: repeat(7, 1fr); gap: 5px;"></div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN VENCIMIENTOS MASIVOS -->
+        <div id="vencimientos" class="section">
+            <h2>Generador de Vencimientos Masivos</h2>
+            <div class="form-container">
+                <select id="masivoMes">
+                    <option value="10-2026">Octubre 2026</option>
+                    <option value="11-2026">Noviembre 2026</option>
+                    <option value="12-2026">Diciembre 2026</option>
+                </select>
+                <select id="masivoObligacion" onchange="autoCompletarFechas()">
+                    <option value="">-- Seleccionar Obligación --</option>
+                    <option value="iva">IVA DJ (mes vencido)</option>
+                    <option value="931">Presentación y pago de 931</option>
+                    <option value="sueldos_emp">Sueldos empresas</option>
+                    <option value="sueldos_casas">Sueldos casas particulares</option>
+                    <option value="iibb_agip">IIBB AGIP DJ contribuyente local</option>
+                    <option value="iibb_arba">IIBB ARBA DJ contribuyente local</option>
+                </select>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                    <input type="date" id="fecha_01" placeholder="CUIT Terminado en 0-1">
+                    <input type="date" id="fecha_23" placeholder="CUIT Terminado en 2-3">
+                    <input type="date" id="fecha_45" placeholder="CUIT Terminado en 4-5">
+                    <input type="date" id="fecha_67" placeholder="CUIT Terminado en 6-7">
+                    <input type="date" id="fecha_89" placeholder="CUIT Terminado en 8-9">
+                </div>
+                <button onclick="generarMasivas()" style="margin-top: 15px;">Generar Tareas para Clientes Activos</button>
+            </div>
+        </div>
+
         <!-- SECCIÓN CLIENTES -->
         <div id="clientes" class="section">
-            <h2>Agregar Nuevo Cliente</h2>
+            <h2>Gestión de Clientes</h2>
             <div class="form-container">
                 <input type="text" id="clientName" placeholder="Nombre completo o Razón Social">
-                <input type="text" id="clientCuit" placeholder="CUIT">
-                <button onclick="addClient()">Guardar Cliente en Firebase</button>
-                <div id="client-msg" style="color: #27ae60; font-weight: bold; margin-top: 10px; display: none;">¡Cliente guardado exitosamente!</div>
+                <input type="text" id="clientCuit" placeholder="CUIT (Ej: 20119861102)">
+                <label>Obligaciones Activas:</label>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item"><input type="checkbox" id="chk_931" value="931"> 931 + Boletas Sindicales</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_iva" value="iva"> IVA DJ</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_iibb_agip" value="iibb_agip"> IIBB AGIP</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_iibb_arba" value="iibb_arba"> IIBB ARBA</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_emp" value="sueldos_emp"> Sueldos empresas</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_casas" value="sueldos_casas"> Sueldos casas part.</div>
+                </div>
+                <button onclick="addClient()">Guardar Cliente</button>
             </div>
+            
+            <h3>Base de Clientes</h3>
+            <table id="clientsTable">
+                <thead><tr><th>Nombre</th><th>CUIT</th><th>Estado</th></tr></thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
-    <!-- FIREBASE & LÓGICA -->
+    <!-- FIREBASE -->
     <script type="module">
-        // Importar funciones de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-        // TU LLAVE MAESTRA
         const firebaseConfig = {
             apiKey: "AIzaSyCUGSTBjTNr-FSOqcysoMvUc4kKMh0Ekg0",
             authDomain: "un-paso-mas-dashboard.firebaseapp.com",
@@ -95,11 +145,11 @@
             appId: "1:1050531286195:web:6de2675628ffba633134c6"
         };
 
-        // Iniciar Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        
+        let clientesActivos = [];
 
-        // Funciones de navegación
         window.showSection = function(sectionId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
@@ -107,83 +157,40 @@
             event.target.classList.add('active');
         }
 
-        // GUARDAR UN CLIENTE NUEVO
+        // GUARDAR CLIENTE CON IMPUESTOS
         window.addClient = async function() {
             const name = document.getElementById('clientName').value;
             const cuit = document.getElementById('clientCuit').value;
+            const obligaciones = Array.from(document.querySelectorAll('.checkbox-grid input:checked')).map(cb => cb.value);
             
-            if(!name || !cuit) { alert("Completa los datos"); return; }
+            if(!name || !cuit) return alert("Completa el nombre y CUIT");
 
-            try {
-                await addDoc(collection(db, "clientes"), {
-                    nombre: name,
-                    cuit: cuit,
-                    fechaCreacion: new Date()
-                });
-                document.getElementById('clientName').value = '';
-                document.getElementById('clientCuit').value = '';
-                document.getElementById('client-msg').style.display = 'block';
-                setTimeout(() => document.getElementById('client-msg').style.display = 'none', 3000);
-            } catch (e) {
-                console.error("Error al guardar: ", e);
-                alert("Error al conectar con la base de datos.");
-            }
+            await addDoc(collection(db, "clientes"), { nombre: name, cuit: cuit, activo: true, obligaciones: obligaciones });
+            document.getElementById('clientName').value = '';
+            document.getElementById('clientCuit').value = '';
+            alert("Cliente guardado");
         }
 
-        // GUARDAR UNA TAREA NUEVA
-        window.addTask = async function() {
-            const title = document.getElementById('taskTitle').value;
-            const resp = document.getElementById('taskResponsible').value;
-            
-            if(!title) { alert("Ponle un nombre a la tarea"); return; }
+        // LEER CLIENTES
+        onSnapshot(query(collection(db, "clientes")), (snapshot) => {
+            const tbody = document.querySelector('#clientsTable tbody');
+            tbody.innerHTML = '';
+            clientesActivos = [];
+            snapshot.forEach(doc => {
+                const c = doc.data();
+                c.id = doc.id;
+                clientesActivos.push(c);
+                tbody.innerHTML += `<tr><td>${c.nombre}</td><td>${c.cuit}</td><td>${c.activo ? 'Activo' : 'Inactivo'}</td></tr>`;
+            });
+        });
 
-            try {
-                await addDoc(collection(db, "tareas"), {
-                    titulo: title,
-                    responsable: resp,
-                    estado: "pendientes",
-                    fechaCreacion: new Date()
-                });
-                document.getElementById('taskTitle').value = '';
-            } catch (e) {
-                console.error("Error al guardar tarea: ", e);
-            }
-        }
-
-        // LEER LAS TAREAS EN TIEMPO REAL
-        const q = query(collection(db, "tareas"));
-        onSnapshot(q, (snapshot) => {
+        // LEER TAREAS
+        onSnapshot(query(collection(db, "tareas")), (snapshot) => {
             document.getElementById('list-pendientes').innerHTML = '';
             document.getElementById('list-proceso').innerHTML = '';
             document.getElementById('list-listas').innerHTML = '';
 
             snapshot.forEach((documento) => {
-                const data = documento.data();
-                const taskId = documento.id;
-                
-                const card = document.createElement('div');
-                card.className = 'task-card';
-                card.innerHTML = `
-                    <strong>${data.titulo}</strong>
-                    <span>Resp: ${data.responsable}</span><br>
-                    <button style="margin-top:10px; padding:5px; font-size:12px; background:#f39c12" onclick="moveTask('${taskId}', 'proceso')">▶ A Proceso</button>
-                    <button style="margin-top:5px; padding:5px; font-size:12px;" onclick="moveTask('${taskId}', 'listas')">✔ Lista</button>
-                `;
-
-                if(data.estado === "pendientes") document.getElementById('list-pendientes').appendChild(card);
-                if(data.estado === "proceso") document.getElementById('list-proceso').appendChild(card);
-                if(data.estado === "listas") {
-                    card.innerHTML = `<strong>${data.titulo}</strong><span>Resp: ${data.responsable}</span>`; // Sin botones si ya está lista
-                    document.getElementById('list-listas').appendChild(card);
-                }
-            });
-        });
-
-        // MOVER TAREA DE COLUMNA
-        window.moveTask = async function(id, nuevoEstado) {
-            const tareaRef = doc(db, "tareas", id);
-            await updateDoc(tareaRef, { estado: nuevoEstado });
-        }
-    </script>
-</body>
-</html>
+                const t = documento.data();
+                const btnProcess = `<button style="background:#f39c12; margin-top:5px;" onclick="moveTask('${documento.id}', 'proceso')">A Proceso</button>`;
+                const btnDone = `<button style="margin
