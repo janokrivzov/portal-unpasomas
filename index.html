@@ -14,23 +14,28 @@
         .section { display: none; }
         .section.active { display: block; }
         
-        /* Kanban */
+        /* Formularios y utilidades */
+        input, select, button { padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit;}
+        button { background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2ecc71; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
+        
+        /* Tablero Kanban */
         .kanban-board { display: flex; gap: 20px; }
         .kanban-col { background: #e2e4e6; border-radius: 5px; width: 33%; padding: 15px; min-height: 400px; }
         .kanban-col h3 { text-align: center; margin-top: 0; color: #333; }
         .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; }
         .task-card strong { display: block; color: #2980b9; margin-bottom: 5px; }
+        .task-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #34495e; color: white; margin-bottom: 8px;}
         
-        /* Formularios y utilidades */
-        input, select, button { padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background: #2ecc71; }
-        .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
+        /* Grilla de Impuestos */
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
-        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 14px;}
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 13px;}
         .checkbox-item input { width: auto; margin: 0; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        
+        /* Tabla Clientes */
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; font-size: 14px;}
         th { background: #34495e; color: white; }
     </style>
 </head>
@@ -38,17 +43,31 @@
 
     <div class="sidebar">
         <h2>Un Paso Más</h2>
-        <button class="menu-btn active" onclick="showSection('tareas')">Tablero Tareas</button>
-        <button class="menu-btn" onclick="showSection('calendario')">Calendario</button>
-        <button class="menu-btn" onclick="showSection('vencimientos')">Vencimientos Masivos</button>
-        <button class="menu-btn" onclick="showSection('clientes')">Gestión Clientes</button>
+        <button class="menu-btn active" onclick="showSection('tareas', this)">Tablero Tareas</button>
+        <button class="menu-btn" onclick="showSection('vencimientos', this)">Vencimientos Masivos</button>
+        <button class="menu-btn" onclick="showSection('clientes', this)">Gestión Clientes</button>
     </div>
 
     <div class="main-content">
         
-        <!-- SECCIÓN TAREAS (KANBAN) -->
+        <!-- 1. SECCIÓN TAREAS (KANBAN) -->
         <div id="tareas" class="section active">
             <h2>Tablero de Tareas</h2>
+            
+            <div class="form-container">
+                <h3>Crear Tarea Manual</h3>
+                <input type="text" id="taskTitle" placeholder="Título de la tarea">
+                <select id="taskClient">
+                    <option value="">-- Seleccionar Cliente --</option>
+                </select>
+                <select id="taskResponsible">
+                    <option value="Ivan Ritvo">Ivan Ritvo</option>
+                    <option value="Jano Krivzov">Jano Krivzov</option>
+                    <option value="Un Paso Mas">Un Paso Mas</option>
+                </select>
+                <button onclick="addTask()">+ Agregar Tarea</button>
+            </div>
+
             <div class="kanban-board">
                 <div class="kanban-col" id="col-pendientes">
                     <h3>Pendientes</h3>
@@ -59,66 +78,76 @@
                     <div id="list-proceso"></div>
                 </div>
                 <div class="kanban-col" id="col-listas">
-                    <h3>Listas</h3>
+                    <h3>Finalizadas</h3>
                     <div id="list-listas"></div>
                 </div>
             </div>
         </div>
 
-        <!-- SECCIÓN CALENDARIO -->
-        <div id="calendario" class="section">
-            <h2>Calendario de Vencimientos</h2>
-            <div class="form-container">
-                <p><i>El calendario interactivo mostrará las tareas pendientes por fecha a medida que se generen en los Vencimientos Masivos.</i></p>
-                <!-- Aquí se inyectará el calendario dinámico -->
-                <div id="calendar-view" style="display:grid; grid-template-columns: repeat(7, 1fr); gap: 5px;"></div>
-            </div>
-        </div>
-
-        <!-- SECCIÓN VENCIMIENTOS MASIVOS -->
+        <!-- 2. SECCIÓN VENCIMIENTOS MASIVOS -->
         <div id="vencimientos" class="section">
             <h2>Generador de Vencimientos Masivos</h2>
             <div class="form-container">
+                <p>Selecciona el mes y la obligación. El sistema autocompletará las fechas o calculará el último día hábil (para Sueldos).</p>
+                
                 <select id="masivoMes">
                     <option value="10-2026">Octubre 2026</option>
-                    <option value="11-2026">Noviembre 2026</option>
+                    <option value="11-2026" selected>Noviembre 2026</option>
                     <option value="12-2026">Diciembre 2026</option>
                 </select>
+                
                 <select id="masivoObligacion" onchange="autoCompletarFechas()">
                     <option value="">-- Seleccionar Obligación --</option>
-                    <option value="iva">IVA DJ (mes vencido)</option>
-                    <option value="931">Presentación y pago de 931</option>
-                    <option value="sueldos_emp">Sueldos empresas</option>
-                    <option value="sueldos_casas">Sueldos casas particulares</option>
-                    <option value="iibb_agip">IIBB AGIP DJ contribuyente local</option>
-                    <option value="iibb_arba">IIBB ARBA DJ contribuyente local</option>
+                    <option value="931">931 + Boletas Sindicales</option>
+                    <option value="sire">SIRE / SICORE</option>
+                    <option value="autonomos">Autónomos</option>
+                    <option value="anticipos">Anticipos Ganancias/Bienes</option>
+                    <option value="iibb_agip">IIBB AGIP Local</option>
+                    <option value="iibb_arba">IIBB ARBA Local</option>
+                    <option value="iibb_cm">IIBB Convenio Multilateral</option>
+                    <option value="iva">IVA DJ</option>
+                    <option value="libro_iva">Libro IVA</option>
+                    <option value="iva_diferido">Pago IVA Diferido</option>
+                    <option value="monotributo">Pago Monotributo</option>
+                    <option value="sire_cuenta">Pago a cuenta SIRE/SICORE</option>
+                    <option value="sueldos_emp">Sueldos Empresas</option>
+                    <option value="sueldos_casas">Sueldos Casas Particulares</option>
                 </select>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                    <input type="date" id="fecha_01" placeholder="CUIT Terminado en 0-1">
-                    <input type="date" id="fecha_23" placeholder="CUIT Terminado en 2-3">
-                    <input type="date" id="fecha_45" placeholder="CUIT Terminado en 4-5">
-                    <input type="date" id="fecha_67" placeholder="CUIT Terminado en 6-7">
-                    <input type="date" id="fecha_89" placeholder="CUIT Terminado en 8-9">
+                    <div><label>Terminación 0-1</label><input type="date" id="fecha_01"></div>
+                    <div><label>Terminación 2-3</label><input type="date" id="fecha_23"></div>
+                    <div><label>Terminación 4-5</label><input type="date" id="fecha_45"></div>
+                    <div><label>Terminación 6-7</label><input type="date" id="fecha_67"></div>
+                    <div><label>Terminación 8-9</label><input type="date" id="fecha_89"></div>
                 </div>
-                <button onclick="generarMasivas()" style="margin-top: 15px;">Generar Tareas para Clientes Activos</button>
+                <button onclick="generarMasivas()" style="margin-top: 15px; background: #e67e22;">Generar Tareas en el Tablero</button>
             </div>
         </div>
 
-        <!-- SECCIÓN CLIENTES -->
+        <!-- 3. SECCIÓN CLIENTES -->
         <div id="clientes" class="section">
             <h2>Gestión de Clientes</h2>
             <div class="form-container">
+                <h3>Agregar Nuevo Cliente</h3>
                 <input type="text" id="clientName" placeholder="Nombre completo o Razón Social">
-                <input type="text" id="clientCuit" placeholder="CUIT (Ej: 20119861102)">
-                <label>Obligaciones Activas:</label>
+                <input type="text" id="clientCuit" placeholder="CUIT (Sin guiones)">
+                
+                <label style="font-weight: bold; display: block; margin-top: 10px; margin-bottom: 5px;">Obligaciones Activas (Tildar las que correspondan):</label>
                 <div class="checkbox-grid">
                     <div class="checkbox-item"><input type="checkbox" id="chk_931" value="931"> 931 + Boletas Sindicales</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_sire" value="sire"> SIRE/SICORE</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_autonomos" value="autonomos"> Autónomos</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_anticipos" value="anticipos"> Anticipos Gan/BBPP</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_iibb_agip" value="iibb_agip"> IIBB AGIP Local</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_iibb_arba" value="iibb_arba"> IIBB ARBA Local</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_iibb_cm" value="iibb_cm"> IIBB Convenio Mult.</div>
                     <div class="checkbox-item"><input type="checkbox" id="chk_iva" value="iva"> IVA DJ</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_iibb_agip" value="iibb_agip"> IIBB AGIP</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_iibb_arba" value="iibb_arba"> IIBB ARBA</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_emp" value="sueldos_emp"> Sueldos empresas</div>
-                    <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_casas" value="sueldos_casas"> Sueldos casas part.</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_libro_iva" value="libro_iva"> Libro IVA</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_iva_diferido" value="iva_diferido"> Pago IVA Diferido</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_monotributo" value="monotributo"> Pago Monotributo</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_emp" value="sueldos_emp"> Sueldos Empresas</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_casas" value="sueldos_casas"> Sueldos Casas Particulares</div>
                 </div>
                 <button onclick="addClient()">Guardar Cliente</button>
             </div>
@@ -131,11 +160,12 @@
         </div>
     </div>
 
-    <!-- FIREBASE -->
+    <!-- SCRIPT DE FIREBASE Y LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
+        // TUS CLAVES REALES DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCUGSTBjTNr-FSOqcysoMvUc4kKMh0Ekg0",
             authDomain: "un-paso-mas-dashboard.firebaseapp.com",
@@ -150,41 +180,77 @@
         
         let clientesActivos = [];
 
-        window.showSection = function(sectionId) {
+        // NAVEGACIÓN CORREGIDA
+        window.showSection = function(sectionId, btnElement) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
-            event.target.classList.add('active');
+            if(btnElement) btnElement.classList.add('active');
         }
 
-        // GUARDAR CLIENTE CON IMPUESTOS
+        // AGREGAR CLIENTE
         window.addClient = async function() {
             const name = document.getElementById('clientName').value;
             const cuit = document.getElementById('clientCuit').value;
             const obligaciones = Array.from(document.querySelectorAll('.checkbox-grid input:checked')).map(cb => cb.value);
             
-            if(!name || !cuit) return alert("Completa el nombre y CUIT");
+            if(!name || !cuit) {
+                alert("Completa el nombre y el CUIT");
+                return;
+            }
 
-            await addDoc(collection(db, "clientes"), { nombre: name, cuit: cuit, activo: true, obligaciones: obligaciones });
-            document.getElementById('clientName').value = '';
-            document.getElementById('clientCuit').value = '';
-            alert("Cliente guardado");
+            try {
+                await addDoc(collection(db, "clientes"), { nombre: name, cuit: cuit, activo: true, obligaciones: obligaciones });
+                document.getElementById('clientName').value = '';
+                document.getElementById('clientCuit').value = '';
+                alert("Cliente guardado correctamente en Firebase.");
+            } catch(e) {
+                console.error(e);
+                alert("Hubo un error al guardar.");
+            }
         }
 
-        // LEER CLIENTES
+        // CARGAR CLIENTES (Y LLENAR DESPLEGABLE DE TAREAS)
         onSnapshot(query(collection(db, "clientes")), (snapshot) => {
             const tbody = document.querySelector('#clientsTable tbody');
+            const selectCliente = document.getElementById('taskClient');
+            
             tbody.innerHTML = '';
+            selectCliente.innerHTML = '<option value="">-- Tarea Interna / Seleccionar Cliente --</option>';
             clientesActivos = [];
+            
             snapshot.forEach(doc => {
                 const c = doc.data();
                 c.id = doc.id;
                 clientesActivos.push(c);
-                tbody.innerHTML += `<tr><td>${c.nombre}</td><td>${c.cuit}</td><td>${c.activo ? 'Activo' : 'Inactivo'}</td></tr>`;
+                
+                // Llenar tabla
+                tbody.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.cuit}</td><td><span style="color:green">Activo</span></td></tr>`;
+                // Llenar desplegable
+                selectCliente.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.cuit})</option>`;
             });
         });
 
-        // LEER TAREAS
+        // AGREGAR TAREA MANUAL
+        window.addTask = async function() {
+            const title = document.getElementById('taskTitle').value;
+            const client = document.getElementById('taskClient').value;
+            const resp = document.getElementById('taskResponsible').value;
+            
+            if(!title) { alert("Ponle un título a la tarea."); return; }
+
+            const tituloFinal = client ? `${title} - ${client}` : title;
+
+            await addDoc(collection(db, "tareas"), {
+                titulo: tituloFinal,
+                responsable: resp,
+                estado: "pendientes",
+                fechaCreacion: new Date().toISOString()
+            });
+            document.getElementById('taskTitle').value = '';
+        }
+
+        // CARGAR TAREAS EN EL KANBAN
         onSnapshot(query(collection(db, "tareas")), (snapshot) => {
             document.getElementById('list-pendientes').innerHTML = '';
             document.getElementById('list-proceso').innerHTML = '';
@@ -192,5 +258,99 @@
 
             snapshot.forEach((documento) => {
                 const t = documento.data();
-                const btnProcess = `<button style="background:#f39c12; margin-top:5px;" onclick="moveTask('${documento.id}', 'proceso')">A Proceso</button>`;
-                const btnDone = `<button style="margin
+                
+                let btnHtml = '';
+                if(t.estado === 'pendientes') {
+                    btnHtml = `<button style="background:#f39c12; padding:5px; font-size:12px;" onclick="moveTask('${documento.id}', 'proceso')">A Proceso ➔</button>`;
+                } else if(t.estado === 'proceso') {
+                    btnHtml = `<button style="padding:5px; font-size:12px;" onclick="moveTask('${documento.id}', 'listas')">✔ Finalizar</button>`;
+                }
+                
+                const card = `<div class="task-card">
+                    <span class="task-badge">${t.responsable}</span>
+                    <strong>${t.titulo}</strong>
+                    ${t.vencimiento ? `<div style="font-size:12px; color:#c0392b; margin-bottom:10px;">Vence: ${t.vencimiento}</div>` : '<br>'}
+                    ${btnHtml}
+                </div>`;
+
+                document.getElementById(`list-${t.estado}`).innerHTML += card;
+            });
+        });
+
+        // MOVER TAREAS
+        window.moveTask = async function(id, estado) {
+            await updateDoc(doc(db, "tareas", id), { estado: estado });
+        }
+
+        // LÓGICA DE DÍAS HÁBILES Y AUTOCOMPLETADO
+        window.autoCompletarFechas = function() {
+            const oblig = document.getElementById('masivoObligacion').value;
+            
+            // Si son sueldos, calcula el último día hábil
+            if(oblig === 'sueldos_emp' || oblig === 'sueldos_casas') {
+                const mes = document.getElementById('masivoMes').value; // ej: 11-2026
+                const parts = mes.split('-');
+                let lastDate = new Date(parts[1], parts[0], 0); // Último día del mes
+                
+                // Retroceder si es fin de semana
+                if (lastDate.getDay() === 6) lastDate.setDate(lastDate.getDate() - 1); // Sábado -> Viernes
+                if (lastDate.getDay() === 0) lastDate.setDate(lastDate.getDate() - 2); // Domingo -> Viernes
+                
+                const strDate = lastDate.toISOString().split('T')[0];
+                
+                ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => {
+                    document.getElementById(id).value = strDate;
+                });
+            } else {
+                // Para los demás, limpia las fechas para cargarlas a mano según el cronograma
+                ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = '');
+            }
+        }
+
+        // GENERAR TAREAS MASIVAS
+        window.generarMasivas = async function() {
+            const oblig = document.getElementById('masivoObligacion').value;
+            const textOblig = document.getElementById('masivoObligacion').options[document.getElementById('masivoObligacion').selectedIndex].text;
+            
+            if(!oblig) return alert("Selecciona una obligación");
+
+            const fechas = {
+                '0': document.getElementById('fecha_01').value, '1': document.getElementById('fecha_01').value,
+                '2': document.getElementById('fecha_23').value, '3': document.getElementById('fecha_23').value,
+                '4': document.getElementById('fecha_45').value, '5': document.getElementById('fecha_45').value,
+                '6': document.getElementById('fecha_67').value, '7': document.getElementById('fecha_67').value,
+                '8': document.getElementById('fecha_89').value, '9': document.getElementById('fecha_89').value
+            };
+
+            let generadas = 0;
+            
+            for (const cli of clientesActivos) {
+                if (cli.activo && cli.obligaciones && cli.obligaciones.includes(oblig)) {
+                    const ultDigito = cli.cuit.slice(-1);
+                    const fechaVenc = fechas[ultDigito];
+                    
+                    if (fechaVenc) {
+                        await addDoc(collection(db, "tareas"), {
+                            titulo: `${textOblig} - ${cli.nombre}`,
+                            responsable: "Un Paso Mas",
+                            estado: "pendientes",
+                            vencimiento: fechaVenc,
+                            clienteId: cli.id
+                        });
+                        generadas++;
+                    }
+                }
+            }
+            
+            if(generadas > 0){
+                alert(`¡Éxito! Se generaron ${generadas} tareas en el tablero.`);
+                // Limpiar campos
+                ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('masivoObligacion').value = '';
+            } else {
+                alert("No se generaron tareas. Asegúrate de haber ingresado las fechas y tener clientes con esa obligación marcada.");
+            }
+        }
+    </script>
+</body>
+</html>
