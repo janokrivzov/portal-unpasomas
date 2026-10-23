@@ -41,6 +41,7 @@
         .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; }
         .task-card strong { display: block; color: #2980b9; margin-bottom: 5px; }
         .task-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #34495e; color: white; margin-bottom: 8px;}
+        .filter-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d4fc;}
         
         /* Grilla y Tabla */
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
@@ -67,7 +68,7 @@
         </div>
     </div>
 
-    <!-- CONTENEDOR PRINCIPAL (Oculto hasta hacer login) -->
+    <!-- CONTENEDOR PRINCIPAL -->
     <div id="app-container">
         <div class="sidebar">
             <h2>Un Paso Más</h2>
@@ -82,16 +83,31 @@
             <!-- SECCIÓN TAREAS -->
             <div id="tareas" class="section active">
                 <h2>Tablero de Tareas</h2>
-                <div class="form-container">
-                    <input type="text" id="taskTitle" placeholder="Título de la tarea">
-                    <select id="taskClient"><option value="">-- Seleccionar Cliente --</option></select>
-                    <select id="taskResponsible">
+                
+                <div class="filter-bar">
+                    <input type="text" id="searchTask" placeholder="🔍 Buscar cliente o tarea..." oninput="renderTareas()" style="margin:0;">
+                    <select id="filterResponsible" onchange="renderTareas()" style="margin:0;">
+                        <option value="">Todos los responsables</option>
                         <option value="Ivan Ritvo">Ivan Ritvo</option>
                         <option value="Jano Krivzov">Jano Krivzov</option>
                         <option value="Un Paso Mas">Un Paso Mas</option>
                     </select>
-                    <button class="btn-green" onclick="addTask()">+ Agregar Tarea</button>
                 </div>
+
+                <div class="form-container">
+                    <h3>Crear Tarea Manual</h3>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
+                        <input type="text" id="taskTitle" placeholder="Título de la tarea" style="margin:0;">
+                        <select id="taskClient" style="margin:0;"><option value="">-- Cliente --</option></select>
+                        <select id="taskResponsible" style="margin:0;">
+                            <option value="Ivan Ritvo">Ivan Ritvo</option>
+                            <option value="Jano Krivzov">Jano Krivzov</option>
+                            <option value="Un Paso Mas">Un Paso Mas</option>
+                        </select>
+                    </div>
+                    <button class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Agregar Tarea</button>
+                </div>
+                
                 <div class="kanban-board">
                     <div class="kanban-col" id="col-pendientes"><h3>Pendientes</h3><div id="list-pendientes"></div></div>
                     <div class="kanban-col" id="col-proceso"><h3>En Proceso</h3><div id="list-proceso"></div></div>
@@ -136,6 +152,7 @@
                 <h2>Gestión de Clientes</h2>
                 <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
                     <h3>📥 Importar Base de Datos</h3>
+                    <p style="font-size: 13px;">Columnas: <b>A: Razón social | B: Cuit | C: ARCA | D: AGIP | E: ARBA | F: Observaciones</b></p>
                     <input type="file" id="csvFile" accept=".csv" style="background: white;">
                     <button id="btnImportar" onclick="importarCSV()" style="background: #2980b9; color:white; border:none; font-weight:bold;">Importar a Firebase</button>
                 </div>
@@ -175,7 +192,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE CON AUTENTICACIÓN -->
+    <!-- SCRIPT FIREBASE CON AUTENTICACIÓN Y FILTROS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
@@ -195,10 +212,10 @@
         const db = getFirestore(app);
         
         let clientesActivos = [];
+        let tareasActuales = []; // Memoria para las tareas
         let editingClientId = null;
         let listeners = [];
 
-        // CONTROL DE SESIÓN
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
@@ -207,7 +224,6 @@
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('app-container').style.display = 'none';
-                // Detener lectura de datos si cierra sesión
                 listeners.forEach(unsub => unsub());
                 listeners = [];
             }
@@ -216,7 +232,7 @@
         window.login = function() {
             const email = document.getElementById('loginEmail').value;
             const pass = document.getElementById('loginPassword').value;
-            signInWithEmailAndPassword(auth, email, pass).catch(err => {
+            signInWithEmailAndPassword(auth, email, pass).catch(() => {
                 document.getElementById('loginError').style.display = 'block';
             });
         }
@@ -235,8 +251,7 @@
                 const tbody = document.querySelector('#clientsTable tbody');
                 const selectCliente = document.getElementById('taskClient');
                 tbody.innerHTML = ''; selectCliente.innerHTML = '<option value="">-- Tarea Interna / Cliente --</option>';
-                clientesActivos = [];
-                let clientesTemp = [];
+                clientesActivos = []; let clientesTemp = [];
                 
                 snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesTemp.push(c); clientesActivos.push(c); });
                 clientesTemp.sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -264,16 +279,37 @@
             });
 
             const unsubTareas = onSnapshot(query(collection(db, "tareas")), (snapshot) => {
-                document.getElementById('list-pendientes').innerHTML = ''; document.getElementById('list-proceso').innerHTML = ''; document.getElementById('list-listas').innerHTML = '';
+                tareasActuales = [];
                 snapshot.forEach((documento) => {
-                    const t = documento.data(); let btnHtml = '';
-                    if(t.estado === 'pendientes') btnHtml = `<button style="background:#f39c12; color:white; border:none; cursor:pointer; padding:5px; font-size:12px;" onclick="moveTask('${documento.id}', 'proceso')">A Proceso ➔</button>`;
-                    else if(t.estado === 'proceso') btnHtml = `<button style="padding:5px; font-size:12px; color:black; border:1px solid #ccc; cursor:pointer;" onclick="moveTask('${documento.id}', 'listas')">✔ Finalizar</button>`;
-                    const card = `<div class="task-card"><span class="task-badge">${t.responsable}</span><strong>${t.titulo}</strong>${t.vencimiento ? `<div style="font-size:12px; color:#c0392b; margin-bottom:10px;">Vence: ${t.vencimiento}</div>` : '<br>'}${btnHtml}</div>`;
-                    document.getElementById(`list-${t.estado}`).innerHTML += card;
+                    const t = documento.data(); t.id = documento.id;
+                    tareasActuales.push(t);
                 });
+                renderTareas();
             });
             listeners.push(unsubClientes, unsubTareas);
+        }
+
+        window.renderTareas = function() {
+            const term = document.getElementById('searchTask').value.toLowerCase();
+            const resp = document.getElementById('filterResponsible').value;
+            
+            document.getElementById('list-pendientes').innerHTML = ''; 
+            document.getElementById('list-proceso').innerHTML = ''; 
+            document.getElementById('list-listas').innerHTML = '';
+
+            const filtradas = tareasActuales.filter(t => {
+                const matchTerm = t.titulo.toLowerCase().includes(term);
+                const matchResp = resp === "" || t.responsable === resp;
+                return matchTerm && matchResp;
+            });
+
+            filtradas.forEach(t => {
+                let btnHtml = '';
+                if(t.estado === 'pendientes') btnHtml = `<button style="background:#f39c12; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; margin-top:5px; width:100%;" onclick="moveTask('${t.id}', 'proceso')">A Proceso ➔</button>`;
+                else if(t.estado === 'proceso') btnHtml = `<button style="padding:5px; font-size:12px; color:black; border:1px solid #ccc; cursor:pointer; border-radius:4px; margin-top:5px; width:100%; background:#ecf0f1;" onclick="moveTask('${t.id}', 'listas')">✔ Finalizar</button>`;
+                const card = `<div class="task-card"><span class="task-badge">${t.responsable}</span><strong>${t.titulo}</strong>${t.vencimiento ? `<div style="font-size:12px; color:#c0392b; margin-bottom:5px;">Vence: ${t.vencimiento}</div>` : ''}${btnHtml}</div>`;
+                document.getElementById(`list-${t.estado}`).innerHTML += card;
+            });
         }
 
         window.importarCSV = async function() {
@@ -282,20 +318,25 @@
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const rows = e.target.result.split('\n');
-                let nuevos = [];
+                let nuevos = []; let duplicados = 0;
                 const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+                document.getElementById('btnImportar').innerText = "Analizando...";
                 for(let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(regex);
                     if(cols.length >= 2) {
                         const nombre = (cols[0] || '').trim().replace(/^"|"$/g, ''); const cuit = (cols[1] || '').trim().replace(/^"|"$/g, '');
-                        if(nombre && cuit && !clientesActivos.find(c => c.cuit === cuit)) {
-                            nuevos.push({ nombre, cuit, clave_arca: (cols[2]||'').replace(/^"|"$/g, ''), clave_agip: (cols[3]||'').replace(/^"|"$/g, ''), clave_arba: (cols[4]||'').replace(/^"|"$/g, ''), observaciones: (cols[5]||'').replace(/^"|"$/g, ''), activo: true, obligaciones: [] });
+                        if(nombre && cuit) {
+                            if(clientesActivos.find(c => c.cuit === cuit) || nuevos.find(n => n.cuit === cuit)) duplicados++;
+                            else nuevos.push({ nombre, cuit, clave_arca: (cols[2]||'').replace(/^"|"$/g, ''), clave_agip: (cols[3]||'').replace(/^"|"$/g, ''), clave_arba: (cols[4]||'').replace(/^"|"$/g, ''), observaciones: (cols[5]||'').replace(/^"|"$/g, ''), activo: true, obligaciones: [] });
                         }
                     }
                 }
-                if(nuevos.length === 0) return alert("Todos los CUITs ya existen.");
+                if(duplicados > 0 && !confirm(`Se detectaron ${duplicados} clientes duplicados.\n\n¿Omitir duplicados e importar los ${nuevos.length} nuevos?`)) { document.getElementById('btnImportar').innerText = "Importar a Firebase"; return; }
+                if(nuevos.length === 0) { alert("No hay clientes nuevos para importar."); document.getElementById('btnImportar').innerText = "Importar a Firebase"; return; }
+                document.getElementById('btnImportar').innerText = "Guardando...";
                 for (const n of nuevos) await addDoc(collection(db, "clientes"), n);
                 alert(`Se cargaron ${nuevos.length} clientes nuevos.`);
+                document.getElementById('btnImportar').innerText = "Importar a Firebase"; document.getElementById('csvFile').value = '';
             };
             reader.readAsText(file);
         }
@@ -316,6 +357,7 @@
             document.getElementById('clientName').value = c.nombre||''; document.getElementById('clientCuit').value = c.cuit||''; document.getElementById('clientARCA').value = c.clave_arca||''; document.getElementById('clientAGIP').value = c.clave_agip||''; document.getElementById('clientARBA').value = c.clave_arba||''; document.getElementById('clientObs').value = c.observaciones||'';
             document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = c.obligaciones && c.obligaciones.includes(cb.value));
             document.getElementById('btnSaveClient').innerText = "Actualizar"; document.getElementById('btnCancelEdit').style.display = "inline-block";
+            document.getElementById('form-cliente-container').scrollIntoView({ behavior: 'smooth' });
         }
 
         window.cancelEdit = function() {
