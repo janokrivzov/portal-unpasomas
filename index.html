@@ -38,10 +38,16 @@
         .kanban-board { display: flex; gap: 20px; }
         .kanban-col { background: #e2e4e6; border-radius: 5px; width: 33%; padding: 15px; min-height: 400px; }
         .kanban-col h3 { text-align: center; margin-top: 0; color: #333; }
-        .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; }
+        .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; display: flex; flex-direction: column;}
         .task-card strong { display: block; color: #2980b9; margin-bottom: 5px; }
-        .task-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #34495e; color: white; margin-bottom: 8px;}
+        .task-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #34495e; color: white; margin-bottom: 8px; align-self: flex-start;}
         .filter-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d4fc;}
+        
+        /* Modal Tarea */
+        #taskModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-content h3 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px; }
+        .modal-desc-box { background: #f9f9f9; padding: 12px; border-radius: 4px; border: 1px solid #eee; min-height: 60px; white-space: pre-wrap; font-size: 14px; color: #333; margin-bottom: 15px;}
         
         /* Grilla y Tabla */
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
@@ -68,6 +74,18 @@
         </div>
     </div>
 
+    <!-- MODAL DE DETALLES DE TAREA -->
+    <div id="taskModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Título de la tarea</h3>
+            <p style="font-size: 14px; margin: 5px 0;"><strong>Responsable:</strong> <span id="modalResp"></span></p>
+            <p style="font-size: 14px; margin: 5px 0 15px 0;"><strong>Vencimiento:</strong> <span id="modalVenc" style="color:#c0392b; font-weight:bold;"></span></p>
+            <label style="font-size: 13px; font-weight: bold; color: #7f8c8d;">Descripción / Notas:</label>
+            <div id="modalDesc" class="modal-desc-box"></div>
+            <button onclick="closeTaskModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cerrar</button>
+        </div>
+    </div>
+
     <!-- CONTENEDOR PRINCIPAL -->
     <div id="app-container">
         <div class="sidebar">
@@ -85,7 +103,7 @@
                 <h2>Tablero de Tareas</h2>
                 
                 <div class="filter-bar">
-                    <input type="text" id="searchTask" placeholder="🔍 Buscar cliente o tarea..." oninput="renderTareas()" style="margin:0;">
+                    <input type="text" id="searchTask" placeholder="🔍 Buscar por título o cliente..." oninput="renderTareas()" style="margin:0;">
                     <select id="filterResponsible" onchange="renderTareas()" style="margin:0;">
                         <option value="">Todos los responsables</option>
                         <option value="Ivan Ritvo">Ivan Ritvo</option>
@@ -96,16 +114,20 @@
 
                 <div class="form-container">
                     <h3>Crear Tarea Manual</h3>
-                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
-                        <input type="text" id="taskTitle" placeholder="Título de la tarea" style="margin:0;">
-                        <select id="taskClient" style="margin:0;"><option value="">-- Cliente --</option></select>
-                        <select id="taskResponsible" style="margin:0;">
-                            <option value="Ivan Ritvo">Ivan Ritvo</option>
-                            <option value="Jano Krivzov">Jano Krivzov</option>
-                            <option value="Un Paso Mas">Un Paso Mas</option>
-                        </select>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div><label style="font-size:12px; font-weight:bold;">Título</label><input type="text" id="taskTitle" placeholder="Ej: Responder AFIP" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="taskClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Responsable</label>
+                            <select id="taskResponsible" style="margin:0;">
+                                <option value="Ivan Ritvo">Ivan Ritvo</option>
+                                <option value="Jano Krivzov">Jano Krivzov</option>
+                                <option value="Un Paso Mas">Un Paso Mas</option>
+                            </select>
+                        </div>
+                        <div><label style="font-size:12px; font-weight:bold;">Vencimiento</label><input type="date" id="taskDueDate" style="margin:0;"></div>
                     </div>
-                    <button class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Agregar Tarea</button>
+                    <textarea id="taskDesc" placeholder="Observaciones, detalles o información adicional de la tarea..." style="margin-top:10px;"></textarea>
+                    <button class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Agregar Tarea al Tablero</button>
                 </div>
                 
                 <div class="kanban-board">
@@ -152,7 +174,6 @@
                 <h2>Gestión de Clientes</h2>
                 <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
                     <h3>📥 Importar Base de Datos</h3>
-                    <p style="font-size: 13px;">Columnas: <b>A: Razón social | B: Cuit | C: ARCA | D: AGIP | E: ARBA | F: Observaciones</b></p>
                     <input type="file" id="csvFile" accept=".csv" style="background: white;">
                     <button id="btnImportar" onclick="importarCSV()" style="background: #2980b9; color:white; border:none; font-weight:bold;">Importar a Firebase</button>
                 </div>
@@ -192,7 +213,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE CON AUTENTICACIÓN Y FILTROS -->
+    <!-- SCRIPT FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
@@ -212,7 +233,7 @@
         const db = getFirestore(app);
         
         let clientesActivos = [];
-        let tareasActuales = []; // Memoria para las tareas
+        let tareasActuales = []; 
         let editingClientId = null;
         let listeners = [];
 
@@ -246,11 +267,26 @@
             if(btnElement) btnElement.classList.add('active');
         }
 
+        // Lógica del Modal
+        window.openTaskModal = function(id) {
+            const t = tareasActuales.find(x => x.id === id);
+            if(!t) return;
+            document.getElementById('modalTitle').innerText = t.titulo;
+            document.getElementById('modalResp').innerText = t.responsable;
+            document.getElementById('modalVenc').innerText = t.vencimiento ? t.vencimiento : 'Sin vencimiento';
+            document.getElementById('modalDesc').innerText = t.descripcion ? t.descripcion : 'Sin observaciones adicionales.';
+            document.getElementById('taskModal').style.display = 'flex';
+        }
+
+        window.closeTaskModal = function() {
+            document.getElementById('taskModal').style.display = 'none';
+        }
+
         function iniciarCargaDatos() {
             const unsubClientes = onSnapshot(query(collection(db, "clientes")), (snapshot) => {
                 const tbody = document.querySelector('#clientsTable tbody');
                 const selectCliente = document.getElementById('taskClient');
-                tbody.innerHTML = ''; selectCliente.innerHTML = '<option value="">-- Tarea Interna / Cliente --</option>';
+                tbody.innerHTML = ''; selectCliente.innerHTML = '<option value="">-- Interna / Sin Cliente --</option>';
                 clientesActivos = []; let clientesTemp = [];
                 
                 snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesTemp.push(c); clientesActivos.push(c); });
@@ -304,13 +340,53 @@
             });
 
             filtradas.forEach(t => {
+                // Control de avance
                 let btnHtml = '';
-                if(t.estado === 'pendientes') btnHtml = `<button style="background:#f39c12; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; margin-top:5px; width:100%;" onclick="moveTask('${t.id}', 'proceso')">A Proceso ➔</button>`;
-                else if(t.estado === 'proceso') btnHtml = `<button style="padding:5px; font-size:12px; color:black; border:1px solid #ccc; cursor:pointer; border-radius:4px; margin-top:5px; width:100%; background:#ecf0f1;" onclick="moveTask('${t.id}', 'listas')">✔ Finalizar</button>`;
-                const card = `<div class="task-card"><span class="task-badge">${t.responsable}</span><strong>${t.titulo}</strong>${t.vencimiento ? `<div style="font-size:12px; color:#c0392b; margin-bottom:5px;">Vence: ${t.vencimiento}</div>` : ''}${btnHtml}</div>`;
+                if(t.estado === 'pendientes') btnHtml = `<button style="background:#f39c12; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; width:100%;" onclick="moveTask('${t.id}', 'proceso')">A Proceso ➔</button>`;
+                else if(t.estado === 'proceso') btnHtml = `<button style="padding:5px; font-size:12px; color:black; border:1px solid #ccc; cursor:pointer; border-radius:4px; width:100%; background:#ecf0f1;" onclick="moveTask('${t.id}', 'listas')">✔ Finalizar</button>`;
+                
+                // Previsualización de texto
+                const descPreview = t.descripcion ? (t.descripcion.length > 50 ? t.descripcion.substring(0, 50) + '...' : t.descripcion) : '';
+                const descHtml = descPreview ? `<div style="font-size:12px; color:#7f8c8d; margin-bottom:10px; padding-left:5px; border-left: 2px solid #bdc3c7;"><i>${descPreview}</i></div>` : '';
+                
+                const card = `<div class="task-card">
+                    <span class="task-badge">${t.responsable}</span>
+                    <strong style="cursor:pointer;" onclick="openTaskModal('${t.id}')">${t.titulo}</strong>
+                    ${descHtml}
+                    ${t.vencimiento ? `<div style="font-size:12px; font-weight:bold; color:#c0392b; margin-bottom:10px;">📅 Vence: ${t.vencimiento}</div>` : '<div style="margin-bottom:10px;"></div>'}
+                    <div style="display:flex; gap:5px; margin-top:auto;">
+                        <button style="background:#3498db; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; width:100%;" onclick="openTaskModal('${t.id}')">👁️ Ver</button>
+                        ${btnHtml}
+                    </div>
+                </div>`;
                 document.getElementById(`list-${t.estado}`).innerHTML += card;
             });
         }
+
+        window.addTask = async function() {
+            const t = document.getElementById('taskTitle').value;
+            const c = document.getElementById('taskClient').value;
+            const resp = document.getElementById('taskResponsible').value;
+            const venc = document.getElementById('taskDueDate').value;
+            const desc = document.getElementById('taskDesc').value;
+
+            if(!t) return alert("El título es obligatorio.");
+
+            await addDoc(collection(db, "tareas"), { 
+                titulo: c ? `${t} - ${c}` : t, 
+                responsable: resp, 
+                vencimiento: venc,
+                descripcion: desc,
+                estado: "pendientes", 
+                fechaCreacion: new Date().toISOString() 
+            }); 
+            
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDueDate').value = '';
+            document.getElementById('taskDesc').value = '';
+        }
+
+        window.moveTask = async function(id, est) { await updateDoc(doc(db, "tareas", id), { estado: est }); }
 
         window.importarCSV = async function() {
             const file = document.getElementById('csvFile').files[0];
@@ -366,8 +442,7 @@
         }
 
         window.toggleStatus = async function(id, st) { if(confirm(`¿Deseas ${!st ? "activar" : "desactivar"} este cliente?`)) await updateDoc(doc(db, "clientes", id), { activo: !st }); }
-        window.addTask = async function() { const t = document.getElementById('taskTitle').value; const c = document.getElementById('taskClient').value; if(!t) return alert("Título obligatorio."); await addDoc(collection(db, "tareas"), { titulo: c ? `${t} - ${c}` : t, responsable: document.getElementById('taskResponsible').value, estado: "pendientes", fechaCreacion: new Date().toISOString() }); document.getElementById('taskTitle').value = ''; }
-        window.moveTask = async function(id, est) { await updateDoc(doc(db, "tareas", id), { estado: est }); }
+        
         window.autoCompletarFechas = function() {
             const ob = document.getElementById('masivoObligacion').value;
             if(ob === 'sueldos_emp' || ob === 'sueldos_casas') {
@@ -376,6 +451,7 @@
                 const s = ld.toISOString().split('T')[0]; ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = s);
             } else { ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = ''); }
         }
+
         window.generarMasivas = async function() {
             const ob = document.getElementById('masivoObligacion').value; if(!ob) return alert("Selecciona obligación.");
             const f = { '0': document.getElementById('fecha_01').value, '1': document.getElementById('fecha_01').value, '2': document.getElementById('fecha_23').value, '3': document.getElementById('fecha_23').value, '4': document.getElementById('fecha_45').value, '5': document.getElementById('fecha_45').value, '6': document.getElementById('fecha_67').value, '7': document.getElementById('fecha_67').value, '8': document.getElementById('fecha_89').value, '9': document.getElementById('fecha_89').value };
