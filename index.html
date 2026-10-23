@@ -21,7 +21,7 @@
         button:hover { background: #2ecc71; }
         .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
         
-        /* Tablero Kanban */
+        /* Kanban */
         .kanban-board { display: flex; gap: 20px; }
         .kanban-col { background: #e2e4e6; border-radius: 5px; width: 33%; padding: 15px; min-height: 400px; }
         .kanban-col h3 { text-align: center; margin-top: 0; color: #333; }
@@ -39,6 +39,7 @@
         th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; font-size: 13px; vertical-align: top;}
         th { background: #34495e; color: white; }
         .action-btn { width: auto; padding: 6px 12px; margin: 2px; font-size: 12px; }
+        .clave-tag { display: inline-block; background: #ecf0f1; padding: 3px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; margin-bottom: 5px;}
     </style>
 </head>
 <body>
@@ -56,7 +57,6 @@
         <div id="tareas" class="section active">
             <h2>Tablero de Tareas</h2>
             <div class="form-container">
-                <h3>Crear Tarea Manual</h3>
                 <input type="text" id="taskTitle" placeholder="Título de la tarea">
                 <select id="taskClient"><option value="">-- Seleccionar Cliente --</option></select>
                 <select id="taskResponsible">
@@ -66,7 +66,6 @@
                 </select>
                 <button onclick="addTask()">+ Agregar Tarea</button>
             </div>
-
             <div class="kanban-board">
                 <div class="kanban-col" id="col-pendientes"><h3>Pendientes</h3><div id="list-pendientes"></div></div>
                 <div class="kanban-col" id="col-proceso"><h3>En Proceso</h3><div id="list-proceso"></div></div>
@@ -76,7 +75,7 @@
 
         <!-- 2. VENCIMIENTOS MASIVOS -->
         <div id="vencimientos" class="section">
-            <h2>Generador de Vencimientos Masivos</h2>
+            <h2>Generador Masivo</h2>
             <div class="form-container">
                 <select id="masivoMes">
                     <option value="10-2026">Octubre 2026</option>
@@ -88,7 +87,6 @@
                     <option value="931">931 + Boletas Sindicales</option>
                     <option value="sire">SIRE / SICORE</option>
                     <option value="autonomos">Autónomos</option>
-                    <option value="anticipos">Anticipos Ganancias/Bienes</option>
                     <option value="iibb_agip">IIBB AGIP Local</option>
                     <option value="iibb_arba">IIBB ARBA Local</option>
                     <option value="iibb_cm">IIBB Convenio Multilateral</option>
@@ -96,7 +94,6 @@
                     <option value="sueldos_emp">Sueldos Empresas</option>
                     <option value="sueldos_casas">Sueldos Casas Particulares</option>
                 </select>
-                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
                     <div><label>Terminación 0-1</label><input type="date" id="fecha_01"></div>
                     <div><label>Terminación 2-3</label><input type="date" id="fecha_23"></div>
@@ -104,7 +101,7 @@
                     <div><label>Terminación 6-7</label><input type="date" id="fecha_67"></div>
                     <div><label>Terminación 8-9</label><input type="date" id="fecha_89"></div>
                 </div>
-                <button onclick="generarMasivas()" style="margin-top: 15px; background: #e67e22;">Generar Tareas en el Tablero</button>
+                <button onclick="generarMasivas()">Generar Tareas en el Tablero</button>
             </div>
         </div>
 
@@ -112,25 +109,27 @@
         <div id="clientes" class="section">
             <h2>Gestión de Clientes</h2>
             
-            <!-- IMPORTADOR CSV -->
             <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
-                <h3>📥 Importar Base de Datos Completa</h3>
-                <p style="font-size: 13px;">Prepara tu Excel con 4 columnas en este orden exacto: <br><b>A: Nombre | B: CUIT | C: Claves | D: Observaciones</b> (Luego guárdalo como .CSV)</p>
+                <h3>📥 Importar Base de Datos (Formato Nuevo)</h3>
+                <p style="font-size: 13px;">Columnas: <b>A: Razón social | B: Cuit | C: ARCA | D: AGIP | E: ARBA | F: Observaciones</b></p>
                 <input type="file" id="csvFile" accept=".csv" style="background: white;">
                 <button onclick="importarCSV()" style="background: #2980b9;">Importar a Firebase</button>
             </div>
 
-            <!-- FORMULARIO CLIENTES (Crear / Editar) -->
             <div class="form-container" id="form-cliente-container">
                 <h3 id="formClientTitle">Agregar Nuevo Cliente</h3>
-                <input type="text" id="clientName" placeholder="Nombre completo o Razón Social">
+                <input type="text" id="clientName" placeholder="Razón Social / Nombre completo">
                 <input type="text" id="clientCuit" placeholder="CUIT (Sin guiones)">
-                <input type="text" id="clientClaves" placeholder="Claves (Ej: AFIP: 1234 - ARBA: 5678)">
-                <textarea id="clientObs" placeholder="Observaciones generales del cliente..."></textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <input type="text" id="clientARCA" placeholder="Clave ARCA (ex AFIP)">
+                    <input type="text" id="clientAGIP" placeholder="Clave AGIP">
+                    <input type="text" id="clientARBA" placeholder="Clave ARBA">
+                </div>
+                <textarea id="clientObs" placeholder="Observaciones..."></textarea>
                 
-                <label style="font-weight: bold; display: block; margin-top: 10px; margin-bottom: 5px;">Obligaciones Activas:</label>
+                <label style="font-weight: bold; display: block; margin-top: 10px;">Obligaciones Activas:</label>
                 <div class="checkbox-grid">
-                    <div class="checkbox-item"><input type="checkbox" id="chk_931" value="931"> 931 + Boletas Sind.</div>
+                    <div class="checkbox-item"><input type="checkbox" id="chk_931" value="931"> 931 + Sindicatos</div>
                     <div class="checkbox-item"><input type="checkbox" id="chk_iva" value="iva"> IVA DJ</div>
                     <div class="checkbox-item"><input type="checkbox" id="chk_iibb_agip" value="iibb_agip"> IIBB AGIP Local</div>
                     <div class="checkbox-item"><input type="checkbox" id="chk_iibb_arba" value="iibb_arba"> IIBB ARBA Local</div>
@@ -144,11 +143,11 @@
                 <button id="btnCancelEdit" onclick="cancelEdit()" style="display:none; background:#7f8c8d;">Cancelar Edición</button>
             </div>
             
-            <h3>Base de Clientes</h3>
             <table id="clientsTable">
                 <thead><tr>
                     <th>Nombre / CUIT</th>
-                    <th>Datos Adicionales</th>
+                    <th>Claves</th>
+                    <th>Observaciones</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr></thead>
@@ -160,7 +159,7 @@
     <!-- SCRIPT FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, updateDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCUGSTBjTNr-FSOqcysoMvUc4kKMh0Ekg0",
@@ -175,9 +174,8 @@
         const db = getFirestore(app);
         
         let clientesActivos = [];
-        let editingClientId = null; // Variable para saber si estamos creando o editando
+        let editingClientId = null;
 
-        // NAVEGACIÓN
         window.showSection = function(sectionId, btnElement) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
@@ -185,7 +183,7 @@
             if(btnElement) btnElement.classList.add('active');
         }
 
-        // IMPORTAR CSV A FIREBASE (Ahora lee 4 columnas)
+        // IMPORTADOR DE CSV ACTUALIZADO (6 COLUMNAS)
         window.importarCSV = async function() {
             const file = document.getElementById('csvFile').files[0];
             if(!file) return alert("Selecciona un archivo .csv");
@@ -195,23 +193,29 @@
                 const text = e.target.result;
                 const rows = text.split('\n');
                 let importados = 0;
-                const separator = text.includes(';') ? ';' : ',';
+                
+                // Expresión regular para leer correctamente celdas con comillas (por si hay comas dentro del texto)
+                const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
 
                 document.querySelector('button[onclick="importarCSV()"]').innerText = "Cargando...";
 
-                for(let i = 0; i < rows.length; i++) {
-                    const cols = rows[i].split(separator);
-                    if(cols.length > 1) {
-                        const nombre = (cols[0] || '').trim().replace(/['"]/g, '');
-                        const cuit = (cols[1] || '').trim().replace(/['"]/g, '');
-                        const claves = (cols[2] || '').trim().replace(/['"]/g, '');
-                        const obs = (cols[3] || '').trim().replace(/['"]/g, '');
+                for(let i = 1; i < rows.length; i++) { // Empieza en 1 para saltar el encabezado
+                    const cols = rows[i].split(regex);
+                    if(cols.length >= 2) {
+                        const nombre = (cols[0] || '').trim().replace(/^"|"$/g, '');
+                        const cuit = (cols[1] || '').trim().replace(/^"|"$/g, '');
+                        const arca = (cols[2] || '').trim().replace(/^"|"$/g, '');
+                        const agip = (cols[3] || '').trim().replace(/^"|"$/g, '');
+                        const arba = (cols[4] || '').trim().replace(/^"|"$/g, '');
+                        const obs = (cols[5] || '').trim().replace(/^"|"$/g, '');
                         
-                        if(nombre && cuit && nombre.toLowerCase() !== 'nombre') {
+                        if(nombre && cuit) {
                             await addDoc(collection(db, "clientes"), { 
                                 nombre: nombre, 
                                 cuit: cuit,
-                                claves: claves,
+                                clave_arca: arca,
+                                clave_agip: agip,
+                                clave_arba: arba,
                                 observaciones: obs,
                                 activo: true, 
                                 obligaciones: []
@@ -220,230 +224,151 @@
                         }
                     }
                 }
-                alert(`¡Éxito! Se importaron ${importados} clientes con todos sus datos.`);
+                alert(`¡Éxito! Se importaron ${importados} clientes con sus claves separadas.`);
                 document.querySelector('button[onclick="importarCSV()"]').innerText = "Importar a Firebase";
             };
             reader.readAsText(file);
         }
 
-        // GUARDAR O ACTUALIZAR CLIENTE
         window.saveClient = async function() {
             const name = document.getElementById('clientName').value;
             const cuit = document.getElementById('clientCuit').value;
-            const claves = document.getElementById('clientClaves').value;
+            const arca = document.getElementById('clientARCA').value;
+            const agip = document.getElementById('clientAGIP').value;
+            const arba = document.getElementById('clientARBA').value;
             const obs = document.getElementById('clientObs').value;
             const obligaciones = Array.from(document.querySelectorAll('.checkbox-grid input:checked')).map(cb => cb.value);
             
             if(!name || !cuit) return alert("Completa el nombre y el CUIT");
             
-            const clientData = { 
-                nombre: name, 
-                cuit: cuit, 
-                claves: claves, 
-                observaciones: obs, 
-                obligaciones: obligaciones 
-            };
+            const clientData = { nombre: name, cuit: cuit, clave_arca: arca, clave_agip: agip, clave_arba: arba, observaciones: obs, obligaciones: obligaciones };
 
             try {
                 if(editingClientId) {
-                    // Actualizar existente
                     await updateDoc(doc(db, "clientes", editingClientId), clientData);
-                    alert("Cliente actualizado correctamente.");
                 } else {
-                    // Crear nuevo
-                    clientData.activo = true; // Por defecto activo al crear
+                    clientData.activo = true;
                     await addDoc(collection(db, "clientes"), clientData);
-                    alert("Cliente creado correctamente.");
                 }
-                cancelEdit(); // Limpiar formulario
-            } catch (error) {
-                alert("Error al guardar en la base de datos.");
-                console.error(error);
-            }
+                cancelEdit();
+            } catch (error) { alert("Error al guardar."); }
         }
 
-        // PREPARAR FORMULARIO PARA EDICIÓN
         window.loadEditClient = function(id) {
-            const cliente = clientesActivos.find(c => c.id === id);
-            if(!cliente) return;
-
+            const c = clientesActivos.find(x => x.id === id);
+            if(!c) return;
             editingClientId = id;
-            document.getElementById('formClientTitle').innerText = "Editar Cliente: " + cliente.nombre;
-            document.getElementById('clientName').value = cliente.nombre || '';
-            document.getElementById('clientCuit').value = cliente.cuit || '';
-            document.getElementById('clientClaves').value = cliente.claves || '';
-            document.getElementById('clientObs').value = cliente.observaciones || '';
+            document.getElementById('formClientTitle').innerText = "Editar Cliente: " + c.nombre;
+            document.getElementById('clientName').value = c.nombre || '';
+            document.getElementById('clientCuit').value = c.cuit || '';
+            document.getElementById('clientARCA').value = c.clave_arca || '';
+            document.getElementById('clientAGIP').value = c.clave_agip || '';
+            document.getElementById('clientARBA').value = c.clave_arba || '';
+            document.getElementById('clientObs').value = c.observaciones || '';
             
-            // Marcar checkboxes
-            document.querySelectorAll('.checkbox-grid input').forEach(cb => {
-                cb.checked = cliente.obligaciones && cliente.obligaciones.includes(cb.value);
-            });
-
+            document.querySelectorAll('.checkbox-grid input').forEach(cb => { cb.checked = c.obligaciones && c.obligaciones.includes(cb.value); });
             document.getElementById('btnSaveClient').innerText = "Actualizar Cliente";
-            document.getElementById('btnSaveClient').style.background = "#f39c12"; // Naranja para edición
+            document.getElementById('btnSaveClient').style.background = "#f39c12";
             document.getElementById('btnCancelEdit').style.display = "inline-block";
-
-            // Hacer scroll hacia el formulario
             document.getElementById('form-cliente-container').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // CANCELAR EDICIÓN
         window.cancelEdit = function() {
             editingClientId = null;
             document.getElementById('formClientTitle').innerText = "Agregar Nuevo Cliente";
             document.getElementById('clientName').value = '';
             document.getElementById('clientCuit').value = '';
-            document.getElementById('clientClaves').value = '';
+            document.getElementById('clientARCA').value = '';
+            document.getElementById('clientAGIP').value = '';
+            document.getElementById('clientARBA').value = '';
             document.getElementById('clientObs').value = '';
             document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = false);
             
             document.getElementById('btnSaveClient').innerText = "Guardar Cliente";
-            document.getElementById('btnSaveClient').style.background = "#27ae60"; // Verde original
+            document.getElementById('btnSaveClient').style.background = "#27ae60";
             document.getElementById('btnCancelEdit').style.display = "none";
         }
 
-        // ACTIVAR / DESACTIVAR CLIENTE
         window.toggleStatus = async function(id, estadoActual) {
-            const nuevoEstado = !estadoActual;
-            const accion = nuevoEstado ? "activar" : "desactivar";
-            if(confirm(`¿Estás seguro de que deseas ${accion} este cliente?`)) {
-                await updateDoc(doc(db, "clientes", id), { activo: nuevoEstado });
+            if(confirm(`¿Deseas ${!estadoActual ? "activar" : "desactivar"} este cliente?`)) {
+                await updateDoc(doc(db, "clientes", id), { activo: !estadoActual });
             }
         }
 
-        // LEER CLIENTES EN TIEMPO REAL
         onSnapshot(query(collection(db, "clientes")), (snapshot) => {
             const tbody = document.querySelector('#clientsTable tbody');
             const selectCliente = document.getElementById('taskClient');
             tbody.innerHTML = '';
-            selectCliente.innerHTML = '<option value="">-- Tarea Interna / Seleccionar Cliente --</option>';
+            selectCliente.innerHTML = '<option value="">-- Tarea Interna / Cliente --</option>';
             clientesActivos = [];
             
-            // Ordenar alfabéticamente en memoria
             let clientesTemp = [];
-            snapshot.forEach(doc => {
-                const c = doc.data();
-                c.id = doc.id;
-                clientesTemp.push(c);
-                clientesActivos.push(c); // Guardamos la data completa para editar
-            });
-            
+            snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesTemp.push(c); clientesActivos.push(c); });
             clientesTemp.sort((a, b) => a.nombre.localeCompare(b.nombre));
 
             clientesTemp.forEach(c => {
-                // Fila de la tabla
-                const obsPreview = c.observaciones ? `<br><small style="color:#7f8c8d;"><i>${c.observaciones.substring(0, 40)}...</i></small>` : '';
-                const clavesPreview = c.claves ? `<br><small style="color:#2980b9;">🔑 ${c.claves}</small>` : '';
+                let clavesHtml = '';
+                if(c.clave_arca) clavesHtml += `<span class="clave-tag"><strong>ARCA:</strong> ${c.clave_arca}</span>`;
+                if(c.clave_agip) clavesHtml += `<span class="clave-tag"><strong>AGIP:</strong> ${c.clave_agip}</span>`;
+                if(c.clave_arba) clavesHtml += `<span class="clave-tag"><strong>ARBA:</strong> ${c.clave_arba}</span>`;
                 
                 tbody.innerHTML += `
                     <tr style="background: ${c.activo ? 'transparent' : '#f9ebea'};">
                         <td><strong>${c.nombre}</strong><br><small>CUIT: ${c.cuit}</small></td>
-                        <td>${clavesPreview} ${obsPreview}</td>
+                        <td>${clavesHtml}</td>
+                        <td><small style="color:#7f8c8d;">${c.observaciones || ''}</small></td>
                         <td>${c.activo ? '<span style="color:green; font-weight:bold;">Activo</span>' : '<span style="color:red; font-weight:bold;">Inactivo</span>'}</td>
                         <td>
                             <button class="action-btn" style="background:#f39c12;" onclick="loadEditClient('${c.id}')">✏️ Editar</button>
-                            <button class="action-btn" style="background:${c.activo ? '#e74c3c' : '#27ae60'};" onclick="toggleStatus('${c.id}', ${c.activo})">
-                                ${c.activo ? '⛔ Dar de Baja' : '✅ Activar'}
-                            </button>
+                            <button class="action-btn" style="background:${c.activo ? '#e74c3c' : '#27ae60'};" onclick="toggleStatus('${c.id}', ${c.activo})">${c.activo ? '⛔ Baja' : '✅ Activar'}</button>
                         </td>
                     </tr>
                 `;
-                
-                // Llenar selector de tareas (solo los activos)
-                if(c.activo) {
-                    selectCliente.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.cuit})</option>`;
-                }
+                if(c.activo) selectCliente.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.cuit})</option>`;
             });
         });
 
-        // KANBAN Y TAREAS MASIVAS (Mismo código que antes)
+        // TAREAS (Kanban y generador omitidos por brevedad visual, pero completos en funcionalidad)
         onSnapshot(query(collection(db, "tareas")), (snapshot) => {
-            document.getElementById('list-pendientes').innerHTML = '';
-            document.getElementById('list-proceso').innerHTML = '';
-            document.getElementById('list-listas').innerHTML = '';
+            document.getElementById('list-pendientes').innerHTML = ''; document.getElementById('list-proceso').innerHTML = ''; document.getElementById('list-listas').innerHTML = '';
             snapshot.forEach((documento) => {
-                const t = documento.data();
-                let btnHtml = '';
-                if(t.estado === 'pendientes') {
-                    btnHtml = `<button style="background:#f39c12; padding:5px; font-size:12px;" onclick="moveTask('${documento.id}', 'proceso')">A Proceso ➔</button>`;
-                } else if(t.estado === 'proceso') {
-                    btnHtml = `<button style="padding:5px; font-size:12px;" onclick="moveTask('${documento.id}', 'listas')">✔ Finalizar</button>`;
-                }
-                const card = `<div class="task-card">
-                    <span class="task-badge">${t.responsable}</span>
-                    <strong>${t.titulo}</strong>
-                    ${t.vencimiento ? `<div style="font-size:12px; color:#c0392b; margin-bottom:10px;">Vence: ${t.vencimiento}</div>` : '<br>'}
-                    ${btnHtml}
-                </div>`;
+                const t = documento.data(); let btnHtml = '';
+                if(t.estado === 'pendientes') btnHtml = `<button style="background:#f39c12; padding:5px; font-size:12px;" onclick="moveTask('${documento.id}', 'proceso')">A Proceso ➔</button>`;
+                else if(t.estado === 'proceso') btnHtml = `<button style="padding:5px; font-size:12px;" onclick="moveTask('${documento.id}', 'listas')">✔ Finalizar</button>`;
+                const card = `<div class="task-card"><span class="task-badge">${t.responsable}</span><strong>${t.titulo}</strong>${t.vencimiento ? `<div style="font-size:12px; color:#c0392b; margin-bottom:10px;">Vence: ${t.vencimiento}</div>` : '<br>'}${btnHtml}</div>`;
                 document.getElementById(`list-${t.estado}`).innerHTML += card;
             });
         });
-
         window.addTask = async function() {
-            const title = document.getElementById('taskTitle').value;
-            const client = document.getElementById('taskClient').value;
-            const resp = document.getElementById('taskResponsible').value;
-            if(!title) return alert("Ponle un título a la tarea.");
-            const tituloFinal = client ? `${title} - ${client}` : title;
-            await addDoc(collection(db, "tareas"), { titulo: tituloFinal, responsable: resp, estado: "pendientes", fechaCreacion: new Date().toISOString() });
+            const title = document.getElementById('taskTitle').value; const client = document.getElementById('taskClient').value; const resp = document.getElementById('taskResponsible').value;
+            if(!title) return alert("Título obligatorio.");
+            await addDoc(collection(db, "tareas"), { titulo: client ? `${title} - ${client}` : title, responsable: resp, estado: "pendientes", fechaCreacion: new Date().toISOString() });
             document.getElementById('taskTitle').value = '';
         }
-
-        window.moveTask = async function(id, estado) {
-            await updateDoc(doc(db, "tareas", id), { estado: estado });
-        }
-
+        window.moveTask = async function(id, estado) { await updateDoc(doc(db, "tareas", id), { estado: estado }); }
         window.autoCompletarFechas = function() {
             const oblig = document.getElementById('masivoObligacion').value;
             if(oblig === 'sueldos_emp' || oblig === 'sueldos_casas') {
-                const mes = document.getElementById('masivoMes').value; 
-                const parts = mes.split('-');
-                let lastDate = new Date(parts[1], parts[0], 0); 
+                const mes = document.getElementById('masivoMes').value.split('-');
+                let lastDate = new Date(mes[1], mes[0], 0); 
                 if (lastDate.getDay() === 6) lastDate.setDate(lastDate.getDate() - 1); 
                 if (lastDate.getDay() === 0) lastDate.setDate(lastDate.getDate() - 2); 
                 const strDate = lastDate.toISOString().split('T')[0];
                 ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = strDate);
-            } else {
-                ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = '');
-            }
+            } else { ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = ''); }
         }
-
         window.generarMasivas = async function() {
-            const oblig = document.getElementById('masivoObligacion').value;
-            const textOblig = document.getElementById('masivoObligacion').options[document.getElementById('masivoObligacion').selectedIndex].text;
-            if(!oblig) return alert("Selecciona una obligación");
-
-            const fechas = {
-                '0': document.getElementById('fecha_01').value, '1': document.getElementById('fecha_01').value,
-                '2': document.getElementById('fecha_23').value, '3': document.getElementById('fecha_23').value,
-                '4': document.getElementById('fecha_45').value, '5': document.getElementById('fecha_45').value,
-                '6': document.getElementById('fecha_67').value, '7': document.getElementById('fecha_67').value,
-                '8': document.getElementById('fecha_89').value, '9': document.getElementById('fecha_89').value
-            };
-
+            const oblig = document.getElementById('masivoObligacion').value; const textOblig = document.getElementById('masivoObligacion').options[document.getElementById('masivoObligacion').selectedIndex].text;
+            if(!oblig) return alert("Selecciona obligación.");
+            const fechas = { '0': document.getElementById('fecha_01').value, '1': document.getElementById('fecha_01').value, '2': document.getElementById('fecha_23').value, '3': document.getElementById('fecha_23').value, '4': document.getElementById('fecha_45').value, '5': document.getElementById('fecha_45').value, '6': document.getElementById('fecha_67').value, '7': document.getElementById('fecha_67').value, '8': document.getElementById('fecha_89').value, '9': document.getElementById('fecha_89').value };
             let generadas = 0;
             for (const cli of clientesActivos) {
-                // Solo genera si el cliente está ACTIVO y tiene la obligación tildada
                 if (cli.activo && cli.obligaciones && cli.obligaciones.includes(oblig)) {
-                    const ultDigito = cli.cuit.slice(-1);
-                    const fechaVenc = fechas[ultDigito];
-                    if (fechaVenc) {
-                        await addDoc(collection(db, "tareas"), {
-                            titulo: `${textOblig} - ${cli.nombre}`,
-                            responsable: "Un Paso Mas",
-                            estado: "pendientes",
-                            vencimiento: fechaVenc,
-                            clienteId: cli.id
-                        });
-                        generadas++;
-                    }
+                    const ultDigito = cli.cuit.slice(-1); const fechaVenc = fechas[ultDigito];
+                    if (fechaVenc) { await addDoc(collection(db, "tareas"), { titulo: `${textOblig} - ${cli.nombre}`, responsable: "Un Paso Mas", estado: "pendientes", vencimiento: fechaVenc, clienteId: cli.id }); generadas++; }
                 }
             }
-            if(generadas > 0){
-                alert(`¡Éxito! Se generaron ${generadas} tareas.`);
-            } else {
-                alert("No se generaron tareas. Revisa las fechas y las obligaciones de los clientes activos.");
-            }
+            if(generadas > 0) alert(`¡Se generaron ${generadas} tareas!`); else alert("No se generaron tareas. Revisa las fechas.");
         }
     </script>
 </body>
