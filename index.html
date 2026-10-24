@@ -53,7 +53,7 @@
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-content h3 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px; }
         
-        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+        .checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
         .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 13px;}
         .checkbox-item input { width: auto; margin: 0; }
         table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -76,7 +76,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDICIÓN DE TAREA -->
     <div id="taskModal">
         <div class="modal-content">
             <h3>Editar Tarea</h3>
@@ -196,14 +195,22 @@
                     <select id="masivoObligacion" onchange="autoCompletarFechas()">
                         <option value="">-- Seleccionar Obligación --</option>
                         <option value="931">931 + Boletas Sindicales</option>
-                        <option value="sire">SIRE / SICORE</option>
-                        <option value="autonomos">Autónomos</option>
+                        <option value="iva">IVA DJ</option>
+                        <option value="iva_diferido">IVA Pago Diferido</option>
+                        <option value="monotributo">Pago Monotributo</option>
+                        <option value="recat_monotributo">Recategorización Monotributo</option>
                         <option value="iibb_agip">IIBB AGIP Local</option>
                         <option value="iibb_arba">IIBB ARBA Local</option>
                         <option value="iibb_cm">IIBB Convenio Multilateral</option>
-                        <option value="iva">IVA DJ</option>
                         <option value="sueldos_emp">Sueldos Empresas</option>
                         <option value="sueldos_casas">Sueldos Casas Particulares</option>
+                        <option value="autonomos">Autónomos</option>
+                        <option value="pago_sicore">Pago a cuenta SICORE</option>
+                        <option value="dj_sicore">DJ SICORE</option>
+                        <option value="anticipo_ganancias">Anticipo Ganancias</option>
+                        <option value="anticipo_bienes">Anticipo Bienes Personales</option>
+                        <option value="dj_ganancias">DJ Ganancias</option>
+                        <option value="dj_bienes">DJ Bienes Personales</option>
                     </select>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
                         <div><label>Terminación 0-1</label><input type="date" id="fecha_01"></div>
@@ -245,19 +252,26 @@
                     <div class="checkbox-grid">
                         <div class="checkbox-item"><input type="checkbox" id="chk_931" value="931"> 931 + Sindicatos</div>
                         <div class="checkbox-item"><input type="checkbox" id="chk_iva" value="iva"> IVA DJ</div>
-                        <div class="checkbox-item"><input type="checkbox" id="chk_iibb_agip" value="iibb_agip"> IIBB AGIP Local</div>
-                        <div class="checkbox-item"><input type="checkbox" id="chk_iibb_arba" value="iibb_arba"> IIBB ARBA Local</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_iva_diferido" value="iva_diferido"> IVA Pago Diferido</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_monotributo" value="monotributo"> Pago Monotributo</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_recat_monotributo" value="recat_monotributo"> Recat. Monotributo</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_iibb_agip" value="iibb_agip"> IIBB AGIP</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_iibb_arba" value="iibb_arba"> IIBB ARBA</div>
                         <div class="checkbox-item"><input type="checkbox" id="chk_iibb_cm" value="iibb_cm"> IIBB Conv. Mult.</div>
                         <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_emp" value="sueldos_emp"> Sueldos Emp.</div>
                         <div class="checkbox-item"><input type="checkbox" id="chk_sueldos_casas" value="sueldos_casas"> Sueldos Casas Part.</div>
                         <div class="checkbox-item"><input type="checkbox" id="chk_autonomos" value="autonomos"> Autónomos</div>
-                        <div class="checkbox-item"><input type="checkbox" id="chk_sire" value="sire"> SIRE/SICORE</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_pago_sicore" value="pago_sicore"> Pago a cuenta SICORE</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_dj_sicore" value="dj_sicore"> DJ SICORE</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_anticipo_ganancias" value="anticipo_ganancias"> Ant. Ganancias</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_anticipo_bienes" value="anticipo_bienes"> Ant. Bienes Pers.</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_dj_ganancias" value="dj_ganancias"> DJ Ganancias</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_dj_bienes" value="dj_bienes"> DJ Bienes Pers.</div>
                     </div>
                     <button id="btnSaveClient" class="btn-green" onclick="saveClient()">Guardar Cliente</button>
                     <button id="btnCancelEdit" onclick="cancelEdit()" style="display:none; background:#7f8c8d; color:white; border:none; font-weight:bold;">Cancelar Edición</button>
                 </div>
                 
-                <!-- BÚSQUEDA Y CONTADORES -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <div>
                         <span style="background: #27ae60; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-right: 5px;" id="countActivos">Activos: 0</span>
