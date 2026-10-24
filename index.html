@@ -90,14 +90,14 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDICIÓN DE TAREA -->
+    <!-- MODAL DE EDICIÓN DE TAREA / VENCIMIENTO -->
     <div id="taskModal">
         <div class="modal-content">
-            <h3>Editar Tarea</h3>
+            <h3>Editar / Ver Detalles</h3>
             <label style="font-size:12px; font-weight:bold;">Título</label>
             <input type="text" id="editTaskTitle" style="margin-bottom: 10px;">
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div>
                     <label style="font-size:12px; font-weight:bold;">Responsable</label>
                     <select id="editTaskResp" style="margin:0;">
@@ -110,6 +110,14 @@
                     <label style="font-size:12px; font-weight:bold;">Vencimiento</label>
                     <input type="date" id="editTaskDate" style="margin:0;">
                 </div>
+                <div>
+                    <label style="font-size:12px; font-weight:bold;">Estado Actual</label>
+                    <select id="editTaskEstado" style="margin:0;">
+                        <option value="pendientes">Pendiente</option>
+                        <option value="proceso">En Proceso</option>
+                        <option value="listas">Finalizada / Lista</option>
+                    </select>
+                </div>
             </div>
             
             <label style="font-size:12px; font-weight:bold;">Descripción / Notas</label>
@@ -120,8 +128,9 @@
             <input type="file" id="editTaskFile" style="margin-bottom: 10px;">
             
             <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button id="btnUpdateTask" onclick="updateTaskDetails()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar Cambios</button>
+                <button id="btnUpdateTask" onclick="updateTaskDetails()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar</button>
                 <button onclick="closeTaskModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cancelar</button>
+                <button id="btnDeleteTask" onclick="deleteTask()" style="background:#e74c3c; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">🗑️ Borrar</button>
             </div>
         </div>
     </div>
@@ -139,6 +148,7 @@
 
         <div class="main-content">
             
+            <!-- PORTAL CLIENTE -->
             <div id="portalCliente" class="section">
                 <div class="client-portal-header">
                     <h2>Portal de Servicios - Un Paso Más</h2>
@@ -152,7 +162,7 @@
 
             <!-- SECCIÓN TABLERO -->
             <div id="tareas" class="section active">
-                <h2>Tablero de Tareas</h2>
+                <h2>Tablero de Tareas Manuales</h2>
                 
                 <div class="filter-bar">
                     <input type="text" id="searchTask" placeholder="🔍 Buscar por título o cliente..." oninput="renderTareas()" style="margin:0;">
@@ -204,6 +214,7 @@
             <!-- SECCIÓN CALENDARIO -->
             <div id="calendario" class="section">
                 <h2>Calendario de Vencimientos</h2>
+                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Aquí solo se muestran las obligaciones generadas masivamente.</p>
                 
                 <div class="calendar-header-bar">
                     <button onclick="changeMonth(-1)" style="background:#34495e; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">&laquo; Mes Anterior</button>
@@ -257,7 +268,6 @@
                         <option value="dj_bienes">DJ Bienes Personales</option>
                     </select>
                     
-                    <!-- 10 casilleros individuales -->
                     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px;">
                         <div><label style="font-size:12px;">Term. 0</label><input type="date" id="fecha_0" style="margin:0;"></div>
                         <div><label style="font-size:12px;">Term. 1</label><input type="date" id="fecha_1" style="margin:0;"></div>
@@ -272,7 +282,7 @@
                         <div><label style="font-size:12px;">Term. 9</label><input type="date" id="fecha_9" style="margin:0;"></div>
                     </div>
                     
-                    <button class="btn-green" onclick="generarMasivas()" style="margin-top: 15px;">Generar Tareas en el Tablero</button>
+                    <button class="btn-green" onclick="generarMasivas()" style="margin-top: 15px;">Generar Vencimientos en el Calendario</button>
                 </div>
             </div>
 
@@ -376,7 +386,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, doc, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, deleteDoc, doc, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -400,7 +410,6 @@
         let listeners = [];
         let isUserAdmin = false;
 
-        // Variables del Calendario
         let currentCalDate = new Date(); 
 
         const ADMIN_EMAILS = [
@@ -454,7 +463,6 @@
             }
         }
 
-        // --- LÓGICA DEL CALENDARIO ---
         window.changeMonth = function(dir) {
             currentCalDate.setMonth(currentCalDate.getMonth() + dir);
             renderCalendar();
@@ -484,7 +492,8 @@
                 const strDay = day.toString().padStart(2, '0');
                 const dateString = `${year}-${strMonth}-${strDay}`;
 
-                const tasksForDay = tareasActuales.filter(t => t.vencimiento === dateString);
+                // Solo muestra items marcados como 'vencimiento' en el calendario
+                const tasksForDay = tareasActuales.filter(t => t.vencimiento === dateString && t.tipo === 'vencimiento');
                 
                 let tasksHtml = '';
                 tasksForDay.forEach(t => {
@@ -503,7 +512,6 @@
                 `;
             }
         }
-        // ------------------------------
 
         function iniciarCargaDatosCliente(email) {
             const unsubCliente = onSnapshot(query(collection(db, "clientes"), where("emailPortal", "==", email)), (snapCliente) => {
@@ -570,6 +578,7 @@
             document.getElementById('editTaskTitle').value = t.titulo || '';
             document.getElementById('editTaskResp').value = t.responsable || 'Un Paso Mas';
             document.getElementById('editTaskDate').value = t.vencimiento || '';
+            document.getElementById('editTaskEstado').value = t.estado || 'pendientes';
             document.getElementById('editTaskDesc').value = t.descripcion || '';
             
             const linkBox = document.getElementById('editTaskFileLink');
@@ -599,6 +608,7 @@
                 titulo: titulo,
                 responsable: document.getElementById('editTaskResp').value,
                 vencimiento: document.getElementById('editTaskDate').value,
+                estado: document.getElementById('editTaskEstado').value,
                 descripcion: document.getElementById('editTaskDesc').value
             };
 
@@ -611,8 +621,16 @@
             }
             
             await updateDoc(doc(db, "tareas", editingTaskId), updateData);
-            btn.innerText = "Guardar Cambios";
+            btn.innerText = "Guardar";
             closeTaskModal();
+        }
+
+        window.deleteTask = async function() {
+            if(!editingTaskId) return;
+            if(confirm("¿Estás seguro de que deseas ELIMINAR esta tarea de forma permanente?")) {
+                await deleteDoc(doc(db, "tareas", editingTaskId));
+                closeTaskModal();
+            }
         }
 
         function iniciarCargaDatosAdmin() {
@@ -620,7 +638,6 @@
                 clientesActivos = [];
                 snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesActivos.push(c); });
                 clientesActivos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-                
                 renderClientes();
             });
 
@@ -638,31 +655,25 @@
 
         window.renderClientes = function() {
             const term = document.getElementById('searchClient').value.toLowerCase();
-            const statusFilter = document.getElementById('filterClientStatus').value; // 'todos', 'activos', 'inactivos'
+            const statusFilter = document.getElementById('filterClientStatus').value;
             
             let tbodyHtml = '';
             let selectHtml = '<option value="">-- Interna / Sin Cliente --</option>';
             let countAct = 0;
             let countInact = 0;
 
-            // Llenar el selector de tareas solo con los activos globales
             clientesActivos.forEach(c => {
-                if (c.activo) {
-                    selectHtml += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`;
-                }
+                if (c.activo) selectHtml += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`;
             });
 
-            // Buscar por texto
             const filtradosText = clientesActivos.filter(c => {
                 return c.nombre.toLowerCase().includes(term) || c.cuit.includes(term);
             });
 
-            // Contadores basados en el texto buscado
             filtradosText.forEach(c => {
                 if (c.activo) countAct++; else countInact++;
             });
 
-            // Aplicar el filtro de estado para la tabla
             const filtradosFinal = filtradosText.filter(c => {
                 if (statusFilter === 'activos' && !c.activo) return false;
                 if (statusFilter === 'inactivos' && c.activo) return false;
@@ -709,8 +720,11 @@
             let htmlProceso = '';
             let htmlListas = '';
 
+            // Solo muestra tareas manuales en el tablero (tipo 'tarea' o sin tipo por compatibilidad)
             const filtradas = tareasActuales.filter(t => {
-                return t.titulo.toLowerCase().includes(term) && (resp === "" || t.responsable === resp);
+                return t.titulo.toLowerCase().includes(term) && 
+                       (resp === "" || t.responsable === resp) &&
+                       t.tipo !== 'vencimiento'; 
             });
 
             filtradas.forEach(t => {
@@ -764,6 +778,7 @@
 
             await addDoc(collection(db, "tareas"), { 
                 titulo: t + nombreParaTitulo, 
+                tipo: 'tarea', // Se marca como manual para el Tablero
                 responsable: document.getElementById('taskResponsible').value, 
                 vencimiento: document.getElementById('taskDueDate').value,
                 descripcion: document.getElementById('taskDesc').value,
@@ -889,7 +904,12 @@
         }
 
         window.generarMasivas = async function() {
-            const ob = document.getElementById('masivoObligacion').value; if(!ob) return alert("Selecciona obligación.");
+            const obSelect = document.getElementById('masivoObligacion');
+            const ob = obSelect.value; 
+            if(!ob) return alert("Selecciona obligación.");
+            
+            const mesSeleccionado = document.getElementById('masivoMes').options[document.getElementById('masivoMes').selectedIndex].text;
+            
             const f = { 
                 '0': document.getElementById('fecha_0').value, 
                 '1': document.getElementById('fecha_1').value, 
@@ -902,17 +922,26 @@
                 '8': document.getElementById('fecha_8').value, 
                 '9': document.getElementById('fecha_9').value 
             };
+            
             let gen = 0;
             for (const c of clientesActivos) {
                 if (c.activo && c.obligaciones && c.obligaciones.includes(ob)) { 
                     const fv = f[c.cuit.slice(-1)]; 
                     if (fv) { 
-                        await addDoc(collection(db, "tareas"), { titulo: `${document.getElementById('masivoObligacion').options[document.getElementById('masivoObligacion').selectedIndex].text} - ${c.nombre}`, responsable: "Un Paso Mas", estado: "pendientes", vencimiento: fv, clienteId: c.id }); 
+                        await addDoc(collection(db, "tareas"), { 
+                            titulo: `${obSelect.options[obSelect.selectedIndex].text} (${mesSeleccionado}) - ${c.nombre}`, 
+                            tipo: 'vencimiento', // Lo marca para ir solo al Calendario
+                            responsable: "Un Paso Mas", 
+                            estado: "pendientes", 
+                            vencimiento: fv, 
+                            clienteId: c.id 
+                        }); 
                         gen++; 
                     } 
                 }
             }
-            if(gen > 0) alert(`¡Se generaron ${gen} tareas!`); else alert("Revisa las fechas. Asegúrate de completarlas para las terminaciones correspondientes.");
+            if(gen > 0) alert(`¡Se generaron ${gen} vencimientos en el calendario!`); 
+            else alert("Revisa las fechas. Asegúrate de completarlas para las terminaciones correspondientes.");
         }
     </script>
 </body>
