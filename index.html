@@ -76,6 +76,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE EDICIÓN DE TAREA -->
     <div id="taskModal">
         <div class="modal-content">
             <h3>Editar Tarea</h3>
@@ -246,7 +247,29 @@
                         <input type="text" id="clientAGIP" placeholder="Clave AGIP">
                         <input type="text" id="clientARBA" placeholder="Clave ARBA">
                     </div>
-                    <textarea id="clientObs" placeholder="Observaciones..."></textarea>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">Condición frente al IVA</label>
+                            <select id="clientCondIva" style="margin:0;">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Responsable Inscripto">Responsable Inscripto</option>
+                                <option value="Monotributista">Monotributista</option>
+                                <option value="Exento">Exento</option>
+                                <option value="No Inscripto">No Inscripto</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">Condición en Ganancias</label>
+                            <select id="clientCondGanancias" style="margin:0;">
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Inscripto">Inscripto</option>
+                                <option value="No Inscripto">No Inscripto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <textarea id="clientObs" placeholder="Observaciones..." style="margin-top: 10px;"></textarea>
                     
                     <label style="font-weight: bold; display: block; margin-top: 10px;">Obligaciones Activas:</label>
                     <div class="checkbox-grid">
@@ -516,11 +539,15 @@
                 if(c.clave_agip) clavesHtml += `<span class="clave-tag"><strong>AGIP:</strong> ${c.clave_agip}</span>`;
                 if(c.clave_arba) clavesHtml += `<span class="clave-tag"><strong>ARBA:</strong> ${c.clave_arba}</span>`;
                 
+                let condTags = '';
+                if(c.condIva) condTags += `<span style="font-size:10px; background:#f39c12; color:white; padding:2px 5px; border-radius:3px; margin-right:3px; font-weight:bold;">${c.condIva}</span>`;
+                if(c.condGanancias) condTags += `<span style="font-size:10px; background:#8e44ad; color:white; padding:2px 5px; border-radius:3px; font-weight:bold;">Gcias: ${c.condGanancias}</span>`;
+                
                 const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${c.emailPortal}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso</span>';
 
                 tbodyHtml += `
                     <tr style="background: ${c.activo ? 'transparent' : '#f9ebea'};">
-                        <td><strong>${c.nombre}</strong><br><small>CUIT: ${c.cuit}</small></td>
+                        <td><strong>${c.nombre}</strong><br><small>CUIT: ${c.cuit}</small><br><div style="margin-top:5px;">${condTags}</div></td>
                         <td>${portalTag}</td>
                         <td>${clavesHtml}</td>
                         <td>${c.activo ? '<span style="color:green; font-weight:bold;">Activo</span>' : '<span style="color:red; font-weight:bold;">Inactivo</span>'}</td>
@@ -629,7 +656,7 @@
                         const nombre = (cols[0] || '').trim().replace(/^"|"$/g, ''); const cuit = (cols[1] || '').trim().replace(/^"|"$/g, '');
                         if(nombre && cuit) {
                             if(clientesActivos.find(c => c.cuit === cuit) || nuevos.find(n => n.cuit === cuit)) duplicados++;
-                            else nuevos.push({ nombre, cuit, emailPortal: "", clave_arca: (cols[2]||'').replace(/^"|"$/g, ''), clave_agip: (cols[3]||'').replace(/^"|"$/g, ''), clave_arba: (cols[4]||'').replace(/^"|"$/g, ''), observaciones: (cols[5]||'').replace(/^"|"$/g, ''), activo: true, obligaciones: [] });
+                            else nuevos.push({ nombre, cuit, emailPortal: "", condIva: "", condGanancias: "", clave_arca: (cols[2]||'').replace(/^"|"$/g, ''), clave_agip: (cols[3]||'').replace(/^"|"$/g, ''), clave_arba: (cols[4]||'').replace(/^"|"$/g, ''), observaciones: (cols[5]||'').replace(/^"|"$/g, ''), activo: true, obligaciones: [] });
                         }
                     }
                 }
@@ -662,6 +689,8 @@
                 nombre: name, 
                 cuit: cuit, 
                 emailPortal: emailPortal,
+                condIva: document.getElementById('clientCondIva').value,
+                condGanancias: document.getElementById('clientCondGanancias').value,
                 clave_arca: document.getElementById('clientARCA').value, 
                 clave_agip: document.getElementById('clientAGIP').value, 
                 clave_arba: document.getElementById('clientARBA').value, 
@@ -680,6 +709,8 @@
             document.getElementById('clientName').value = c.nombre||''; 
             document.getElementById('clientCuit').value = c.cuit||''; 
             document.getElementById('clientEmailLogin').value = c.emailPortal||''; 
+            document.getElementById('clientCondIva').value = c.condIva||''; 
+            document.getElementById('clientCondGanancias').value = c.condGanancias||''; 
             document.getElementById('clientARCA').value = c.clave_arca||''; 
             document.getElementById('clientAGIP').value = c.clave_agip||''; 
             document.getElementById('clientARBA').value = c.clave_arba||''; 
@@ -695,6 +726,8 @@
             document.getElementById('clientName').value = ''; 
             document.getElementById('clientCuit').value = ''; 
             document.getElementById('clientEmailLogin').value = ''; 
+            document.getElementById('clientCondIva').value = ''; 
+            document.getElementById('clientCondGanancias').value = ''; 
             document.getElementById('clientARCA').value = ''; 
             document.getElementById('clientAGIP').value = ''; 
             document.getElementById('clientARBA').value = ''; 
