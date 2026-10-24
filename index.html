@@ -71,7 +71,7 @@
         .action-btn { width: auto; padding: 6px 12px; margin: 2px; font-size: 12px; }
         .clave-tag { display: inline-block; background: #ecf0f1; padding: 3px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; margin-bottom: 5px;}
 
-        /* Estilos del Calendario Mejorado */
+        /* Calendario */
         .calendar-header-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;}
         .calendar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
         .calendar-day-name { background: #2c3e50; color: white; text-align: center; padding: 10px; font-weight: bold; border-radius: 4px; font-size: 14px;}
@@ -225,7 +225,7 @@
                 </div>
 
                 <div class="form-container">
-                    <h3>Crear Tarea Manual</h3>
+                    <h3>Crear Registro Manual</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                         <div><label style="font-size:12px; font-weight:bold;">Título</label><input type="text" id="taskTitle" placeholder="Ej: Responder AFIP" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="taskClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
@@ -237,12 +237,19 @@
                             </select>
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">Destino</label>
+                            <select id="taskDestino" style="margin:0;">
+                                <option value="tarea">📋 Al Tablero (Tarea)</option>
+                                <option value="vencimiento">📅 Al Calendario (Vencimiento)</option>
+                            </select>
+                        </div>
                         <div><label style="font-size:12px; font-weight:bold;">Vencimiento</label><input type="date" id="taskDueDate" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="taskFile" style="margin:0;"></div>
                     </div>
-                    <textarea id="taskDesc" placeholder="Observaciones, detalles o información adicional de la tarea..." style="margin-top:10px;"></textarea>
-                    <button id="btnCreateTask" class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Agregar Tarea al Tablero</button>
+                    <textarea id="taskDesc" placeholder="Observaciones, detalles o información adicional..." style="margin-top:10px;"></textarea>
+                    <button id="btnCreateTask" class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Guardar Registro</button>
                 </div>
                 
                 <div class="kanban-board">
@@ -264,7 +271,7 @@
             <!-- SECCIÓN CALENDARIO -->
             <div id="calendario" class="section">
                 <h2>Calendario de Vencimientos</h2>
-                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Aquí solo se muestran las obligaciones generadas masivamente. (Lunes a Sábado)</p>
+                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Aquí solo se muestran los vencimientos (Masivos o Manuales). (Lunes a Sábado)</p>
                 
                 <div class="calendar-header-bar">
                     <button onclick="changeMonth(-1)" style="background:#34495e; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">&laquo; Mes Anterior</button>
@@ -629,7 +636,7 @@
             if(!confirm("¿Estás seguro de marcar TODOS estos vencimientos como FINALIZADOS?")) return;
             
             const btn = document.getElementById('btnMarkAllFinished');
-            btn.innerText = "Actualizando Base de Datos...";
+            btn.innerText = "Actualizando...";
             btn.disabled = true;
             
             try {
@@ -897,6 +904,7 @@
         window.addTask = async function() {
             const t = document.getElementById('taskTitle').value;
             const clientId = document.getElementById('taskClient').value;
+            const tipoDestino = document.getElementById('taskDestino').value;
             
             if(!t) return alert("El título es obligatorio.");
             
@@ -921,7 +929,7 @@
 
             await addDoc(collection(db, "tareas"), { 
                 titulo: t + nombreParaTitulo, 
-                tipo: 'tarea', 
+                tipo: tipoDestino, 
                 responsable: document.getElementById('taskResponsible').value, 
                 vencimiento: document.getElementById('taskDueDate').value,
                 descripcion: document.getElementById('taskDesc').value,
@@ -932,7 +940,7 @@
             }); 
             
             document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = ''; document.getElementById('taskFile').value = '';
-            btn.innerText = "+ Agregar Tarea al Tablero";
+            btn.innerText = "+ Guardar Registro";
         }
 
         window.importarCSV = async function() {
