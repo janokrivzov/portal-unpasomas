@@ -42,6 +42,12 @@
         .task-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #34495e; color: white; margin-bottom: 8px; align-self: flex-start;}
         .filter-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d4fc;}
         
+        /* Portal Cliente */
+        .client-portal-header { background: #34495e; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;}
+        .client-task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;}
+        .client-task-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #bdc3c7;}
+        .client-task-card.finalizada { border-left-color: #27ae60; }
+        
         /* Modal Tarea */
         #taskModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
@@ -62,7 +68,7 @@
     <div id="login-screen">
         <div class="login-box">
             <h2>Acceso Intranet</h2>
-            <p style="font-size:13px; color:#666; margin-bottom:20px;">Ingresa tus credenciales del estudio</p>
+            <p style="font-size:13px; color:#666; margin-bottom:20px;">Ingresa tus credenciales</p>
             <input type="email" id="loginEmail" placeholder="Correo electrónico">
             <input type="password" id="loginPassword" placeholder="Contraseña">
             <button onclick="login()">Iniciar Sesión</button>
@@ -95,7 +101,7 @@
             <label style="font-size:12px; font-weight:bold;">Descripción / Notas</label>
             <textarea id="editTaskDesc" style="min-height: 70px;"></textarea>
             
-            <label style="font-size:12px; font-weight:bold; display:block; margin-top:10px;">Archivo Adjunto</label>
+            <label style="font-size:12px; font-weight:bold; display:block; margin-top:10px;">Archivo Adjunto (Visible para el Cliente)</label>
             <div id="editTaskFileLink" style="font-size:12px; margin-bottom:10px; color:#2980b9;"></div>
             <input type="file" id="editTaskFile" style="margin-bottom: 10px;">
             
@@ -107,7 +113,9 @@
     </div>
 
     <div id="app-container">
-        <div class="sidebar">
+        
+        <!-- SIDEBAR: Solo visible para Administradores -->
+        <div class="sidebar" id="adminSidebar">
             <h2>Un Paso Más</h2>
             <button class="menu-btn active" onclick="showSection('tareas', this)">Tablero Tareas</button>
             <button class="menu-btn" onclick="showSection('vencimientos', this)">Vencimientos Masivos</button>
@@ -117,6 +125,21 @@
 
         <div class="main-content">
             
+            <!-- PORTAL DEL CLIENTE (Solo visible para Clientes) -->
+            <div id="portalCliente" class="section">
+                <div class="client-portal-header">
+                    <h2>Portal de Servicios - Un Paso Más</h2>
+                    <p style="margin:0; font-size:14px; opacity:0.8;">Bienvenido. Aquí puedes descargar tus comprobantes y liquidaciones.</p>
+                </div>
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <button onclick="logout()" style="background: #e74c3c; width: auto; padding: 8px 15px;">Cerrar Sesión</button>
+                </div>
+                <div class="client-task-grid" id="clientDashboardGrid">
+                    <!-- Las tarjetas del cliente se inyectan aquí -->
+                </div>
+            </div>
+
+            <!-- SECCIÓN TAREAS (Admin) -->
             <div id="tareas" class="section active">
                 <h2>Tablero de Tareas</h2>
                 
@@ -167,7 +190,7 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN VENCIMIENTOS -->
+            <!-- SECCIÓN VENCIMIENTOS (Admin) -->
             <div id="vencimientos" class="section">
                 <h2>Generador Masivo</h2>
                 <div class="form-container">
@@ -199,7 +222,7 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN CLIENTES -->
+            <!-- SECCIÓN CLIENTES (Admin) -->
             <div id="clientes" class="section">
                 <h2>Gestión de Clientes</h2>
                 <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
@@ -211,7 +234,12 @@
                 <div class="form-container" id="form-cliente-container">
                     <h3 id="formClientTitle">Agregar Nuevo Cliente</h3>
                     <input type="text" id="clientName" placeholder="Razón Social / Nombre completo">
-                    <input type="text" id="clientCuit" placeholder="CUIT (Sin guiones)">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="text" id="clientCuit" placeholder="CUIT (Sin guiones)">
+                        <input type="email" id="clientEmailLogin" placeholder="Email de acceso para el Portal (Opcional)">
+                    </div>
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                         <input type="text" id="clientARCA" placeholder="Clave ARCA">
                         <input type="text" id="clientAGIP" placeholder="Clave AGIP">
@@ -236,7 +264,7 @@
                 </div>
                 
                 <table id="clientsTable">
-                    <thead><tr><th>Nombre / CUIT</th><th>Claves</th><th>Observaciones</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Nombre / CUIT</th><th>Acceso Portal</th><th>Claves</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -246,8 +274,8 @@
     <!-- SCRIPT FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, doc, where } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -269,12 +297,35 @@
         let editingClientId = null;
         let editingTaskId = null; 
         let listeners = [];
+        let isUserAdmin = false;
+
+        // AQUI DEFINES LOS CORREOS QUE SON DEL ESTUDIO Y TIENEN ACCESO TOTAL
+        const ADMIN_EMAILS = [
+            "jano.krivzov@estudioritvo.com.ar",
+            "info@estudioritvo.com.ar",
+            "ivan.ritvo@estudioritvo.com.ar"
+        ];
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
-                iniciarCargaDatos();
+                
+                isUserAdmin = ADMIN_EMAILS.includes(user.email);
+
+                if(isUserAdmin) {
+                    // MODO ADMINISTRADOR: Ve todo el sistema
+                    document.getElementById('adminSidebar').style.display = 'flex';
+                    document.getElementById('portalCliente').classList.remove('active');
+                    showSection('tareas', document.querySelector('.menu-btn'));
+                    iniciarCargaDatosAdmin();
+                } else {
+                    // MODO CLIENTE: Oculta el menú y carga solo su portal
+                    document.getElementById('adminSidebar').style.display = 'none';
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    document.getElementById('portalCliente').classList.add('active');
+                    iniciarCargaDatosCliente(user.email);
+                }
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('app-container').style.display = 'none';
@@ -291,12 +342,66 @@
         window.logout = function() { signOut(auth); }
 
         window.showSection = function(sectionId, btnElement) {
+            if(!isUserAdmin) return;
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
             if(btnElement) btnElement.classList.add('active');
         }
 
+        /* --- LOGICA DEL PORTAL DEL CLIENTE --- */
+        function iniciarCargaDatosCliente(email) {
+            // 1. Busca si el correo le pertenece a un cliente en la base de datos
+            const unsubCliente = onSnapshot(query(collection(db, "clientes"), where("emailPortal", "==", email)), (snapCliente) => {
+                if(snapCliente.empty) {
+                    document.getElementById('clientDashboardGrid').innerHTML = '<p>No se encontró un cliente asociado a este correo. Comunícate con el Estudio.</p>';
+                    return;
+                }
+                const clienteData = snapCliente.docs[0].data();
+                
+                // 2. Trae solo las tareas asignadas a este cliente específico
+                const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", snapCliente.docs[0].id)), (snapTareas) => {
+                    const grid = document.getElementById('clientDashboardGrid');
+                    grid.innerHTML = '';
+                    
+                    snapTareas.forEach(doc => {
+                        const t = doc.data();
+                        const isFinalizada = t.estado === 'listas';
+                        const badgeColor = isFinalizada ? '#27ae60' : '#e67e22';
+                        const estadoText = isFinalizada ? 'Presentado / Finalizado' : 'Pendiente de Gestión';
+                        
+                        let fileBtn = '';
+                        if(t.archivoUrl) {
+                            fileBtn = `<a href="${t.archivoUrl}" target="_blank" style="display:inline-block; margin-top:15px; padding:10px 15px; background:#3498db; color:white; text-decoration:none; border-radius:4px; font-weight:bold;">📥 Descargar Comprobante / VEP</a>`;
+                        } else if(isFinalizada) {
+                            fileBtn = `<p style="font-size:12px; color:#7f8c8d; margin-top:15px;">Finalizado sin comprobantes adjuntos.</p>`;
+                        } else {
+                            fileBtn = `<p style="font-size:12px; color:#7f8c8d; margin-top:15px;">A la espera de la gestión del estudio.</p>`;
+                        }
+
+                        grid.innerHTML += `
+                            <div class="client-task-card ${isFinalizada ? 'finalizada' : ''}">
+                                <div style="display:inline-block; padding:4px 8px; background:${badgeColor}; color:white; font-size:11px; border-radius:12px; margin-bottom:10px; font-weight:bold;">
+                                    ${estadoText}
+                                </div>
+                                <h3 style="margin:0 0 10px 0; font-size:18px; color:#2c3e50;">${t.titulo}</h3>
+                                ${t.vencimiento ? `<p style="margin:0 0 5px 0; font-size:13px; color:#c0392b;"><strong>Vencimiento:</strong> ${t.vencimiento}</p>` : ''}
+                                ${fileBtn}
+                            </div>
+                        `;
+                    });
+                    
+                    if(snapTareas.empty) {
+                        grid.innerHTML = '<p>No tienes presentaciones o tareas pendientes.</p>';
+                    }
+                });
+                listeners.push(unsubTareas);
+            });
+            listeners.push(unsubCliente);
+        }
+        /* ------------------------------------- */
+
+        // DRAG AND DROP (Admin)
         window.allowDrop = function(ev) { ev.preventDefault(); }
         window.drag = function(ev, id) { ev.dataTransfer.setData("text", id); }
         window.drop = async function(ev, estadoDestino) {
@@ -357,7 +462,7 @@
             closeTaskModal();
         }
 
-        function iniciarCargaDatos() {
+        function iniciarCargaDatosAdmin() {
             const unsubClientes = onSnapshot(query(collection(db, "clientes")), (snapshot) => {
                 const tbody = document.querySelector('#clientsTable tbody');
                 const selectCliente = document.getElementById('taskClient');
@@ -373,11 +478,13 @@
                     if(c.clave_agip) clavesHtml += `<span class="clave-tag"><strong>AGIP:</strong> ${c.clave_agip}</span>`;
                     if(c.clave_arba) clavesHtml += `<span class="clave-tag"><strong>ARBA:</strong> ${c.clave_arba}</span>`;
                     
+                    const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${c.emailPortal}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso</span>';
+
                     tbody.innerHTML += `
                         <tr style="background: ${c.activo ? 'transparent' : '#f9ebea'};">
                             <td><strong>${c.nombre}</strong><br><small>CUIT: ${c.cuit}</small></td>
+                            <td>${portalTag}</td>
                             <td>${clavesHtml}</td>
-                            <td><small style="color:#7f8c8d;">${c.observaciones || ''}</small></td>
                             <td>${c.activo ? '<span style="color:green; font-weight:bold;">Activo</span>' : '<span style="color:red; font-weight:bold;">Inactivo</span>'}</td>
                             <td>
                                 <button class="action-btn" style="background:#f39c12; color:white; border:none; cursor:pointer;" onclick="loadEditClient('${c.id}')">✏️ Editar</button>
@@ -385,7 +492,8 @@
                             </td>
                         </tr>
                     `;
-                    if(c.activo) selectCliente.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.cuit})</option>`;
+                    // Guardamos el ID del cliente en el value para vincular correctamente las tareas
+                    if(c.activo) selectCliente.innerHTML += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`;
                 });
             });
 
@@ -431,7 +539,8 @@
 
         window.addTask = async function() {
             const t = document.getElementById('taskTitle').value;
-            const c = document.getElementById('taskClient').value;
+            const clientId = document.getElementById('taskClient').value;
+            
             if(!t) return alert("El título es obligatorio.");
             
             const btn = document.getElementById('btnCreateTask');
@@ -447,12 +556,20 @@
                 archivoUrl = await getDownloadURL(storageRef);
             }
 
+            // Si hay un cliente seleccionado, recuperamos su nombre para el titulo
+            let nombreParaTitulo = "";
+            if(clientId) {
+                const clienteData = clientesActivos.find(x => x.id === clientId);
+                nombreParaTitulo = clienteData ? ` - ${clienteData.nombre}` : "";
+            }
+
             await addDoc(collection(db, "tareas"), { 
-                titulo: c ? `${t} - ${c}` : t, 
+                titulo: t + nombreParaTitulo, 
                 responsable: document.getElementById('taskResponsible').value, 
                 vencimiento: document.getElementById('taskDueDate').value,
                 descripcion: document.getElementById('taskDesc').value,
                 archivoUrl: archivoUrl,
+                clienteId: clientId, // Clave para que el cliente lo vea en su portal
                 estado: "pendientes", 
                 fechaCreacion: new Date().toISOString() 
             }); 
@@ -461,8 +578,6 @@
             btn.innerText = "+ Agregar Tarea al Tablero";
         }
 
-        // Resto de las funciones CSV, Guardado de Clientes y Masivas omitidas por brevedad en la explicación, pero intactas en el bloque.
-        
         window.importarCSV = async function() {
             const file = document.getElementById('csvFile').files[0];
             if(!file) return alert("Selecciona un archivo .csv");
@@ -478,7 +593,7 @@
                         const nombre = (cols[0] || '').trim().replace(/^"|"$/g, ''); const cuit = (cols[1] || '').trim().replace(/^"|"$/g, '');
                         if(nombre && cuit) {
                             if(clientesActivos.find(c => c.cuit === cuit) || nuevos.find(n => n.cuit === cuit)) duplicados++;
-                            else nuevos.push({ nombre, cuit, clave_arca: (cols[2]||'').replace(/^"|"$/g, ''), clave_agip: (cols[3]||'').replace(/^"|"$/g, ''), clave_arba: (cols[4]||'').replace(/^"|"$/g, ''), observaciones: (cols[5]||'').replace(/^"|"$/g, ''), activo: true, obligaciones: [] });
+                            else nuevos.push({ nombre, cuit, emailPortal: "", clave_arca: (cols[2]||'').replace(/^"|"$/g, ''), clave_agip: (cols[3]||'').replace(/^"|"$/g, ''), clave_arba: (cols[4]||'').replace(/^"|"$/g, ''), observaciones: (cols[5]||'').replace(/^"|"$/g, ''), activo: true, obligaciones: [] });
                         }
                     }
                 }
@@ -494,9 +609,33 @@
 
         window.saveClient = async function() {
             const name = document.getElementById('clientName').value; const cuit = document.getElementById('clientCuit').value;
+            const emailPortal = document.getElementById('clientEmailLogin').value.trim().toLowerCase();
+            
             if(!name || !cuit) return alert("Completa nombre y CUIT");
             if(clientesActivos.find(c => c.cuit === cuit && c.id !== editingClientId)) return alert("CUIT ya registrado.");
-            const data = { nombre: name, cuit: cuit, clave_arca: document.getElementById('clientARCA').value, clave_agip: document.getElementById('clientAGIP').value, clave_arba: document.getElementById('clientARBA').value, observaciones: document.getElementById('clientObs').value, obligaciones: Array.from(document.querySelectorAll('.checkbox-grid input:checked')).map(cb => cb.value) };
+            
+            // Si agrega un mail para el portal, lo registramos en la base de seguridad de Firebase Auth
+            if (emailPortal) {
+                try {
+                    // Creamos el usuario en Auth con una contraseña generica (cuit) para que el cliente ingrese.
+                    // Si el usuario ya existe, esto tirará un error que ignoramos (por eso el catch silencioso)
+                    await createUserWithEmailAndPassword(auth, emailPortal, cuit);
+                } catch(e) {
+                    console.log("El usuario ya existe en Auth o hubo un error al crearlo.", e);
+                }
+            }
+
+            const data = { 
+                nombre: name, 
+                cuit: cuit, 
+                emailPortal: emailPortal,
+                clave_arca: document.getElementById('clientARCA').value, 
+                clave_agip: document.getElementById('clientAGIP').value, 
+                clave_arba: document.getElementById('clientARBA').value, 
+                observaciones: document.getElementById('clientObs').value, 
+                obligaciones: Array.from(document.querySelectorAll('.checkbox-grid input:checked')).map(cb => cb.value) 
+            };
+            
             if(editingClientId) await updateDoc(doc(db, "clientes", editingClientId), data);
             else { data.activo = true; await addDoc(collection(db, "clientes"), data); }
             cancelEdit();
@@ -505,15 +644,32 @@
         window.loadEditClient = function(id) {
             const c = clientesActivos.find(x => x.id === id); if(!c) return;
             editingClientId = id;
-            document.getElementById('clientName').value = c.nombre||''; document.getElementById('clientCuit').value = c.cuit||''; document.getElementById('clientARCA').value = c.clave_arca||''; document.getElementById('clientAGIP').value = c.clave_agip||''; document.getElementById('clientARBA').value = c.clave_arba||''; document.getElementById('clientObs').value = c.observaciones||'';
+            document.getElementById('clientName').value = c.nombre||''; 
+            document.getElementById('clientCuit').value = c.cuit||''; 
+            document.getElementById('clientEmailLogin').value = c.emailPortal||''; 
+            document.getElementById('clientARCA').value = c.clave_arca||''; 
+            document.getElementById('clientAGIP').value = c.clave_agip||''; 
+            document.getElementById('clientARBA').value = c.clave_arba||''; 
+            document.getElementById('clientObs').value = c.observaciones||'';
+            
             document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = c.obligaciones && c.obligaciones.includes(cb.value));
             document.getElementById('btnSaveClient').innerText = "Actualizar"; document.getElementById('btnCancelEdit').style.display = "inline-block";
             document.getElementById('form-cliente-container').scrollIntoView({ behavior: 'smooth' });
         }
 
         window.cancelEdit = function() {
-            editingClientId = null; document.getElementById('clientName').value = ''; document.getElementById('clientCuit').value = ''; document.getElementById('clientARCA').value = ''; document.getElementById('clientAGIP').value = ''; document.getElementById('clientARBA').value = ''; document.getElementById('clientObs').value = '';
-            document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = false); document.getElementById('btnSaveClient').innerText = "Guardar Cliente"; document.getElementById('btnCancelEdit').style.display = "none";
+            editingClientId = null; 
+            document.getElementById('clientName').value = ''; 
+            document.getElementById('clientCuit').value = ''; 
+            document.getElementById('clientEmailLogin').value = ''; 
+            document.getElementById('clientARCA').value = ''; 
+            document.getElementById('clientAGIP').value = ''; 
+            document.getElementById('clientARBA').value = ''; 
+            document.getElementById('clientObs').value = '';
+            
+            document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = false); 
+            document.getElementById('btnSaveClient').innerText = "Guardar Cliente"; 
+            document.getElementById('btnCancelEdit').style.display = "none";
         }
 
         window.toggleStatus = async function(id, st) { if(confirm(`¿Deseas ${!st ? "activar" : "desactivar"} este cliente?`)) await updateDoc(doc(db, "clientes", id), { activo: !st }); }
