@@ -79,14 +79,14 @@
         .calendar-cell { 
             background: white; 
             min-height: 140px; 
-            max-height: 140px; /* Limita la altura para no romper la fila */
+            max-height: 140px; 
             border-radius: 4px; 
             padding: 8px; 
             box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
             display: flex; 
             flex-direction: column; 
             border: 1px solid #ecf0f1;
-            overflow: hidden; /* Oculta lo que sale del contenedor padre */
+            overflow: hidden; 
         }
         .calendar-cell.empty { background: transparent; border: none; box-shadow: none; }
         
@@ -94,15 +94,17 @@
         
         .calendar-cell-content {
             flex: 1;
-            overflow-y: auto; /* Agrega scroll solo a la lista de vencimientos */
+            overflow-y: auto; 
             padding-right: 4px;
         }
         
-        /* Personaliza la barrita de scroll para que no quite mucho espacio */
         .calendar-cell-content::-webkit-scrollbar { width: 4px; }
         .calendar-cell-content::-webkit-scrollbar-thumb { background-color: #bdc3c7; border-radius: 4px; }
 
-        .cal-task-pill { font-size: 10px; padding: 5px; border-radius: 3px; color: white; margin-bottom: 4px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
+        .cal-group-title { font-size: 10px; font-weight: bold; color: #2c3e50; margin: 8px 0 4px 0; border-bottom: 1px solid #bdc3c7; padding-bottom: 2px; }
+        .cal-group-title:first-child { margin-top: 0; }
+        
+        .cal-task-pill { font-size: 10px; padding: 4px 6px; border-radius: 3px; color: white; margin-bottom: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
         .cal-task-pill:hover { opacity: 0.8; }
         .cal-pendientes { background: #3498db; }
         .cal-proceso { background: #e67e22; }
@@ -516,10 +518,6 @@
             grid.innerHTML = '';
 
             let firstDay = new Date(year, month, 1).getDay();
-            
-            // Calculamos los espacios vacíos excluyendo el Domingo
-            // getDay() devuelve: 0(Dom), 1(Lun), 2(Mar)... 6(Sab)
-            // Si el 1er dia es Domingo (0), al obviarlo, el Lunes 2 será la primera columna, así que lleva 0 celdas vacías previas.
             let emptyDays = firstDay === 0 ? 0 : firstDay - 1; 
             
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -530,8 +528,7 @@
 
             for(let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(year, month, day);
-                // Si el día cae Domingo, se saltea y no se dibuja en la grilla
-                if(dateObj.getDay() === 0) continue; 
+                if(dateObj.getDay() === 0) continue; // Saltea los domingos
 
                 const strMonth = (month + 1).toString().padStart(2, '0');
                 const strDay = day.toString().padStart(2, '0');
@@ -539,14 +536,38 @@
 
                 const tasksForDay = tareasActuales.filter(t => t.vencimiento === dateString && t.tipo === 'vencimiento');
                 
-                let tasksHtml = '';
+                // Lógica para agrupar las tareas por Obligación/Período
+                const groupedTasks = {};
                 tasksForDay.forEach(t => {
-                    let pillClass = 'cal-pendientes';
-                    if(t.estado === 'proceso') pillClass = 'cal-proceso';
-                    if(t.estado === 'listas') pillClass = 'cal-listas';
+                    let groupName = t.titulo;
+                    let clientName = t.titulo;
+                    
+                    const splitIndex = t.titulo.indexOf(' - ');
+                    if(splitIndex !== -1) {
+                        groupName = t.titulo.substring(0, splitIndex); // Ej: "IVA DJ (Octubre 2026)"
+                        clientName = t.titulo.substring(splitIndex + 3); // Ej: "VANINA EPELBAUM"
+                    } else {
+                        groupName = "Otros Vencimientos";
+                    }
 
-                    tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${t.titulo}">${t.titulo}</div>`;
+                    if(!groupedTasks[groupName]) {
+                        groupedTasks[groupName] = [];
+                    }
+                    groupedTasks[groupName].push({ ...t, shortName: clientName });
                 });
+
+                let tasksHtml = '';
+                for (const group in groupedTasks) {
+                    tasksHtml += `<div class="cal-group-title">${group}</div>`;
+                    
+                    groupedTasks[group].forEach(t => {
+                        let pillClass = 'cal-pendientes';
+                        if(t.estado === 'proceso') pillClass = 'cal-proceso';
+                        if(t.estado === 'listas') pillClass = 'cal-listas';
+
+                        tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${t.shortName}">${t.shortName}</div>`;
+                    });
+                }
 
                 grid.innerHTML += `
                     <div class="calendar-cell">
