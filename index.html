@@ -114,7 +114,6 @@
 
     <div id="app-container">
         
-        <!-- SIDEBAR: Solo visible para Administradores -->
         <div class="sidebar" id="adminSidebar">
             <h2>Un Paso Más</h2>
             <button class="menu-btn active" onclick="showSection('tareas', this)">Tablero Tareas</button>
@@ -125,7 +124,6 @@
 
         <div class="main-content">
             
-            <!-- PORTAL DEL CLIENTE (Solo visible para Clientes) -->
             <div id="portalCliente" class="section">
                 <div class="client-portal-header">
                     <h2>Portal de Servicios - Un Paso Más</h2>
@@ -134,12 +132,9 @@
                 <div style="text-align: right; margin-bottom: 20px;">
                     <button onclick="logout()" style="background: #e74c3c; width: auto; padding: 8px 15px;">Cerrar Sesión</button>
                 </div>
-                <div class="client-task-grid" id="clientDashboardGrid">
-                    <!-- Las tarjetas del cliente se inyectan aquí -->
-                </div>
+                <div class="client-task-grid" id="clientDashboardGrid"></div>
             </div>
 
-            <!-- SECCIÓN TAREAS (Admin) -->
             <div id="tareas" class="section active">
                 <h2>Tablero de Tareas</h2>
                 
@@ -190,7 +185,6 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN VENCIMIENTOS (Admin) -->
             <div id="vencimientos" class="section">
                 <h2>Generador Masivo</h2>
                 <div class="form-container">
@@ -222,9 +216,12 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN CLIENTES (Admin) -->
             <div id="clientes" class="section">
-                <h2>Gestión de Clientes</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Gestión de Clientes</h2>
+                    <button id="btnDesactivarTodos" onclick="desactivarTodos()" style="background:#e74c3c; color:white; border:none; padding:10px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">Desactivar Todos los Clientes</button>
+                </div>
+                
                 <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
                     <h3>📥 Importar Base de Datos</h3>
                     <input type="file" id="csvFile" accept=".csv" style="background: white;">
@@ -299,11 +296,10 @@
         let listeners = [];
         let isUserAdmin = false;
 
-        // AQUI DEFINES LOS CORREOS QUE SON DEL ESTUDIO Y TIENEN ACCESO TOTAL
         const ADMIN_EMAILS = [
-            "jano.krivzov@estudioritvo.com.ar",
-            "info@estudioritvo.com.ar",
-            "ivan.ritvo@estudioritvo.com.ar"
+            "tu_correo_administrador@gmail.com",
+            "correo_jano@gmail.com",
+            "correo_ivan@gmail.com"
         ];
 
         onAuthStateChanged(auth, (user) => {
@@ -314,13 +310,11 @@
                 isUserAdmin = ADMIN_EMAILS.includes(user.email);
 
                 if(isUserAdmin) {
-                    // MODO ADMINISTRADOR: Ve todo el sistema
                     document.getElementById('adminSidebar').style.display = 'flex';
                     document.getElementById('portalCliente').classList.remove('active');
                     showSection('tareas', document.querySelector('.menu-btn'));
                     iniciarCargaDatosAdmin();
                 } else {
-                    // MODO CLIENTE: Oculta el menú y carga solo su portal
                     document.getElementById('adminSidebar').style.display = 'none';
                     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                     document.getElementById('portalCliente').classList.add('active');
@@ -349,17 +343,13 @@
             if(btnElement) btnElement.classList.add('active');
         }
 
-        /* --- LOGICA DEL PORTAL DEL CLIENTE --- */
         function iniciarCargaDatosCliente(email) {
-            // 1. Busca si el correo le pertenece a un cliente en la base de datos
             const unsubCliente = onSnapshot(query(collection(db, "clientes"), where("emailPortal", "==", email)), (snapCliente) => {
                 if(snapCliente.empty) {
                     document.getElementById('clientDashboardGrid').innerHTML = '<p>No se encontró un cliente asociado a este correo. Comunícate con el Estudio.</p>';
                     return;
                 }
-                const clienteData = snapCliente.docs[0].data();
                 
-                // 2. Trae solo las tareas asignadas a este cliente específico
                 const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", snapCliente.docs[0].id)), (snapTareas) => {
                     const grid = document.getElementById('clientDashboardGrid');
                     grid.innerHTML = '';
@@ -399,9 +389,7 @@
             });
             listeners.push(unsubCliente);
         }
-        /* ------------------------------------- */
 
-        // DRAG AND DROP (Admin)
         window.allowDrop = function(ev) { ev.preventDefault(); }
         window.drag = function(ev, id) { ev.dataTransfer.setData("text", id); }
         window.drop = async function(ev, estadoDestino) {
@@ -462,15 +450,15 @@
             closeTaskModal();
         }
 
+        // OPTIMIZACIÓN DE RENDIMIENTO: Renderizado de la tabla en memoria
         function iniciarCargaDatosAdmin() {
             const unsubClientes = onSnapshot(query(collection(db, "clientes")), (snapshot) => {
-                const tbody = document.querySelector('#clientsTable tbody');
-                const selectCliente = document.getElementById('taskClient');
-                tbody.innerHTML = ''; selectCliente.innerHTML = '<option value="">-- Interna / Sin Cliente --</option>';
                 clientesActivos = []; let clientesTemp = [];
-                
                 snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesTemp.push(c); clientesActivos.push(c); });
                 clientesTemp.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+                let tbodyHtml = '';
+                let selectHtml = '<option value="">-- Interna / Sin Cliente --</option>';
 
                 clientesTemp.forEach(c => {
                     let clavesHtml = '';
@@ -480,7 +468,7 @@
                     
                     const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${c.emailPortal}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso</span>';
 
-                    tbody.innerHTML += `
+                    tbodyHtml += `
                         <tr style="background: ${c.activo ? 'transparent' : '#f9ebea'};">
                             <td><strong>${c.nombre}</strong><br><small>CUIT: ${c.cuit}</small></td>
                             <td>${portalTag}</td>
@@ -492,9 +480,11 @@
                             </td>
                         </tr>
                     `;
-                    // Guardamos el ID del cliente en el value para vincular correctamente las tareas
-                    if(c.activo) selectCliente.innerHTML += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`;
+                    if(c.activo) selectHtml += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`;
                 });
+
+                document.querySelector('#clientsTable tbody').innerHTML = tbodyHtml;
+                document.getElementById('taskClient').innerHTML = selectHtml;
             });
 
             const unsubTareas = onSnapshot(query(collection(db, "tareas")), (snapshot) => {
@@ -512,9 +502,9 @@
             const term = document.getElementById('searchTask').value.toLowerCase();
             const resp = document.getElementById('filterResponsible').value;
             
-            document.getElementById('list-pendientes').innerHTML = ''; 
-            document.getElementById('list-proceso').innerHTML = ''; 
-            document.getElementById('list-listas').innerHTML = '';
+            let htmlPendientes = '';
+            let htmlProceso = '';
+            let htmlListas = '';
 
             const filtradas = tareasActuales.filter(t => {
                 return t.titulo.toLowerCase().includes(term) && (resp === "" || t.responsable === resp);
@@ -533,8 +523,15 @@
                     ${fileHtml}
                     <button style="background:#3498db; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; width:100%; margin-top:auto;" onclick="openTaskModal('${t.id}')">👁️ Ver / Editar</button>
                 </div>`;
-                document.getElementById(`list-${t.estado}`).innerHTML += card;
+                
+                if (t.estado === 'pendientes') htmlPendientes += card;
+                else if (t.estado === 'proceso') htmlProceso += card;
+                else if (t.estado === 'listas') htmlListas += card;
             });
+            
+            document.getElementById('list-pendientes').innerHTML = htmlPendientes;
+            document.getElementById('list-proceso').innerHTML = htmlProceso;
+            document.getElementById('list-listas').innerHTML = htmlListas;
         }
 
         window.addTask = async function() {
@@ -556,7 +553,6 @@
                 archivoUrl = await getDownloadURL(storageRef);
             }
 
-            // Si hay un cliente seleccionado, recuperamos su nombre para el titulo
             let nombreParaTitulo = "";
             if(clientId) {
                 const clienteData = clientesActivos.find(x => x.id === clientId);
@@ -569,13 +565,29 @@
                 vencimiento: document.getElementById('taskDueDate').value,
                 descripcion: document.getElementById('taskDesc').value,
                 archivoUrl: archivoUrl,
-                clienteId: clientId, // Clave para que el cliente lo vea en su portal
+                clienteId: clientId, 
                 estado: "pendientes", 
                 fechaCreacion: new Date().toISOString() 
             }); 
             
             document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = ''; document.getElementById('taskFile').value = '';
             btn.innerText = "+ Agregar Tarea al Tablero";
+        }
+
+        // FUNCIONALIDAD: Desactivar Todos los Clientes
+        window.desactivarTodos = async function() {
+            if(!confirm("¿Estás seguro de desactivar a TODOS los clientes? Esto puede demorar unos segundos y ocultará a los clientes del generador masivo.")) return;
+            const btn = document.getElementById('btnDesactivarTodos');
+            btn.innerText = "Desactivando...";
+            let count = 0;
+            for(const c of clientesActivos) {
+                if(c.activo) {
+                    await updateDoc(doc(db, "clientes", c.id), { activo: false });
+                    count++;
+                }
+            }
+            alert(`Se desactivaron ${count} clientes correctamente.`);
+            btn.innerText = "Desactivar Todos los Clientes";
         }
 
         window.importarCSV = async function() {
@@ -614,11 +626,8 @@
             if(!name || !cuit) return alert("Completa nombre y CUIT");
             if(clientesActivos.find(c => c.cuit === cuit && c.id !== editingClientId)) return alert("CUIT ya registrado.");
             
-            // Si agrega un mail para el portal, lo registramos en la base de seguridad de Firebase Auth
             if (emailPortal) {
                 try {
-                    // Creamos el usuario en Auth con una contraseña generica (cuit) para que el cliente ingrese.
-                    // Si el usuario ya existe, esto tirará un error que ignoramos (por eso el catch silencioso)
                     await createUserWithEmailAndPassword(auth, emailPortal, cuit);
                 } catch(e) {
                     console.log("El usuario ya existe en Auth o hubo un error al crearlo.", e);
