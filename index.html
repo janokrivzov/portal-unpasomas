@@ -272,7 +272,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, doc, where } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, doc, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -574,17 +574,29 @@
         }
 
         window.desactivarTodos = async function() {
-            if(!confirm("¿Estás seguro de desactivar a TODOS los clientes? Esto puede demorar unos segundos y ocultará a los clientes del generador masivo.")) return;
+            if(!confirm("¿Estás seguro de desactivar a TODOS los clientes? Esto ocultará a los clientes del generador masivo.")) return;
             const btn = document.getElementById('btnDesactivarTodos');
             btn.innerText = "Desactivando...";
-            let count = 0;
-            for(const c of clientesActivos) {
-                if(c.activo) {
-                    await updateDoc(doc(db, "clientes", c.id), { activo: false });
-                    count++;
-                }
+            
+            try {
+                const batch = writeBatch(db);
+                let count = 0;
+                
+                clientesActivos.forEach(c => {
+                    if (c.activo) {
+                        const refDoc = doc(db, "clientes", c.id);
+                        batch.update(refDoc, { activo: false });
+                        count++;
+                    }
+                });
+                
+                await batch.commit();
+                alert(`Se desactivaron ${count} clientes en un solo paso.`);
+            } catch (error) {
+                console.error(error);
+                alert("Hubo un error al desactivar los clientes.");
             }
-            alert(`Se desactivaron ${count} clientes correctamente.`);
+            
             btn.innerText = "Desactivar Todos los Clientes";
         }
 
