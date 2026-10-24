@@ -42,7 +42,7 @@
         .task-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #34495e; color: white; margin-bottom: 8px; align-self: flex-start;}
         .filter-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d4fc;}
         
-        /* Modal Tarea (Ahora Editable) */
+        /* Modal Tarea */
         #taskModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-content h3 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px; }
@@ -93,10 +93,14 @@
             </div>
             
             <label style="font-size:12px; font-weight:bold;">Descripción / Notas</label>
-            <textarea id="editTaskDesc" style="min-height: 100px;"></textarea>
+            <textarea id="editTaskDesc" style="min-height: 70px;"></textarea>
+            
+            <label style="font-size:12px; font-weight:bold; display:block; margin-top:10px;">Archivo Adjunto</label>
+            <div id="editTaskFileLink" style="font-size:12px; margin-bottom:10px; color:#2980b9;"></div>
+            <input type="file" id="editTaskFile" style="margin-bottom: 10px;">
             
             <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button onclick="updateTaskDetails()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar Cambios</button>
+                <button id="btnUpdateTask" onclick="updateTaskDetails()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar Cambios</button>
                 <button onclick="closeTaskModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cancelar</button>
             </div>
         </div>
@@ -112,6 +116,7 @@
         </div>
 
         <div class="main-content">
+            
             <div id="tareas" class="section active">
                 <h2>Tablero de Tareas</h2>
                 
@@ -127,7 +132,7 @@
 
                 <div class="form-container">
                     <h3>Crear Tarea Manual</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                         <div><label style="font-size:12px; font-weight:bold;">Título</label><input type="text" id="taskTitle" placeholder="Ej: Responder AFIP" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="taskClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
                         <div><label style="font-size:12px; font-weight:bold;">Responsable</label>
@@ -137,10 +142,13 @@
                                 <option value="Un Paso Mas">Un Paso Mas</option>
                             </select>
                         </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
                         <div><label style="font-size:12px; font-weight:bold;">Vencimiento</label><input type="date" id="taskDueDate" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="taskFile" style="margin:0;"></div>
                     </div>
                     <textarea id="taskDesc" placeholder="Observaciones, detalles o información adicional de la tarea..." style="margin-top:10px;"></textarea>
-                    <button class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Agregar Tarea al Tablero</button>
+                    <button id="btnCreateTask" class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Agregar Tarea al Tablero</button>
                 </div>
                 
                 <div class="kanban-board">
@@ -159,6 +167,7 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN VENCIMIENTOS -->
             <div id="vencimientos" class="section">
                 <h2>Generador Masivo</h2>
                 <div class="form-container">
@@ -190,6 +199,7 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN CLIENTES -->
             <div id="clientes" class="section">
                 <h2>Gestión de Clientes</h2>
                 <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
@@ -233,11 +243,12 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE CON DRAG&DROP Y EDICIÓN -->
+    <!-- SCRIPT FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCUGSTBjTNr-FSOqcysoMvUc4kKMh0Ekg0",
@@ -251,11 +262,12 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
         
         let clientesActivos = [];
         let tareasActuales = []; 
         let editingClientId = null;
-        let editingTaskId = null; // Para saber qué tarea editamos en el modal
+        let editingTaskId = null; 
         let listeners = [];
 
         onAuthStateChanged(auth, (user) => {
@@ -285,7 +297,6 @@
             if(btnElement) btnElement.classList.add('active');
         }
 
-        // DRAG AND DROP
         window.allowDrop = function(ev) { ev.preventDefault(); }
         window.drag = function(ev, id) { ev.dataTransfer.setData("text", id); }
         window.drop = async function(ev, estadoDestino) {
@@ -294,7 +305,6 @@
             if(id) await updateDoc(doc(db, "tareas", id), { estado: estadoDestino });
         }
 
-        // MODAL TAREAS (Edición)
         window.openTaskModal = function(id) {
             const t = tareasActuales.find(x => x.id === id);
             if(!t) return;
@@ -303,6 +313,14 @@
             document.getElementById('editTaskResp').value = t.responsable || 'Un Paso Mas';
             document.getElementById('editTaskDate').value = t.vencimiento || '';
             document.getElementById('editTaskDesc').value = t.descripcion || '';
+            
+            const linkBox = document.getElementById('editTaskFileLink');
+            if(t.archivoUrl) {
+                linkBox.innerHTML = `<a href="${t.archivoUrl}" target="_blank">📎 Ver Archivo Actual</a> (Sube uno nuevo para reemplazar)`;
+            } else {
+                linkBox.innerHTML = 'Sin archivo adjunto.';
+            }
+            document.getElementById('editTaskFile').value = '';
             document.getElementById('taskModal').style.display = 'flex';
         }
 
@@ -316,12 +334,26 @@
             const titulo = document.getElementById('editTaskTitle').value;
             if(!titulo) return alert("El título no puede estar vacío");
             
-            await updateDoc(doc(db, "tareas", editingTaskId), {
+            const btn = document.getElementById('btnUpdateTask');
+            btn.innerText = "Guardando...";
+            
+            let updateData = {
                 titulo: titulo,
                 responsable: document.getElementById('editTaskResp').value,
                 vencimiento: document.getElementById('editTaskDate').value,
                 descripcion: document.getElementById('editTaskDesc').value
-            });
+            };
+
+            const fileInput = document.getElementById('editTaskFile');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const storageRef = ref(storage, `tareas/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                updateData.archivoUrl = await getDownloadURL(storageRef);
+            }
+            
+            await updateDoc(doc(db, "tareas", editingTaskId), updateData);
+            btn.innerText = "Guardar Cambios";
             closeTaskModal();
         }
 
@@ -382,14 +414,15 @@
 
             filtradas.forEach(t => {
                 const descPreview = t.descripcion ? (t.descripcion.length > 40 ? t.descripcion.substring(0, 40) + '...' : t.descripcion) : '';
-                const descHtml = descPreview ? `<div style="font-size:12px; color:#7f8c8d; margin-bottom:10px; padding-left:5px; border-left: 2px solid #bdc3c7;"><i>${descPreview}</i></div>` : '';
+                const descHtml = descPreview ? `<div style="font-size:12px; color:#7f8c8d; margin-bottom:5px; padding-left:5px; border-left: 2px solid #bdc3c7;"><i>${descPreview}</i></div>` : '';
+                const fileHtml = t.archivoUrl ? `<a href="${t.archivoUrl}" target="_blank" style="font-size:12px; color:#2980b9; text-decoration:none; display:block; margin-bottom:10px;">📎 Archivo adjunto</a>` : '<div style="margin-bottom:10px;"></div>';
                 
-                // Se agrega draggable="true" y ondragstart
                 const card = `<div class="task-card" draggable="true" ondragstart="drag(event, '${t.id}')">
                     <span class="task-badge">${t.responsable}</span>
                     <strong style="cursor:pointer;" onclick="openTaskModal('${t.id}')">${t.titulo}</strong>
                     ${descHtml}
-                    ${t.vencimiento ? `<div style="font-size:12px; font-weight:bold; color:#c0392b; margin-bottom:10px;">📅 Vence: ${t.vencimiento}</div>` : '<div style="margin-bottom:10px;"></div>'}
+                    ${t.vencimiento ? `<div style="font-size:12px; font-weight:bold; color:#c0392b; margin-bottom:5px;">📅 Vence: ${t.vencimiento}</div>` : ''}
+                    ${fileHtml}
                     <button style="background:#3498db; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; width:100%; margin-top:auto;" onclick="openTaskModal('${t.id}')">👁️ Ver / Editar</button>
                 </div>`;
                 document.getElementById(`list-${t.estado}`).innerHTML += card;
@@ -400,17 +433,36 @@
             const t = document.getElementById('taskTitle').value;
             const c = document.getElementById('taskClient').value;
             if(!t) return alert("El título es obligatorio.");
+            
+            const btn = document.getElementById('btnCreateTask');
+            btn.innerText = "Subiendo...";
+            
+            const fileInput = document.getElementById('taskFile');
+            let archivoUrl = "";
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const storageRef = ref(storage, `tareas/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                archivoUrl = await getDownloadURL(storageRef);
+            }
+
             await addDoc(collection(db, "tareas"), { 
                 titulo: c ? `${t} - ${c}` : t, 
                 responsable: document.getElementById('taskResponsible').value, 
                 vencimiento: document.getElementById('taskDueDate').value,
                 descripcion: document.getElementById('taskDesc').value,
+                archivoUrl: archivoUrl,
                 estado: "pendientes", 
                 fechaCreacion: new Date().toISOString() 
             }); 
-            document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = '';
+            
+            document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = ''; document.getElementById('taskFile').value = '';
+            btn.innerText = "+ Agregar Tarea al Tablero";
         }
 
+        // Resto de las funciones CSV, Guardado de Clientes y Masivas omitidas por brevedad en la explicación, pero intactas en el bloque.
+        
         window.importarCSV = async function() {
             const file = document.getElementById('csvFile').files[0];
             if(!file) return alert("Selecciona un archivo .csv");
