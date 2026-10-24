@@ -16,11 +16,11 @@
         #app-container { display: none; width: 100%; height: 100%; }
         
         /* SIDEBAR COLAPSABLE */
-        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; transition: width 0.3s ease; overflow: hidden; white-space: nowrap; box-sizing: border-box; }
+        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; transition: width 0.3s ease; overflow: hidden; white-space: nowrap; box-sizing: border-box; flex-shrink: 0;}
         .sidebar.collapsed { width: 70px; padding: 20px 10px; }
         .sidebar.collapsed .menu-text { display: none; }
         .sidebar.collapsed #sidebarHeader { justify-content: center; }
-        .sidebar.collapsed .menu-btn { text-align: center; padding: 15px 0; }
+        .sidebar.collapsed .menu-btn { text-align: center; padding: 15px 0; justify-content: center;}
         
         #sidebarHeader { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #34495e; padding-bottom: 15px; margin-bottom: 15px; }
         
@@ -29,7 +29,7 @@
         .logout-btn { margin-top: auto; background: #c0392b; justify-content: center; }
         .logout-btn:hover { background: #e74c3c; }
         
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; background: #f4f7f6; }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; background: #f4f7f6; min-width: 0;}
         .section { display: none; }
         .section.active { display: block; }
         
@@ -39,7 +39,7 @@
         .btn-green:hover { background: #2ecc71; }
         .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
         
-        /* Kanban */
+        /* Kanban y Drag & Drop */
         .kanban-board { display: flex; gap: 20px; }
         .kanban-col { background: #e2e4e6; border-radius: 5px; width: 33%; padding: 15px; min-height: 400px; display: flex; flex-direction: column;}
         .kanban-col h3 { text-align: center; margin-top: 0; color: #333; pointer-events: none;}
@@ -71,14 +71,38 @@
         .action-btn { width: auto; padding: 6px 12px; margin: 2px; font-size: 12px; }
         .clave-tag { display: inline-block; background: #ecf0f1; padding: 3px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; margin-bottom: 5px;}
 
-        /* Calendario */
+        /* Estilos del Calendario Mejorado */
         .calendar-header-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;}
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
         .calendar-day-name { background: #2c3e50; color: white; text-align: center; padding: 10px; font-weight: bold; border-radius: 4px; font-size: 14px;}
-        .calendar-cell { background: white; min-height: 120px; border-radius: 4px; padding: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; border: 1px solid #ecf0f1;}
+        
+        .calendar-cell { 
+            background: white; 
+            min-height: 140px; 
+            max-height: 140px; /* Limita la altura para no romper la fila */
+            border-radius: 4px; 
+            padding: 8px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            display: flex; 
+            flex-direction: column; 
+            border: 1px solid #ecf0f1;
+            overflow: hidden; /* Oculta lo que sale del contenedor padre */
+        }
         .calendar-cell.empty { background: transparent; border: none; box-shadow: none; }
-        .calendar-date-number { font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-align: right; font-size: 14px;}
-        .cal-task-pill { font-size: 10px; padding: 4px 6px; border-radius: 3px; color: white; margin-bottom: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
+        
+        .calendar-date-number { font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-align: right; font-size: 14px; flex-shrink: 0;}
+        
+        .calendar-cell-content {
+            flex: 1;
+            overflow-y: auto; /* Agrega scroll solo a la lista de vencimientos */
+            padding-right: 4px;
+        }
+        
+        /* Personaliza la barrita de scroll para que no quite mucho espacio */
+        .calendar-cell-content::-webkit-scrollbar { width: 4px; }
+        .calendar-cell-content::-webkit-scrollbar-thumb { background-color: #bdc3c7; border-radius: 4px; }
+
+        .cal-task-pill { font-size: 10px; padding: 5px; border-radius: 3px; color: white; margin-bottom: 4px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
         .cal-task-pill:hover { opacity: 0.8; }
         .cal-pendientes { background: #3498db; }
         .cal-proceso { background: #e67e22; }
@@ -225,7 +249,7 @@
             <!-- SECCIÓN CALENDARIO -->
             <div id="calendario" class="section">
                 <h2>Calendario de Vencimientos</h2>
-                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Aquí solo se muestran las obligaciones generadas masivamente.</p>
+                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Aquí solo se muestran las obligaciones generadas masivamente. (Lunes a Sábado)</p>
                 
                 <div class="calendar-header-bar">
                     <button onclick="changeMonth(-1)" style="background:#34495e; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">&laquo; Mes Anterior</button>
@@ -240,7 +264,6 @@
                     <div class="calendar-day-name">Jueves</div>
                     <div class="calendar-day-name">Viernes</div>
                     <div class="calendar-day-name">Sábado</div>
-                    <div class="calendar-day-name">Domingo</div>
                 </div>
                 <div class="calendar-grid" id="calendarGrid" style="margin-top: 8px;">
                     <!-- Dias inyectados por JS -->
@@ -369,7 +392,6 @@
                     <button id="btnCancelEdit" onclick="cancelEdit()" style="display:none; background:#7f8c8d; color:white; border:none; font-weight:bold;">Cancelar Edición</button>
                 </div>
                 
-                <!-- BÚSQUEDA Y FILTROS MEJORADOS -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <div>
                         <span style="background: #27ae60; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-right: 5px;" id="countActivos">Activos: 0</span>
@@ -494,7 +516,11 @@
             grid.innerHTML = '';
 
             let firstDay = new Date(year, month, 1).getDay();
-            let emptyDays = firstDay === 0 ? 6 : firstDay - 1; 
+            
+            // Calculamos los espacios vacíos excluyendo el Domingo
+            // getDay() devuelve: 0(Dom), 1(Lun), 2(Mar)... 6(Sab)
+            // Si el 1er dia es Domingo (0), al obviarlo, el Lunes 2 será la primera columna, así que lleva 0 celdas vacías previas.
+            let emptyDays = firstDay === 0 ? 0 : firstDay - 1; 
             
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -503,11 +529,14 @@
             }
 
             for(let day = 1; day <= daysInMonth; day++) {
+                const dateObj = new Date(year, month, day);
+                // Si el día cae Domingo, se saltea y no se dibuja en la grilla
+                if(dateObj.getDay() === 0) continue; 
+
                 const strMonth = (month + 1).toString().padStart(2, '0');
                 const strDay = day.toString().padStart(2, '0');
                 const dateString = `${year}-${strMonth}-${strDay}`;
 
-                // Solo muestra items marcados como 'vencimiento' en el calendario
                 const tasksForDay = tareasActuales.filter(t => t.vencimiento === dateString && t.tipo === 'vencimiento');
                 
                 let tasksHtml = '';
@@ -522,7 +551,7 @@
                 grid.innerHTML += `
                     <div class="calendar-cell">
                         <div class="calendar-date-number">${day}</div>
-                        <div style="flex:1; overflow-y:auto;">${tasksHtml}</div>
+                        <div class="calendar-cell-content">${tasksHtml}</div>
                     </div>
                 `;
             }
@@ -735,7 +764,6 @@
             let htmlProceso = '';
             let htmlListas = '';
 
-            // Solo muestra tareas manuales en el tablero
             const filtradas = tareasActuales.filter(t => {
                 return t.titulo.toLowerCase().includes(term) && 
                        (resp === "" || t.responsable === resp) &&
