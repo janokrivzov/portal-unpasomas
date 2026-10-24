@@ -297,9 +297,9 @@
         let isUserAdmin = false;
 
         const ADMIN_EMAILS = [
-            "tu_correo_administrador@gmail.com",
-            "correo_jano@gmail.com",
-            "correo_ivan@gmail.com"
+            "info@estudioritvo.com.ar",
+            "jano.krivzov@estudioritvo.com.ar",
+            "ivan.ritvo@estudioritvo.com.ar"
         ];
 
         onAuthStateChanged(auth, (user) => {
@@ -450,7 +450,6 @@
             closeTaskModal();
         }
 
-        // OPTIMIZACIÓN DE RENDIMIENTO: Renderizado de la tabla en memoria
         function iniciarCargaDatosAdmin() {
             const unsubClientes = onSnapshot(query(collection(db, "clientes")), (snapshot) => {
                 clientesActivos = []; let clientesTemp = [];
@@ -574,7 +573,6 @@
             btn.innerText = "+ Agregar Tarea al Tablero";
         }
 
-        // FUNCIONALIDAD: Desactivar Todos los Clientes
         window.desactivarTodos = async function() {
             if(!confirm("¿Estás seguro de desactivar a TODOS los clientes? Esto puede demorar unos segundos y ocultará a los clientes del generador masivo.")) return;
             const btn = document.getElementById('btnDesactivarTodos');
