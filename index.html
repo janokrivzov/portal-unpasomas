@@ -256,14 +256,23 @@
                         <option value="dj_ganancias">DJ Ganancias</option>
                         <option value="dj_bienes">DJ Bienes Personales</option>
                     </select>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                        <div><label>Terminación 0-1</label><input type="date" id="fecha_01"></div>
-                        <div><label>Terminación 2-3</label><input type="date" id="fecha_23"></div>
-                        <div><label>Terminación 4-5</label><input type="date" id="fecha_45"></div>
-                        <div><label>Terminación 6-7</label><input type="date" id="fecha_67"></div>
-                        <div><label>Terminación 8-9</label><input type="date" id="fecha_89"></div>
+                    
+                    <!-- 10 casilleros individuales -->
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px;">
+                        <div><label style="font-size:12px;">Term. 0</label><input type="date" id="fecha_0" style="margin:0;"></div>
+                        <div><label style="font-size:12px;">Term. 1</label><input type="date" id="fecha_1" style="margin:0;"></div>
+                        <div><label style="font-size:12px;">Term. 2</label><input type="date" id="fecha_2" style="margin:0;"></div>
+                        <div><label style="font-size:12px;">Term. 3</label><input type="date" id="fecha_3" style="margin:0;"></div>
+                        <div><label style="font-size:12px;">Term. 4</label><input type="date" id="fecha_4" style="margin:0;"></div>
+                        
+                        <div><label style="font-size:12px;">Term. 5</label><input type="date" id="fecha_5" style="margin:0;"></div>
+                        <div><label style="font-size:12px;">Term. 6</label><input type="date" id="fecha_6" style="margin:0;"></div>
+                        <div><label style="font-size:12px;">Term. 7</label><input type="date" id="fecha_7" style="margin:0;"></div>
+                        <div><label style="font-size:12px;">Term. 8</label><input type="date" id="fecha_8" style="margin:0;"></div>
+                        <div><label style="font-size:12px;">Term. 9</label><input type="date" id="fecha_9" style="margin:0;"></div>
                     </div>
-                    <button class="btn-green" onclick="generarMasivas()">Generar Tareas en el Tablero</button>
+                    
+                    <button class="btn-green" onclick="generarMasivas()" style="margin-top: 15px;">Generar Tareas en el Tablero</button>
                 </div>
             </div>
 
@@ -872,18 +881,38 @@
             if(ob === 'sueldos_emp' || ob === 'sueldos_casas') {
                 const mes = document.getElementById('masivoMes').value.split('-'); let ld = new Date(mes[1], mes[0], 0); 
                 if (ld.getDay() === 6) ld.setDate(ld.getDate() - 1); if (ld.getDay() === 0) ld.setDate(ld.getDate() - 2); 
-                const s = ld.toISOString().split('T')[0]; ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = s);
-            } else { ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'].forEach(id => document.getElementById(id).value = ''); }
+                const s = ld.toISOString().split('T')[0]; 
+                ['fecha_0', 'fecha_1', 'fecha_2', 'fecha_3', 'fecha_4', 'fecha_5', 'fecha_6', 'fecha_7', 'fecha_8', 'fecha_9'].forEach(id => document.getElementById(id).value = s);
+            } else { 
+                ['fecha_0', 'fecha_1', 'fecha_2', 'fecha_3', 'fecha_4', 'fecha_5', 'fecha_6', 'fecha_7', 'fecha_8', 'fecha_9'].forEach(id => document.getElementById(id).value = ''); 
+            }
         }
 
         window.generarMasivas = async function() {
             const ob = document.getElementById('masivoObligacion').value; if(!ob) return alert("Selecciona obligación.");
-            const f = { '0': document.getElementById('fecha_01').value, '1': document.getElementById('fecha_01').value, '2': document.getElementById('fecha_23').value, '3': document.getElementById('fecha_23').value, '4': document.getElementById('fecha_45').value, '5': document.getElementById('fecha_45').value, '6': document.getElementById('fecha_67').value, '7': document.getElementById('fecha_67').value, '8': document.getElementById('fecha_89').value, '9': document.getElementById('fecha_89').value };
+            const f = { 
+                '0': document.getElementById('fecha_0').value, 
+                '1': document.getElementById('fecha_1').value, 
+                '2': document.getElementById('fecha_2').value, 
+                '3': document.getElementById('fecha_3').value, 
+                '4': document.getElementById('fecha_4').value, 
+                '5': document.getElementById('fecha_5').value, 
+                '6': document.getElementById('fecha_6').value, 
+                '7': document.getElementById('fecha_7').value, 
+                '8': document.getElementById('fecha_8').value, 
+                '9': document.getElementById('fecha_9').value 
+            };
             let gen = 0;
             for (const c of clientesActivos) {
-                if (c.activo && c.obligaciones && c.obligaciones.includes(ob)) { const fv = f[c.cuit.slice(-1)]; if (fv) { await addDoc(collection(db, "tareas"), { titulo: `${document.getElementById('masivoObligacion').options[document.getElementById('masivoObligacion').selectedIndex].text} - ${c.nombre}`, responsable: "Un Paso Mas", estado: "pendientes", vencimiento: fv, clienteId: c.id }); gen++; } }
+                if (c.activo && c.obligaciones && c.obligaciones.includes(ob)) { 
+                    const fv = f[c.cuit.slice(-1)]; 
+                    if (fv) { 
+                        await addDoc(collection(db, "tareas"), { titulo: `${document.getElementById('masivoObligacion').options[document.getElementById('masivoObligacion').selectedIndex].text} - ${c.nombre}`, responsable: "Un Paso Mas", estado: "pendientes", vencimiento: fv, clienteId: c.id }); 
+                        gen++; 
+                    } 
+                }
             }
-            if(gen > 0) alert(`¡Se generaron ${gen} tareas!`); else alert("Revisa las fechas.");
+            if(gen > 0) alert(`¡Se generaron ${gen} tareas!`); else alert("Revisa las fechas. Asegúrate de completarlas para las terminaciones correspondientes.");
         }
     </script>
 </body>
