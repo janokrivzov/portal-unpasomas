@@ -7,14 +7,12 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Login Screen */
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #2c3e50; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 300px; text-align: center; }
         .login-box input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .login-box button { width: 100%; padding: 10px; background: #2980b9; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .login-box button:hover { background: #3498db; }
         
-        /* App Structure */
         #app-container { display: none; width: 100%; height: 100%; }
         .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
         .sidebar h2 { margin-top: 0; font-size: 20px; text-align: center; border-bottom: 1px solid #34495e; padding-bottom: 15px; }
@@ -27,29 +25,28 @@
         .section { display: none; }
         .section.active { display: block; }
         
-        /* Formularios y UI General */
         input, select, textarea, button { padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit;}
         textarea { resize: vertical; min-height: 80px; }
         .btn-green { background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
         .btn-green:hover { background: #2ecc71; }
         .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
         
-        /* Kanban */
+        /* Kanban y Drag & Drop */
         .kanban-board { display: flex; gap: 20px; }
-        .kanban-col { background: #e2e4e6; border-radius: 5px; width: 33%; padding: 15px; min-height: 400px; }
-        .kanban-col h3 { text-align: center; margin-top: 0; color: #333; }
-        .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; display: flex; flex-direction: column;}
+        .kanban-col { background: #e2e4e6; border-radius: 5px; width: 33%; padding: 15px; min-height: 400px; display: flex; flex-direction: column;}
+        .kanban-col h3 { text-align: center; margin-top: 0; color: #333; pointer-events: none;}
+        .task-list { flex: 1; min-height: 50px; }
+        .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; display: flex; flex-direction: column; cursor: grab;}
+        .task-card:active { cursor: grabbing; }
         .task-card strong { display: block; color: #2980b9; margin-bottom: 5px; }
         .task-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #34495e; color: white; margin-bottom: 8px; align-self: flex-start;}
         .filter-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d4fc;}
         
-        /* Modal Tarea */
+        /* Modal Tarea (Ahora Editable) */
         #taskModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-content h3 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px; }
-        .modal-desc-box { background: #f9f9f9; padding: 12px; border-radius: 4px; border: 1px solid #eee; min-height: 60px; white-space: pre-wrap; font-size: 14px; color: #333; margin-bottom: 15px;}
         
-        /* Grilla y Tabla */
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
         .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 13px;}
         .checkbox-item input { width: auto; margin: 0; }
@@ -62,7 +59,6 @@
 </head>
 <body>
 
-    <!-- PANTALLA DE LOGIN -->
     <div id="login-screen">
         <div class="login-box">
             <h2>Acceso Intranet</h2>
@@ -74,19 +70,38 @@
         </div>
     </div>
 
-    <!-- MODAL DE DETALLES DE TAREA -->
+    <!-- MODAL DE EDICIÓN DE TAREA -->
     <div id="taskModal">
         <div class="modal-content">
-            <h3 id="modalTitle">Título de la tarea</h3>
-            <p style="font-size: 14px; margin: 5px 0;"><strong>Responsable:</strong> <span id="modalResp"></span></p>
-            <p style="font-size: 14px; margin: 5px 0 15px 0;"><strong>Vencimiento:</strong> <span id="modalVenc" style="color:#c0392b; font-weight:bold;"></span></p>
-            <label style="font-size: 13px; font-weight: bold; color: #7f8c8d;">Descripción / Notas:</label>
-            <div id="modalDesc" class="modal-desc-box"></div>
-            <button onclick="closeTaskModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cerrar</button>
+            <h3>Editar Tarea</h3>
+            <label style="font-size:12px; font-weight:bold;">Título</label>
+            <input type="text" id="editTaskTitle" style="margin-bottom: 10px;">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <label style="font-size:12px; font-weight:bold;">Responsable</label>
+                    <select id="editTaskResp" style="margin:0;">
+                        <option value="Ivan Ritvo">Ivan Ritvo</option>
+                        <option value="Jano Krivzov">Jano Krivzov</option>
+                        <option value="Un Paso Mas">Un Paso Mas</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:12px; font-weight:bold;">Vencimiento</label>
+                    <input type="date" id="editTaskDate" style="margin:0;">
+                </div>
+            </div>
+            
+            <label style="font-size:12px; font-weight:bold;">Descripción / Notas</label>
+            <textarea id="editTaskDesc" style="min-height: 100px;"></textarea>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="updateTaskDetails()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar Cambios</button>
+                <button onclick="closeTaskModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cancelar</button>
+            </div>
         </div>
     </div>
 
-    <!-- CONTENEDOR PRINCIPAL -->
     <div id="app-container">
         <div class="sidebar">
             <h2>Un Paso Más</h2>
@@ -97,8 +112,6 @@
         </div>
 
         <div class="main-content">
-            
-            <!-- SECCIÓN TAREAS -->
             <div id="tareas" class="section active">
                 <h2>Tablero de Tareas</h2>
                 
@@ -131,13 +144,21 @@
                 </div>
                 
                 <div class="kanban-board">
-                    <div class="kanban-col" id="col-pendientes"><h3>Pendientes</h3><div id="list-pendientes"></div></div>
-                    <div class="kanban-col" id="col-proceso"><h3>En Proceso</h3><div id="list-proceso"></div></div>
-                    <div class="kanban-col" id="col-listas"><h3>Finalizadas</h3><div id="list-listas"></div></div>
+                    <div class="kanban-col" ondrop="drop(event, 'pendientes')" ondragover="allowDrop(event)">
+                        <h3>Pendientes</h3>
+                        <div class="task-list" id="list-pendientes"></div>
+                    </div>
+                    <div class="kanban-col" ondrop="drop(event, 'proceso')" ondragover="allowDrop(event)">
+                        <h3>En Proceso</h3>
+                        <div class="task-list" id="list-proceso"></div>
+                    </div>
+                    <div class="kanban-col" ondrop="drop(event, 'listas')" ondragover="allowDrop(event)">
+                        <h3>Finalizadas</h3>
+                        <div class="task-list" id="list-listas"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- SECCIÓN VENCIMIENTOS -->
             <div id="vencimientos" class="section">
                 <h2>Generador Masivo</h2>
                 <div class="form-container">
@@ -169,7 +190,6 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN CLIENTES -->
             <div id="clientes" class="section">
                 <h2>Gestión de Clientes</h2>
                 <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
@@ -213,7 +233,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE -->
+    <!-- SCRIPT FIREBASE CON DRAG&DROP Y EDICIÓN -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
@@ -235,6 +255,7 @@
         let clientesActivos = [];
         let tareasActuales = []; 
         let editingClientId = null;
+        let editingTaskId = null; // Para saber qué tarea editamos en el modal
         let listeners = [];
 
         onAuthStateChanged(auth, (user) => {
@@ -251,13 +272,10 @@
         });
 
         window.login = function() {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPassword').value;
-            signInWithEmailAndPassword(auth, email, pass).catch(() => {
+            signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value).catch(() => {
                 document.getElementById('loginError').style.display = 'block';
             });
         }
-
         window.logout = function() { signOut(auth); }
 
         window.showSection = function(sectionId, btnElement) {
@@ -267,19 +285,44 @@
             if(btnElement) btnElement.classList.add('active');
         }
 
-        // Lógica del Modal
+        // DRAG AND DROP
+        window.allowDrop = function(ev) { ev.preventDefault(); }
+        window.drag = function(ev, id) { ev.dataTransfer.setData("text", id); }
+        window.drop = async function(ev, estadoDestino) {
+            ev.preventDefault();
+            const id = ev.dataTransfer.getData("text");
+            if(id) await updateDoc(doc(db, "tareas", id), { estado: estadoDestino });
+        }
+
+        // MODAL TAREAS (Edición)
         window.openTaskModal = function(id) {
             const t = tareasActuales.find(x => x.id === id);
             if(!t) return;
-            document.getElementById('modalTitle').innerText = t.titulo;
-            document.getElementById('modalResp').innerText = t.responsable;
-            document.getElementById('modalVenc').innerText = t.vencimiento ? t.vencimiento : 'Sin vencimiento';
-            document.getElementById('modalDesc').innerText = t.descripcion ? t.descripcion : 'Sin observaciones adicionales.';
+            editingTaskId = id;
+            document.getElementById('editTaskTitle').value = t.titulo || '';
+            document.getElementById('editTaskResp').value = t.responsable || 'Un Paso Mas';
+            document.getElementById('editTaskDate').value = t.vencimiento || '';
+            document.getElementById('editTaskDesc').value = t.descripcion || '';
             document.getElementById('taskModal').style.display = 'flex';
         }
 
         window.closeTaskModal = function() {
+            editingTaskId = null;
             document.getElementById('taskModal').style.display = 'none';
+        }
+
+        window.updateTaskDetails = async function() {
+            if(!editingTaskId) return;
+            const titulo = document.getElementById('editTaskTitle').value;
+            if(!titulo) return alert("El título no puede estar vacío");
+            
+            await updateDoc(doc(db, "tareas", editingTaskId), {
+                titulo: titulo,
+                responsable: document.getElementById('editTaskResp').value,
+                vencimiento: document.getElementById('editTaskDate').value,
+                descripcion: document.getElementById('editTaskDesc').value
+            });
+            closeTaskModal();
         }
 
         function iniciarCargaDatos() {
@@ -334,30 +377,20 @@
             document.getElementById('list-listas').innerHTML = '';
 
             const filtradas = tareasActuales.filter(t => {
-                const matchTerm = t.titulo.toLowerCase().includes(term);
-                const matchResp = resp === "" || t.responsable === resp;
-                return matchTerm && matchResp;
+                return t.titulo.toLowerCase().includes(term) && (resp === "" || t.responsable === resp);
             });
 
             filtradas.forEach(t => {
-                // Control de avance
-                let btnHtml = '';
-                if(t.estado === 'pendientes') btnHtml = `<button style="background:#f39c12; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; width:100%;" onclick="moveTask('${t.id}', 'proceso')">A Proceso ➔</button>`;
-                else if(t.estado === 'proceso') btnHtml = `<button style="padding:5px; font-size:12px; color:black; border:1px solid #ccc; cursor:pointer; border-radius:4px; width:100%; background:#ecf0f1;" onclick="moveTask('${t.id}', 'listas')">✔ Finalizar</button>`;
-                
-                // Previsualización de texto
-                const descPreview = t.descripcion ? (t.descripcion.length > 50 ? t.descripcion.substring(0, 50) + '...' : t.descripcion) : '';
+                const descPreview = t.descripcion ? (t.descripcion.length > 40 ? t.descripcion.substring(0, 40) + '...' : t.descripcion) : '';
                 const descHtml = descPreview ? `<div style="font-size:12px; color:#7f8c8d; margin-bottom:10px; padding-left:5px; border-left: 2px solid #bdc3c7;"><i>${descPreview}</i></div>` : '';
                 
-                const card = `<div class="task-card">
+                // Se agrega draggable="true" y ondragstart
+                const card = `<div class="task-card" draggable="true" ondragstart="drag(event, '${t.id}')">
                     <span class="task-badge">${t.responsable}</span>
                     <strong style="cursor:pointer;" onclick="openTaskModal('${t.id}')">${t.titulo}</strong>
                     ${descHtml}
                     ${t.vencimiento ? `<div style="font-size:12px; font-weight:bold; color:#c0392b; margin-bottom:10px;">📅 Vence: ${t.vencimiento}</div>` : '<div style="margin-bottom:10px;"></div>'}
-                    <div style="display:flex; gap:5px; margin-top:auto;">
-                        <button style="background:#3498db; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; width:100%;" onclick="openTaskModal('${t.id}')">👁️ Ver</button>
-                        ${btnHtml}
-                    </div>
+                    <button style="background:#3498db; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; width:100%; margin-top:auto;" onclick="openTaskModal('${t.id}')">👁️ Ver / Editar</button>
                 </div>`;
                 document.getElementById(`list-${t.estado}`).innerHTML += card;
             });
@@ -366,27 +399,17 @@
         window.addTask = async function() {
             const t = document.getElementById('taskTitle').value;
             const c = document.getElementById('taskClient').value;
-            const resp = document.getElementById('taskResponsible').value;
-            const venc = document.getElementById('taskDueDate').value;
-            const desc = document.getElementById('taskDesc').value;
-
             if(!t) return alert("El título es obligatorio.");
-
             await addDoc(collection(db, "tareas"), { 
                 titulo: c ? `${t} - ${c}` : t, 
-                responsable: resp, 
-                vencimiento: venc,
-                descripcion: desc,
+                responsable: document.getElementById('taskResponsible').value, 
+                vencimiento: document.getElementById('taskDueDate').value,
+                descripcion: document.getElementById('taskDesc').value,
                 estado: "pendientes", 
                 fechaCreacion: new Date().toISOString() 
             }); 
-            
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDueDate').value = '';
-            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = '';
         }
-
-        window.moveTask = async function(id, est) { await updateDoc(doc(db, "tareas", id), { estado: est }); }
 
         window.importarCSV = async function() {
             const file = document.getElementById('csvFile').files[0];
