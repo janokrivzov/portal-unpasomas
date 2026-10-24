@@ -14,11 +14,19 @@
         .login-box button:hover { background: #3498db; }
         
         #app-container { display: none; width: 100%; height: 100%; }
-        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { margin-top: 0; font-size: 20px; text-align: center; border-bottom: 1px solid #34495e; padding-bottom: 15px; }
-        .menu-btn { background: none; border: none; color: #ecf0f1; padding: 15px 10px; text-align: left; font-size: 16px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
+        
+        /* SIDEBAR COLAPSABLE */
+        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; transition: width 0.3s ease; overflow: hidden; white-space: nowrap; box-sizing: border-box; }
+        .sidebar.collapsed { width: 70px; padding: 20px 10px; }
+        .sidebar.collapsed .menu-text { display: none; }
+        .sidebar.collapsed #sidebarHeader { justify-content: center; }
+        .sidebar.collapsed .menu-btn { text-align: center; padding: 15px 0; }
+        
+        #sidebarHeader { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #34495e; padding-bottom: 15px; margin-bottom: 15px; }
+        
+        .menu-btn { background: none; border: none; color: #ecf0f1; padding: 15px 10px; text-align: left; font-size: 16px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
         .menu-btn:hover, .menu-btn.active { background: #34495e; }
-        .logout-btn { margin-top: auto; background: #c0392b; text-align: center; }
+        .logout-btn { margin-top: auto; background: #c0392b; justify-content: center; }
         .logout-btn:hover { background: #e74c3c; }
         
         .main-content { flex: 1; padding: 30px; overflow-y: auto; background: #f4f7f6; }
@@ -31,7 +39,7 @@
         .btn-green:hover { background: #2ecc71; }
         .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
         
-        /* Kanban y Drag & Drop */
+        /* Kanban */
         .kanban-board { display: flex; gap: 20px; }
         .kanban-col { background: #e2e4e6; border-radius: 5px; width: 33%; padding: 15px; min-height: 400px; display: flex; flex-direction: column;}
         .kanban-col h3 { text-align: center; margin-top: 0; color: #333; pointer-events: none;}
@@ -63,7 +71,7 @@
         .action-btn { width: auto; padding: 6px 12px; margin: 2px; font-size: 12px; }
         .clave-tag { display: inline-block; background: #ecf0f1; padding: 3px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; margin-bottom: 5px;}
 
-        /* Estilos del Calendario */
+        /* Calendario */
         .calendar-header-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;}
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
         .calendar-day-name { background: #2c3e50; color: white; text-align: center; padding: 10px; font-weight: bold; border-radius: 4px; font-size: 14px;}
@@ -138,12 +146,15 @@
     <div id="app-container">
         
         <div class="sidebar" id="adminSidebar">
-            <h2>Un Paso Más</h2>
-            <button class="menu-btn active" onclick="showSection('tareas', this)">Tablero Tareas</button>
-            <button class="menu-btn" onclick="showSection('calendario', this)">📅 Calendario</button>
-            <button class="menu-btn" onclick="showSection('vencimientos', this)">Vencimientos Masivos</button>
-            <button class="menu-btn" onclick="showSection('clientes', this)">Gestión Clientes</button>
-            <button class="menu-btn logout-btn" onclick="logout()">Cerrar Sesión</button>
+            <div id="sidebarHeader">
+                <h2 class="menu-text" style="margin:0; font-size:20px; flex:1; text-align:left;">Un Paso Más</h2>
+                <button onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer; padding:0; line-height:1;">☰</button>
+            </div>
+            <button class="menu-btn active" onclick="showSection('tareas', this)"><span>📋</span> <span class="menu-text">Tablero Tareas</span></button>
+            <button class="menu-btn" onclick="showSection('calendario', this)"><span>📅</span> <span class="menu-text">Calendario</span></button>
+            <button class="menu-btn" onclick="showSection('vencimientos', this)"><span>🚀</span> <span class="menu-text">Venc. Masivos</span></button>
+            <button class="menu-btn" onclick="showSection('clientes', this)"><span>👥</span> <span class="menu-text">Gestión Clientes</span></button>
+            <button class="menu-btn logout-btn" onclick="logout()"><span>🚪</span> <span class="menu-text">Cerrar Sesión</span></button>
         </div>
 
         <div class="main-content">
@@ -451,6 +462,10 @@
         }
         window.logout = function() { signOut(auth); }
 
+        window.toggleSidebar = function() {
+            document.getElementById('adminSidebar').classList.toggle('collapsed');
+        }
+
         window.showSection = function(sectionId, btnElement) {
             if(!isUserAdmin) return;
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -627,7 +642,7 @@
 
         window.deleteTask = async function() {
             if(!editingTaskId) return;
-            if(confirm("¿Estás seguro de que deseas ELIMINAR esta tarea de forma permanente?")) {
+            if(confirm("¿Estás seguro de que deseas ELIMINAR esta tarea permanentemente?")) {
                 await deleteDoc(doc(db, "tareas", editingTaskId));
                 closeTaskModal();
             }
@@ -720,7 +735,7 @@
             let htmlProceso = '';
             let htmlListas = '';
 
-            // Solo muestra tareas manuales en el tablero (tipo 'tarea' o sin tipo por compatibilidad)
+            // Solo muestra tareas manuales en el tablero
             const filtradas = tareasActuales.filter(t => {
                 return t.titulo.toLowerCase().includes(term) && 
                        (resp === "" || t.responsable === resp) &&
@@ -778,7 +793,7 @@
 
             await addDoc(collection(db, "tareas"), { 
                 titulo: t + nombreParaTitulo, 
-                tipo: 'tarea', // Se marca como manual para el Tablero
+                tipo: 'tarea', 
                 responsable: document.getElementById('taskResponsible').value, 
                 vencimiento: document.getElementById('taskDueDate').value,
                 descripcion: document.getElementById('taskDesc').value,
@@ -930,7 +945,7 @@
                     if (fv) { 
                         await addDoc(collection(db, "tareas"), { 
                             titulo: `${obSelect.options[obSelect.selectedIndex].text} (${mesSeleccionado}) - ${c.nombre}`, 
-                            tipo: 'vencimiento', // Lo marca para ir solo al Calendario
+                            tipo: 'vencimiento', 
                             responsable: "Un Paso Mas", 
                             estado: "pendientes", 
                             vencimiento: fv, 
