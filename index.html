@@ -217,10 +217,7 @@
             </div>
 
             <div id="clientes" class="section">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2>Gestión de Clientes</h2>
-                    <button id="btnDesactivarTodos" onclick="desactivarTodos()" style="background:#e74c3c; color:white; border:none; padding:10px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">Desactivar Todos los Clientes</button>
-                </div>
+                <h2>Gestión de Clientes</h2>
                 
                 <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
                     <h3>📥 Importar Base de Datos</h3>
@@ -260,6 +257,15 @@
                     <button id="btnCancelEdit" onclick="cancelEdit()" style="display:none; background:#7f8c8d; color:white; border:none; font-weight:bold;">Cancelar Edición</button>
                 </div>
                 
+                <!-- BÚSQUEDA Y CONTADORES -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div>
+                        <span style="background: #27ae60; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-right: 5px;" id="countActivos">Activos: 0</span>
+                        <span style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 13px;" id="countInactivos">Inactivos: 0</span>
+                    </div>
+                    <input type="text" id="searchClient" placeholder="🔍 Buscar por nombre o CUIT..." oninput="renderClientes()" style="width: 300px; margin: 0;">
+                </div>
+
                 <table id="clientsTable">
                     <thead><tr><th>Nombre / CUIT</th><th>Acceso Portal</th><th>Claves</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody></tbody>
@@ -452,38 +458,11 @@
 
         function iniciarCargaDatosAdmin() {
             const unsubClientes = onSnapshot(query(collection(db, "clientes")), (snapshot) => {
-                clientesActivos = []; let clientesTemp = [];
-                snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesTemp.push(c); clientesActivos.push(c); });
-                clientesTemp.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-                let tbodyHtml = '';
-                let selectHtml = '<option value="">-- Interna / Sin Cliente --</option>';
-
-                clientesTemp.forEach(c => {
-                    let clavesHtml = '';
-                    if(c.clave_arca) clavesHtml += `<span class="clave-tag"><strong>ARCA:</strong> ${c.clave_arca}</span>`;
-                    if(c.clave_agip) clavesHtml += `<span class="clave-tag"><strong>AGIP:</strong> ${c.clave_agip}</span>`;
-                    if(c.clave_arba) clavesHtml += `<span class="clave-tag"><strong>ARBA:</strong> ${c.clave_arba}</span>`;
-                    
-                    const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${c.emailPortal}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso</span>';
-
-                    tbodyHtml += `
-                        <tr style="background: ${c.activo ? 'transparent' : '#f9ebea'};">
-                            <td><strong>${c.nombre}</strong><br><small>CUIT: ${c.cuit}</small></td>
-                            <td>${portalTag}</td>
-                            <td>${clavesHtml}</td>
-                            <td>${c.activo ? '<span style="color:green; font-weight:bold;">Activo</span>' : '<span style="color:red; font-weight:bold;">Inactivo</span>'}</td>
-                            <td>
-                                <button class="action-btn" style="background:#f39c12; color:white; border:none; cursor:pointer;" onclick="loadEditClient('${c.id}')">✏️ Editar</button>
-                                <button class="action-btn" style="background:${c.activo ? '#e74c3c' : '#27ae60'}; color:white; border:none; cursor:pointer;" onclick="toggleStatus('${c.id}', ${c.activo})">${c.activo ? '⛔ Baja' : '✅ Activar'}</button>
-                            </td>
-                        </tr>
-                    `;
-                    if(c.activo) selectHtml += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`;
-                });
-
-                document.querySelector('#clientsTable tbody').innerHTML = tbodyHtml;
-                document.getElementById('taskClient').innerHTML = selectHtml;
+                clientesActivos = [];
+                snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesActivos.push(c); });
+                clientesActivos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                
+                renderClientes();
             });
 
             const unsubTareas = onSnapshot(query(collection(db, "tareas")), (snapshot) => {
@@ -495,6 +474,54 @@
                 renderTareas();
             });
             listeners.push(unsubClientes, unsubTareas);
+        }
+
+        window.renderClientes = function() {
+            const term = document.getElementById('searchClient').value.toLowerCase();
+            let tbodyHtml = '';
+            let selectHtml = '<option value="">-- Interna / Sin Cliente --</option>';
+            let countAct = 0;
+            let countInact = 0;
+
+            const filtrados = clientesActivos.filter(c => {
+                return c.nombre.toLowerCase().includes(term) || c.cuit.includes(term);
+            });
+
+            clientesActivos.forEach(c => {
+                if (c.activo) {
+                    countAct++;
+                    selectHtml += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`;
+                } else {
+                    countInact++;
+                }
+            });
+
+            filtrados.forEach(c => {
+                let clavesHtml = '';
+                if(c.clave_arca) clavesHtml += `<span class="clave-tag"><strong>ARCA:</strong> ${c.clave_arca}</span>`;
+                if(c.clave_agip) clavesHtml += `<span class="clave-tag"><strong>AGIP:</strong> ${c.clave_agip}</span>`;
+                if(c.clave_arba) clavesHtml += `<span class="clave-tag"><strong>ARBA:</strong> ${c.clave_arba}</span>`;
+                
+                const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${c.emailPortal}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso</span>';
+
+                tbodyHtml += `
+                    <tr style="background: ${c.activo ? 'transparent' : '#f9ebea'};">
+                        <td><strong>${c.nombre}</strong><br><small>CUIT: ${c.cuit}</small></td>
+                        <td>${portalTag}</td>
+                        <td>${clavesHtml}</td>
+                        <td>${c.activo ? '<span style="color:green; font-weight:bold;">Activo</span>' : '<span style="color:red; font-weight:bold;">Inactivo</span>'}</td>
+                        <td>
+                            <button class="action-btn" style="background:#f39c12; color:white; border:none; cursor:pointer;" onclick="loadEditClient('${c.id}')">✏️ Editar</button>
+                            <button class="action-btn" style="background:${c.activo ? '#e74c3c' : '#27ae60'}; color:white; border:none; cursor:pointer;" onclick="toggleStatus('${c.id}', ${c.activo})">${c.activo ? '⛔ Baja' : '✅ Activar'}</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.querySelector('#clientsTable tbody').innerHTML = tbodyHtml;
+            document.getElementById('taskClient').innerHTML = selectHtml;
+            document.getElementById('countActivos').innerText = `Activos: ${countAct}`;
+            document.getElementById('countInactivos').innerText = `Inactivos: ${countInact}`;
         }
 
         window.renderTareas = function() {
@@ -571,33 +598,6 @@
             
             document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = ''; document.getElementById('taskFile').value = '';
             btn.innerText = "+ Agregar Tarea al Tablero";
-        }
-
-        window.desactivarTodos = async function() {
-            if(!confirm("¿Estás seguro de desactivar a TODOS los clientes? Esto ocultará a los clientes del generador masivo.")) return;
-            const btn = document.getElementById('btnDesactivarTodos');
-            btn.innerText = "Desactivando...";
-            
-            try {
-                const batch = writeBatch(db);
-                let count = 0;
-                
-                clientesActivos.forEach(c => {
-                    if (c.activo) {
-                        const refDoc = doc(db, "clientes", c.id);
-                        batch.update(refDoc, { activo: false });
-                        count++;
-                    }
-                });
-                
-                await batch.commit();
-                alert(`Se desactivaron ${count} clientes en un solo paso.`);
-            } catch (error) {
-                console.error(error);
-                alert("Hubo un error al desactivar los clientes.");
-            }
-            
-            btn.innerText = "Desactivar Todos los Clientes";
         }
 
         window.importarCSV = async function() {
