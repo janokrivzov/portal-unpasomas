@@ -56,8 +56,8 @@
         .client-task-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #bdc3c7;}
         .client-task-card.finalizada { border-left-color: #27ae60; }
         
-        /* Modal Tarea */
-        #taskModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        /* Modales */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-content h3 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px; }
         
@@ -92,17 +92,13 @@
         
         .calendar-date-number { font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-align: right; font-size: 14px; flex-shrink: 0;}
         
-        .calendar-cell-content {
-            flex: 1;
-            overflow-y: auto; 
-            padding-right: 4px;
-        }
-        
+        .calendar-cell-content { flex: 1; overflow-y: auto; padding-right: 4px; }
         .calendar-cell-content::-webkit-scrollbar { width: 4px; }
         .calendar-cell-content::-webkit-scrollbar-thumb { background-color: #bdc3c7; border-radius: 4px; }
 
-        .cal-group-title { font-size: 10px; font-weight: bold; color: #2c3e50; margin: 8px 0 4px 0; border-bottom: 1px solid #bdc3c7; padding-bottom: 2px; }
+        .cal-group-title { font-size: 11px; font-weight: bold; color: #2c3e50; margin: 8px 0 4px 0; border-bottom: 1px solid #bdc3c7; padding-bottom: 2px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
         .cal-group-title:first-child { margin-top: 0; }
+        .cal-group-title:hover { color: #2980b9; }
         
         .cal-task-pill { font-size: 10px; padding: 4px 6px; border-radius: 3px; color: white; margin-bottom: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
         .cal-task-pill:hover { opacity: 0.8; }
@@ -124,8 +120,8 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDICIÓN DE TAREA / VENCIMIENTO -->
-    <div id="taskModal">
+    <!-- MODAL DE EDICIÓN DE TAREA / VENCIMIENTO INDIVIDUAL -->
+    <div id="taskModal" class="modal-overlay">
         <div class="modal-content">
             <h3>Editar / Ver Detalles</h3>
             <label style="font-size:12px; font-weight:bold;">Título</label>
@@ -165,6 +161,23 @@
                 <button id="btnUpdateTask" onclick="updateTaskDetails()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar</button>
                 <button onclick="closeTaskModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cancelar</button>
                 <button id="btnDeleteTask" onclick="deleteTask()" style="background:#e74c3c; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">🗑️ Borrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE GESTIÓN DE GRUPO (MASIVO) -->
+    <div id="groupModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="groupModalTitle" style="color:#2980b9;">Nombre del Grupo</h3>
+            <p style="font-size:12px; color:#7f8c8d; margin-top:-5px; margin-bottom:15px;">Listado de clientes en este vencimiento.</p>
+            
+            <div id="groupModalList" style="margin-bottom:15px; border:1px solid #ecf0f1; border-radius:4px; padding:10px; background:#f9f9f9;">
+                <!-- Aquí se inyecta la lista de clientes -->
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="btnMarkAllFinished" onclick="markAllAsFinished()" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">✅ Marcar Todas como Finalizadas</button>
+                <button onclick="closeGroupModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">Cerrar</button>
             </div>
         </div>
     </div>
@@ -446,6 +459,9 @@
         let isUserAdmin = false;
 
         let currentCalDate = new Date(); 
+        
+        // Almacena temporalmente las tareas de un grupo específico para su gestión
+        window.currentGroupTasks = []; 
 
         const ADMIN_EMAILS = [
             "info@estudioritvo.com.ar",
@@ -536,7 +552,6 @@
 
                 const tasksForDay = tareasActuales.filter(t => t.vencimiento === dateString && t.tipo === 'vencimiento');
                 
-                // Lógica para agrupar las tareas por Obligación/Período
                 const groupedTasks = {};
                 tasksForDay.forEach(t => {
                     let groupName = t.titulo;
@@ -544,8 +559,8 @@
                     
                     const splitIndex = t.titulo.indexOf(' - ');
                     if(splitIndex !== -1) {
-                        groupName = t.titulo.substring(0, splitIndex); // Ej: "IVA DJ (Octubre 2026)"
-                        clientName = t.titulo.substring(splitIndex + 3); // Ej: "VANINA EPELBAUM"
+                        groupName = t.titulo.substring(0, splitIndex);
+                        clientName = t.titulo.substring(splitIndex + 3);
                     } else {
                         groupName = "Otros Vencimientos";
                     }
@@ -558,7 +573,8 @@
 
                 let tasksHtml = '';
                 for (const group in groupedTasks) {
-                    tasksHtml += `<div class="cal-group-title">${group}</div>`;
+                    // Encabezado clickeable para abrir el modal del grupo
+                    tasksHtml += `<div class="cal-group-title" onclick="openGroupModal('${group}', '${dateString}')" title="Ver detalles y opciones"><span>${group}</span> <span>⚙️</span></div>`;
                     
                     groupedTasks[group].forEach(t => {
                         let pillClass = 'cal-pendientes';
@@ -577,6 +593,74 @@
                 `;
             }
         }
+
+        // --- FUNCIONES DEL MODAL DE GRUPO ---
+        window.openGroupModal = function(groupName, dateString) {
+            // Filtra las tareas que coincidan con la fecha, tipo y el prefijo del grupo
+            window.currentGroupTasks = tareasActuales.filter(t => 
+                t.vencimiento === dateString && 
+                t.tipo === 'vencimiento' && 
+                t.titulo.startsWith(groupName)
+            );
+            
+            document.getElementById('groupModalTitle').innerText = groupName;
+            
+            let html = '<ul style="list-style:none; padding:0; margin:0; max-height:200px; overflow-y:auto;">';
+            window.currentGroupTasks.forEach(t => {
+                let statusText = t.estado === 'listas' ? '✅ Finalizada' : (t.estado === 'proceso' ? '⏳ Proceso' : '🕒 Pendiente');
+                let color = t.estado === 'listas' ? '#27ae60' : (t.estado === 'proceso' ? '#e67e22' : '#3498db');
+                
+                const splitIndex = t.titulo.indexOf(' - ');
+                const shortName = splitIndex !== -1 ? t.titulo.substring(splitIndex + 3) : t.titulo;
+                
+                html += `<li style="padding:8px 5px; border-bottom:1px solid #ecf0f1; display:flex; justify-content:space-between; font-size:13px;">
+                    <span style="font-weight:500;">${shortName}</span>
+                    <span style="color:${color}; font-weight:bold; font-size:11px;">${statusText}</span>
+                </li>`;
+            });
+            html += '</ul>';
+            
+            document.getElementById('groupModalList').innerHTML = html;
+            document.getElementById('groupModal').style.display = 'flex';
+        }
+
+        window.closeGroupModal = function() {
+            document.getElementById('groupModal').style.display = 'none';
+            window.currentGroupTasks = [];
+        }
+
+        window.markAllAsFinished = async function() {
+            if(!confirm("¿Estás seguro de marcar TODOS estos vencimientos como FINALIZADOS?")) return;
+            
+            const btn = document.getElementById('btnMarkAllFinished');
+            btn.innerText = "Actualizando Base de Datos...";
+            btn.disabled = true;
+            
+            try {
+                const batch = writeBatch(db);
+                let updates = 0;
+                
+                window.currentGroupTasks.forEach(t => {
+                    if(t.estado !== 'listas') {
+                        const refDoc = doc(db, "tareas", t.id);
+                        batch.update(refDoc, { estado: 'listas' });
+                        updates++;
+                    }
+                });
+                
+                if (updates > 0) {
+                    await batch.commit();
+                }
+                closeGroupModal();
+            } catch (e) {
+                console.error(e);
+                alert("Hubo un error al actualizar los vencimientos.");
+            }
+            
+            btn.innerText = "✅ Marcar Todas como Finalizadas";
+            btn.disabled = false;
+        }
+        // ------------------------------------
 
         function iniciarCargaDatosCliente(email) {
             const unsubCliente = onSnapshot(query(collection(db, "clientes"), where("emailPortal", "==", email)), (snapCliente) => {
