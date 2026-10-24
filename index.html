@@ -71,7 +71,7 @@
         .action-btn { width: auto; padding: 6px 12px; margin: 2px; font-size: 12px; }
         .clave-tag { display: inline-block; background: #ecf0f1; padding: 3px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; margin-bottom: 5px;}
 
-        /* Calendario */
+        /* Estilos del Calendario Mejorado */
         .calendar-header-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;}
         .calendar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
         .calendar-day-name { background: #2c3e50; color: white; text-align: center; padding: 10px; font-weight: bold; border-radius: 4px; font-size: 14px;}
@@ -225,7 +225,7 @@
                 </div>
 
                 <div class="form-container">
-                    <h3>Crear Registro Manual</h3>
+                    <h3 style="margin-top:0;">Crear Tarea Manual (Uso Interno)</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                         <div><label style="font-size:12px; font-weight:bold;">Título</label><input type="text" id="taskTitle" placeholder="Ej: Responder AFIP" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="taskClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
@@ -237,19 +237,12 @@
                             </select>
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
-                        <div>
-                            <label style="font-size:12px; font-weight:bold;">Destino</label>
-                            <select id="taskDestino" style="margin:0;">
-                                <option value="tarea">📋 Al Tablero (Tarea)</option>
-                                <option value="vencimiento">📅 Al Calendario (Vencimiento)</option>
-                            </select>
-                        </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
                         <div><label style="font-size:12px; font-weight:bold;">Vencimiento</label><input type="date" id="taskDueDate" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="taskFile" style="margin:0;"></div>
                     </div>
-                    <textarea id="taskDesc" placeholder="Observaciones, detalles o información adicional..." style="margin-top:10px;"></textarea>
-                    <button id="btnCreateTask" class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Guardar Registro</button>
+                    <textarea id="taskDesc" placeholder="Observaciones, detalles o información adicional de la tarea..." style="margin-top:10px;"></textarea>
+                    <button id="btnCreateTask" class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Agregar Tarea al Tablero</button>
                 </div>
                 
                 <div class="kanban-board">
@@ -272,6 +265,28 @@
             <div id="calendario" class="section">
                 <h2>Calendario de Vencimientos</h2>
                 <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Aquí solo se muestran los vencimientos (Masivos o Manuales). (Lunes a Sábado)</p>
+                
+                <!-- Panel Crear Vencimiento Manual en el Calendario -->
+                <div class="form-container">
+                    <h3 style="margin-top:0;">Crear Vencimiento Manual</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <div><label style="font-size:12px; font-weight:bold;">Título / Obligación</label><input type="text" id="vencTitle" placeholder="Ej: Plan de Pagos 08/25" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="vencClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Responsable</label>
+                            <select id="vencResp" style="margin:0;">
+                                <option value="Ivan Ritvo">Ivan Ritvo</option>
+                                <option value="Jano Krivzov">Jano Krivzov</option>
+                                <option value="Un Paso Mas">Un Paso Mas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div><label style="font-size:12px; font-weight:bold;">Fecha Exacta</label><input type="date" id="vencDate" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="vencFile" style="margin:0;"></div>
+                    </div>
+                    <textarea id="vencDesc" placeholder="Observaciones o detalles del vencimiento..." style="margin-top:10px;"></textarea>
+                    <button id="btnCreateVenc" class="btn-green" onclick="addVencimiento()" style="margin-top: 10px; width: 100%;">+ Agregar Vencimiento al Calendario</button>
+                </div>
                 
                 <div class="calendar-header-bar">
                     <button onclick="changeMonth(-1)" style="background:#34495e; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">&laquo; Mes Anterior</button>
@@ -859,6 +874,7 @@
 
             document.querySelector('#clientsTable tbody').innerHTML = tbodyHtml;
             document.getElementById('taskClient').innerHTML = selectHtml;
+            document.getElementById('vencClient').innerHTML = selectHtml;
             document.getElementById('countActivos').innerText = `Activos: ${countAct}`;
             document.getElementById('countInactivos').innerText = `Inactivos: ${countInact}`;
         }
@@ -904,7 +920,6 @@
         window.addTask = async function() {
             const t = document.getElementById('taskTitle').value;
             const clientId = document.getElementById('taskClient').value;
-            const tipoDestino = document.getElementById('taskDestino').value;
             
             if(!t) return alert("El título es obligatorio.");
             
@@ -929,7 +944,7 @@
 
             await addDoc(collection(db, "tareas"), { 
                 titulo: t + nombreParaTitulo, 
-                tipo: tipoDestino, 
+                tipo: 'tarea', 
                 responsable: document.getElementById('taskResponsible').value, 
                 vencimiento: document.getElementById('taskDueDate').value,
                 descripcion: document.getElementById('taskDesc').value,
@@ -940,7 +955,48 @@
             }); 
             
             document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = ''; document.getElementById('taskFile').value = '';
-            btn.innerText = "+ Guardar Registro";
+            btn.innerText = "+ Agregar Tarea al Tablero";
+        }
+
+        window.addVencimiento = async function() {
+            const t = document.getElementById('vencTitle').value;
+            const clientId = document.getElementById('vencClient').value;
+            
+            if(!t) return alert("El título / obligación es obligatorio.");
+            
+            const btn = document.getElementById('btnCreateVenc');
+            btn.innerText = "Subiendo...";
+            
+            const fileInput = document.getElementById('vencFile');
+            let archivoUrl = "";
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const storageRef = ref(storage, `tareas/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                archivoUrl = await getDownloadURL(storageRef);
+            }
+
+            let nombreParaTitulo = "";
+            if(clientId) {
+                const clienteData = clientesActivos.find(x => x.id === clientId);
+                nombreParaTitulo = clienteData ? ` - ${clienteData.nombre}` : "";
+            }
+
+            await addDoc(collection(db, "tareas"), { 
+                titulo: t + nombreParaTitulo, 
+                tipo: 'vencimiento', 
+                responsable: document.getElementById('vencResp').value, 
+                vencimiento: document.getElementById('vencDate').value,
+                descripcion: document.getElementById('vencDesc').value,
+                archivoUrl: archivoUrl,
+                clienteId: clientId, 
+                estado: "pendientes", 
+                fechaCreacion: new Date().toISOString() 
+            }); 
+            
+            document.getElementById('vencTitle').value = ''; document.getElementById('vencDate').value = ''; document.getElementById('vencDesc').value = ''; document.getElementById('vencFile').value = '';
+            btn.innerText = "+ Agregar Vencimiento al Calendario";
         }
 
         window.importarCSV = async function() {
