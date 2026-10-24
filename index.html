@@ -182,6 +182,40 @@
         </div>
     </div>
 
+    <!-- MODAL PARA CREAR VENCIMIENTO MANUAL DESDE EL CALENDARIO -->
+    <div id="createVencModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Crear Vencimiento Manual</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div><label style="font-size:12px; font-weight:bold;">Título / Obligación</label><input type="text" id="vencTitle" placeholder="Ej: Plan de Pagos 08/25" style="margin:0;"></div>
+                <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="vencClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <label style="font-size:12px; font-weight:bold;">Responsable</label>
+                    <select id="vencResp" style="margin:0;">
+                        <option value="Ivan Ritvo">Ivan Ritvo</option>
+                        <option value="Jano Krivzov">Jano Krivzov</option>
+                        <option value="Un Paso Mas">Un Paso Mas</option>
+                    </select>
+                </div>
+                <div><label style="font-size:12px; font-weight:bold;">Fecha Exacta</label><input type="date" id="vencDate" style="margin:0;"></div>
+            </div>
+            
+            <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="vencFile" style="margin-bottom: 10px;"></div>
+            
+            <label style="font-size:12px; font-weight:bold;">Descripción / Notas</label>
+            <textarea id="vencDesc" placeholder="Observaciones o detalles del vencimiento..." style="min-height: 70px;"></textarea>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="btnCreateVenc" onclick="addVencimiento()" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar Vencimiento</button>
+                <button onclick="closeVencModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="app-container">
         
         <div class="sidebar" id="adminSidebar">
@@ -266,26 +300,8 @@
                 <h2>Calendario de Vencimientos</h2>
                 <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Aquí solo se muestran los vencimientos (Masivos o Manuales). (Lunes a Sábado)</p>
                 
-                <!-- Panel Crear Vencimiento Manual en el Calendario -->
-                <div class="form-container">
-                    <h3 style="margin-top:0;">Crear Vencimiento Manual</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                        <div><label style="font-size:12px; font-weight:bold;">Título / Obligación</label><input type="text" id="vencTitle" placeholder="Ej: Plan de Pagos 08/25" style="margin:0;"></div>
-                        <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="vencClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
-                        <div><label style="font-size:12px; font-weight:bold;">Responsable</label>
-                            <select id="vencResp" style="margin:0;">
-                                <option value="Ivan Ritvo">Ivan Ritvo</option>
-                                <option value="Jano Krivzov">Jano Krivzov</option>
-                                <option value="Un Paso Mas">Un Paso Mas</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                        <div><label style="font-size:12px; font-weight:bold;">Fecha Exacta</label><input type="date" id="vencDate" style="margin:0;"></div>
-                        <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="vencFile" style="margin:0;"></div>
-                    </div>
-                    <textarea id="vencDesc" placeholder="Observaciones o detalles del vencimiento..." style="margin-top:10px;"></textarea>
-                    <button id="btnCreateVenc" class="btn-green" onclick="addVencimiento()" style="margin-top: 10px; width: 100%;">+ Agregar Vencimiento al Calendario</button>
+                <div style="margin-bottom: 20px;">
+                    <button class="btn-green" onclick="openVencModal()" style="width: auto; padding: 10px 20px;">+ Crear Vencimiento Manual</button>
                 </div>
                 
                 <div class="calendar-header-bar">
@@ -612,6 +628,13 @@
                     </div>
                 `;
             }
+        }
+
+        window.openVencModal = function() {
+            document.getElementById('createVencModal').style.display = 'flex';
+        }
+        window.closeVencModal = function() {
+            document.getElementById('createVencModal').style.display = 'none';
         }
 
         window.openGroupModal = function(groupName, dateString) {
@@ -996,7 +1019,8 @@
             }); 
             
             document.getElementById('vencTitle').value = ''; document.getElementById('vencDate').value = ''; document.getElementById('vencDesc').value = ''; document.getElementById('vencFile').value = '';
-            btn.innerText = "+ Agregar Vencimiento al Calendario";
+            btn.innerText = "Guardar Vencimiento";
+            closeVencModal();
         }
 
         window.importarCSV = async function() {
