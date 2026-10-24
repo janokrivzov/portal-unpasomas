@@ -53,6 +53,7 @@
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .modal-content h3 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px; }
         
+        /* Checkboxes y Tablas */
         .checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
         .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 13px;}
         .checkbox-item input { width: auto; margin: 0; }
@@ -61,6 +62,19 @@
         th { background: #34495e; color: white; }
         .action-btn { width: auto; padding: 6px 12px; margin: 2px; font-size: 12px; }
         .clave-tag { display: inline-block; background: #ecf0f1; padding: 3px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; margin-bottom: 5px;}
+
+        /* Estilos del Calendario */
+        .calendar-header-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;}
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .calendar-day-name { background: #2c3e50; color: white; text-align: center; padding: 10px; font-weight: bold; border-radius: 4px; font-size: 14px;}
+        .calendar-cell { background: white; min-height: 120px; border-radius: 4px; padding: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; border: 1px solid #ecf0f1;}
+        .calendar-cell.empty { background: transparent; border: none; box-shadow: none; }
+        .calendar-date-number { font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-align: right; font-size: 14px;}
+        .cal-task-pill { font-size: 10px; padding: 4px 6px; border-radius: 3px; color: white; margin-bottom: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
+        .cal-task-pill:hover { opacity: 0.8; }
+        .cal-pendientes { background: #3498db; }
+        .cal-proceso { background: #e67e22; }
+        .cal-listas { background: #27ae60; }
     </style>
 </head>
 <body>
@@ -117,6 +131,7 @@
         <div class="sidebar" id="adminSidebar">
             <h2>Un Paso Más</h2>
             <button class="menu-btn active" onclick="showSection('tareas', this)">Tablero Tareas</button>
+            <button class="menu-btn" onclick="showSection('calendario', this)">📅 Calendario</button>
             <button class="menu-btn" onclick="showSection('vencimientos', this)">Vencimientos Masivos</button>
             <button class="menu-btn" onclick="showSection('clientes', this)">Gestión Clientes</button>
             <button class="menu-btn logout-btn" onclick="logout()">Cerrar Sesión</button>
@@ -135,6 +150,7 @@
                 <div class="client-task-grid" id="clientDashboardGrid"></div>
             </div>
 
+            <!-- SECCIÓN TABLERO -->
             <div id="tareas" class="section active">
                 <h2>Tablero de Tareas</h2>
                 
@@ -185,6 +201,31 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN CALENDARIO -->
+            <div id="calendario" class="section">
+                <h2>Calendario de Vencimientos</h2>
+                
+                <div class="calendar-header-bar">
+                    <button onclick="changeMonth(-1)" style="background:#34495e; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">&laquo; Mes Anterior</button>
+                    <h3 id="calendarMonthYear" style="margin:0; color:#2c3e50; font-size:22px;">Mes Año</h3>
+                    <button onclick="changeMonth(1)" style="background:#34495e; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">Mes Siguiente &raquo;</button>
+                </div>
+                
+                <div class="calendar-grid">
+                    <div class="calendar-day-name">Lunes</div>
+                    <div class="calendar-day-name">Martes</div>
+                    <div class="calendar-day-name">Miércoles</div>
+                    <div class="calendar-day-name">Jueves</div>
+                    <div class="calendar-day-name">Viernes</div>
+                    <div class="calendar-day-name">Sábado</div>
+                    <div class="calendar-day-name">Domingo</div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid" style="margin-top: 8px;">
+                    <!-- Dias inyectados por JS -->
+                </div>
+            </div>
+
+            <!-- SECCIÓN VENCIMIENTOS MASIVOS -->
             <div id="vencimientos" class="section">
                 <h2>Generador Masivo</h2>
                 <div class="form-container">
@@ -192,6 +233,8 @@
                         <option value="10-2026">Octubre 2026</option>
                         <option value="11-2026" selected>Noviembre 2026</option>
                         <option value="12-2026">Diciembre 2026</option>
+                        <option value="01-2027">Enero 2027</option>
+                        <option value="02-2027">Febrero 2027</option>
                     </select>
                     <select id="masivoObligacion" onchange="autoCompletarFechas()">
                         <option value="">-- Seleccionar Obligación --</option>
@@ -224,6 +267,7 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN CLIENTES -->
             <div id="clientes" class="section">
                 <h2>Gestión de Clientes</h2>
                 
@@ -295,12 +339,20 @@
                     <button id="btnCancelEdit" onclick="cancelEdit()" style="display:none; background:#7f8c8d; color:white; border:none; font-weight:bold;">Cancelar Edición</button>
                 </div>
                 
+                <!-- BÚSQUEDA Y FILTROS MEJORADOS -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <div>
                         <span style="background: #27ae60; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-right: 5px;" id="countActivos">Activos: 0</span>
                         <span style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 13px;" id="countInactivos">Inactivos: 0</span>
                     </div>
-                    <input type="text" id="searchClient" placeholder="🔍 Buscar por nombre o CUIT..." oninput="renderClientes()" style="width: 300px; margin: 0;">
+                    <div style="display: flex; gap: 10px;">
+                        <select id="filterClientStatus" onchange="renderClientes()" style="margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            <option value="todos">Todos los estados</option>
+                            <option value="activos">Solo Activos</option>
+                            <option value="inactivos">Solo Inactivos</option>
+                        </select>
+                        <input type="text" id="searchClient" placeholder="🔍 Buscar por nombre o CUIT..." oninput="renderClientes()" style="width: 300px; margin: 0; padding: 8px;">
+                    </div>
                 </div>
 
                 <table id="clientsTable">
@@ -338,6 +390,9 @@
         let editingTaskId = null; 
         let listeners = [];
         let isUserAdmin = false;
+
+        // Variables del Calendario
+        let currentCalDate = new Date(); 
 
         const ADMIN_EMAILS = [
             "info@estudioritvo.com.ar",
@@ -384,7 +439,62 @@
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
             if(btnElement) btnElement.classList.add('active');
+            
+            if(sectionId === 'calendario') {
+                renderCalendar();
+            }
         }
+
+        // --- LÓGICA DEL CALENDARIO ---
+        window.changeMonth = function(dir) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + dir);
+            renderCalendar();
+        }
+
+        window.renderCalendar = function() {
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            document.getElementById('calendarMonthYear').innerText = `${monthNames[month]} ${year}`;
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            let firstDay = new Date(year, month, 1).getDay();
+            let emptyDays = firstDay === 0 ? 6 : firstDay - 1; 
+            
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for(let i = 0; i < emptyDays; i++) {
+                grid.innerHTML += `<div class="calendar-cell empty"></div>`;
+            }
+
+            for(let day = 1; day <= daysInMonth; day++) {
+                const strMonth = (month + 1).toString().padStart(2, '0');
+                const strDay = day.toString().padStart(2, '0');
+                const dateString = `${year}-${strMonth}-${strDay}`;
+
+                const tasksForDay = tareasActuales.filter(t => t.vencimiento === dateString);
+                
+                let tasksHtml = '';
+                tasksForDay.forEach(t => {
+                    let pillClass = 'cal-pendientes';
+                    if(t.estado === 'proceso') pillClass = 'cal-proceso';
+                    if(t.estado === 'listas') pillClass = 'cal-listas';
+
+                    tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${t.titulo}">${t.titulo}</div>`;
+                });
+
+                grid.innerHTML += `
+                    <div class="calendar-cell">
+                        <div class="calendar-date-number">${day}</div>
+                        <div style="flex:1; overflow-y:auto;">${tasksHtml}</div>
+                    </div>
+                `;
+            }
+        }
+        // ------------------------------
 
         function iniciarCargaDatosCliente(email) {
             const unsubCliente = onSnapshot(query(collection(db, "clientes"), where("emailPortal", "==", email)), (snapCliente) => {
@@ -438,7 +548,10 @@
         window.drop = async function(ev, estadoDestino) {
             ev.preventDefault();
             const id = ev.dataTransfer.getData("text");
-            if(id) await updateDoc(doc(db, "tareas", id), { estado: estadoDestino });
+            if(id) {
+                await updateDoc(doc(db, "tareas", id), { estado: estadoDestino });
+                if(document.getElementById('calendario').classList.contains('active')) renderCalendar();
+            }
         }
 
         window.openTaskModal = function(id) {
@@ -509,31 +622,45 @@
                     tareasActuales.push(t);
                 });
                 renderTareas();
+                if(document.getElementById('calendario').classList.contains('active')) renderCalendar();
             });
             listeners.push(unsubClientes, unsubTareas);
         }
 
         window.renderClientes = function() {
             const term = document.getElementById('searchClient').value.toLowerCase();
+            const statusFilter = document.getElementById('filterClientStatus').value; // 'todos', 'activos', 'inactivos'
+            
             let tbodyHtml = '';
             let selectHtml = '<option value="">-- Interna / Sin Cliente --</option>';
             let countAct = 0;
             let countInact = 0;
 
-            const filtrados = clientesActivos.filter(c => {
-                return c.nombre.toLowerCase().includes(term) || c.cuit.includes(term);
-            });
-
+            // Llenar el selector de tareas solo con los activos globales
             clientesActivos.forEach(c => {
                 if (c.activo) {
-                    countAct++;
                     selectHtml += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`;
-                } else {
-                    countInact++;
                 }
             });
 
-            filtrados.forEach(c => {
+            // Buscar por texto
+            const filtradosText = clientesActivos.filter(c => {
+                return c.nombre.toLowerCase().includes(term) || c.cuit.includes(term);
+            });
+
+            // Contadores basados en el texto buscado
+            filtradosText.forEach(c => {
+                if (c.activo) countAct++; else countInact++;
+            });
+
+            // Aplicar el filtro de estado para la tabla
+            const filtradosFinal = filtradosText.filter(c => {
+                if (statusFilter === 'activos' && !c.activo) return false;
+                if (statusFilter === 'inactivos' && c.activo) return false;
+                return true;
+            });
+
+            filtradosFinal.forEach(c => {
                 let clavesHtml = '';
                 if(c.clave_arca) clavesHtml += `<span class="clave-tag"><strong>ARCA:</strong> ${c.clave_arca}</span>`;
                 if(c.clave_agip) clavesHtml += `<span class="clave-tag"><strong>AGIP:</strong> ${c.clave_agip}</span>`;
