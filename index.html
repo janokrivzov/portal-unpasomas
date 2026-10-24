@@ -460,7 +460,6 @@
 
         let currentCalDate = new Date(); 
         
-        // Almacena temporalmente las tareas de un grupo específico para su gestión
         window.currentGroupTasks = []; 
 
         const ADMIN_EMAILS = [
@@ -544,7 +543,7 @@
 
             for(let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(year, month, day);
-                if(dateObj.getDay() === 0) continue; // Saltea los domingos
+                if(dateObj.getDay() === 0) continue;
 
                 const strMonth = (month + 1).toString().padStart(2, '0');
                 const strDay = day.toString().padStart(2, '0');
@@ -573,7 +572,6 @@
 
                 let tasksHtml = '';
                 for (const group in groupedTasks) {
-                    // Encabezado clickeable para abrir el modal del grupo
                     tasksHtml += `<div class="cal-group-title" onclick="openGroupModal('${group}', '${dateString}')" title="Ver detalles y opciones"><span>${group}</span> <span>⚙️</span></div>`;
                     
                     groupedTasks[group].forEach(t => {
@@ -594,9 +592,7 @@
             }
         }
 
-        // --- FUNCIONES DEL MODAL DE GRUPO ---
         window.openGroupModal = function(groupName, dateString) {
-            // Filtra las tareas que coincidan con la fecha, tipo y el prefijo del grupo
             window.currentGroupTasks = tareasActuales.filter(t => 
                 t.vencimiento === dateString && 
                 t.tipo === 'vencimiento' && 
@@ -660,7 +656,6 @@
             btn.innerText = "✅ Marcar Todas como Finalizadas";
             btn.disabled = false;
         }
-        // ------------------------------------
 
         function iniciarCargaDatosCliente(email) {
             const unsubCliente = onSnapshot(query(collection(db, "clientes"), where("emailPortal", "==", email)), (snapCliente) => {
