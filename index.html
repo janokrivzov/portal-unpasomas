@@ -37,7 +37,12 @@
         textarea { resize: vertical; min-height: 80px; }
         .btn-green { background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
         .btn-green:hover { background: #2ecc71; }
-        .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
+        
+        /* Botón de WhatsApp */
+        .btn-wpp { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 5px;}
+        .btn-wpp:hover { background: #1ebd5a; }
+
+        .form-container { background: white; padding: 20px; border-radius: 8px; max-width: 900px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;}
         
         /* Kanban y Drag & Drop */
         .kanban-board { display: flex; gap: 20px; }
@@ -47,23 +52,27 @@
         .task-card { background: white; padding: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 10px; display: flex; flex-direction: column; cursor: grab;}
         .task-card:active { cursor: grabbing; }
         .task-card strong { display: block; color: #2980b9; margin-bottom: 5px; }
+        
         .task-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; background: #34495e; color: white; margin-bottom: 8px; align-self: flex-start;}
+        .badge-pago { background: #e74c3c; }
+        .badge-pres { background: #8e44ad; }
+        
         .filter-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d4fc;}
         
         /* Portal Cliente */
         .client-portal-header { background: #34495e; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;}
-        .client-task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;}
-        .client-task-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 5px solid #bdc3c7;}
-        .client-task-card.finalizada { border-left-color: #27ae60; }
+        .client-task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;}
+        .client-task-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-top: 5px solid #3498db; display:flex; flex-direction:column; justify-content:space-between;}
+        .client-task-card.finalizada { border-top-color: #27ae60; opacity: 0.8; }
         
         /* Modales */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 550px; max-width: 95%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;}
         .modal-content h3 { margin-top: 0; color: #2c3e50; border-bottom: 1px solid #ecf0f1; padding-bottom: 10px; }
         
         /* Checkboxes y Tablas */
-        .checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
-        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 13px;}
+        .checkbox-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 11px;}
         .checkbox-item input { width: auto; margin: 0; }
         table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; font-size: 13px; vertical-align: top;}
@@ -120,12 +129,24 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDICIÓN DE TAREA / VENCIMIENTO INDIVIDUAL -->
+    <!-- MODAL DE EDICIÓN GENÉRICO (TAREAS Y VENCIMIENTOS) -->
     <div id="taskModal" class="modal-overlay">
         <div class="modal-content">
             <h3>Editar / Ver Detalles</h3>
-            <label style="font-size:12px; font-weight:bold;">Título</label>
-            <input type="text" id="editTaskTitle" style="margin-bottom: 10px;">
+            
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <label style="font-size:12px; font-weight:bold;">Título</label>
+                    <input type="text" id="editTaskTitle" style="margin:0;">
+                </div>
+                <div>
+                    <label style="font-size:12px; font-weight:bold;">Tipo de Obligación</label>
+                    <select id="editTaskTipoOb" style="margin:0;">
+                        <option value="presentacion">📁 Presentación / DJ</option>
+                        <option value="pago">💰 Pago</option>
+                    </select>
+                </div>
+            </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div>
@@ -149,13 +170,26 @@
                     </select>
                 </div>
             </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <label style="font-size:12px; font-weight:bold;">Monto ($)</label>
+                    <input type="number" id="editTaskMonto" placeholder="Ej: 15000" style="margin:0;">
+                </div>
+                <div>
+                    <label style="font-size:12px; font-weight:bold;">Posición (IVA/IIBB/Gcias)</label>
+                    <input type="text" id="editTaskPosicion" placeholder="Ej: Saldo a favor $2000" style="margin:0;">
+                </div>
+            </div>
             
             <label style="font-size:12px; font-weight:bold;">Descripción / Notas</label>
-            <textarea id="editTaskDesc" style="min-height: 70px;"></textarea>
+            <textarea id="editTaskDesc" style="min-height: 60px; margin-bottom: 10px;"></textarea>
             
-            <label style="font-size:12px; font-weight:bold; display:block; margin-top:10px;">Archivo Adjunto (Visible para el Cliente)</label>
+            <label style="font-size:12px; font-weight:bold; display:block;">Archivo Adjunto (Visible para el Cliente)</label>
             <div id="editTaskFileLink" style="font-size:12px; margin-bottom:10px; color:#2980b9;"></div>
             <input type="file" id="editTaskFile" style="margin-bottom: 10px;">
+            
+            <p id="editAuditLog" style="font-size:11px; color:#7f8c8d; margin-top:0; font-style:italic;"></p>
             
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button id="btnUpdateTask" onclick="updateTaskDetails()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar</button>
@@ -192,6 +226,18 @@
                 <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="vencClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
             </div>
             
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <label style="font-size:12px; font-weight:bold;">Tipo</label>
+                    <select id="vencTipoOb" style="margin:0;">
+                        <option value="pago">💰 Pago</option>
+                        <option value="presentacion">📁 Presentación</option>
+                    </select>
+                </div>
+                <div><label style="font-size:12px; font-weight:bold;">Monto ($)</label><input type="number" id="vencMonto" placeholder="Opcional" style="margin:0;"></div>
+                <div><label style="font-size:12px; font-weight:bold;">Fecha Exacta</label><input type="date" id="vencDate" style="margin:0;"></div>
+            </div>
+            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div>
                     <label style="font-size:12px; font-weight:bold;">Responsable</label>
@@ -201,15 +247,13 @@
                         <option value="Un Paso Mas">Un Paso Mas</option>
                     </select>
                 </div>
-                <div><label style="font-size:12px; font-weight:bold;">Fecha Exacta</label><input type="date" id="vencDate" style="margin:0;"></div>
+                <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="vencFile" style="margin:0;"></div>
             </div>
             
-            <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="vencFile" style="margin-bottom: 10px;"></div>
-            
             <label style="font-size:12px; font-weight:bold;">Descripción / Notas</label>
-            <textarea id="vencDesc" placeholder="Observaciones o detalles del vencimiento..." style="min-height: 70px;"></textarea>
+            <textarea id="vencDesc" placeholder="Observaciones o detalles del vencimiento..." style="min-height: 70px; margin-bottom:0;"></textarea>
             
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button id="btnCreateVenc" onclick="addVencimiento()" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar Vencimiento</button>
                 <button onclick="closeVencModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cancelar</button>
             </div>
@@ -236,7 +280,7 @@
             <div id="portalCliente" class="section">
                 <div class="client-portal-header">
                     <h2>Portal de Servicios - Un Paso Más</h2>
-                    <p style="margin:0; font-size:14px; opacity:0.8;">Bienvenido. Aquí puedes descargar tus comprobantes y liquidaciones.</p>
+                    <p style="margin:0; font-size:14px; opacity:0.8;">Bienvenido. Aquí puedes descargar tus comprobantes y gestionar tus pagos.</p>
                 </div>
                 <div style="text-align: right; margin-bottom: 20px;">
                     <button onclick="logout()" style="background: #e74c3c; width: auto; padding: 8px 15px;">Cerrar Sesión</button>
@@ -246,7 +290,7 @@
 
             <!-- SECCIÓN TABLERO -->
             <div id="tareas" class="section active">
-                <h2>Tablero de Tareas Manuales</h2>
+                <h2>Tablero de Tareas Internas</h2>
                 
                 <div class="filter-bar">
                     <input type="text" id="searchTask" placeholder="🔍 Buscar por título o cliente..." oninput="renderTareas()" style="margin:0;">
@@ -260,7 +304,7 @@
 
                 <div class="form-container">
                     <h3 style="margin-top:0;">Crear Tarea Manual (Uso Interno)</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
                         <div><label style="font-size:12px; font-weight:bold;">Título</label><input type="text" id="taskTitle" placeholder="Ej: Responder AFIP" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="taskClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
                         <div><label style="font-size:12px; font-weight:bold;">Responsable</label>
@@ -271,7 +315,14 @@
                             </select>
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">Tipo de Tarea</label>
+                            <select id="taskTipoOb" style="margin:0;">
+                                <option value="presentacion">📁 Trámite / Presentación</option>
+                                <option value="pago">💰 Pago a realizar</option>
+                            </select>
+                        </div>
                         <div><label style="font-size:12px; font-weight:bold;">Vencimiento</label><input type="date" id="taskDueDate" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="taskFile" style="margin:0;"></div>
                     </div>
@@ -325,51 +376,73 @@
 
             <!-- SECCIÓN VENCIMIENTOS MASIVOS -->
             <div id="vencimientos" class="section">
-                <h2>Generador Masivo</h2>
+                <h2>Generador Masivo Inteligente</h2>
+                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">El sistema ajustará el período al mes vencido o actual según el impuesto elegido.</p>
+                
                 <div class="form-container">
-                    <select id="masivoMes">
-                        <option value="10-2026">Octubre 2026</option>
-                        <option value="11-2026" selected>Noviembre 2026</option>
-                        <option value="12-2026">Diciembre 2026</option>
-                        <option value="01-2027">Enero 2027</option>
-                        <option value="02-2027">Febrero 2027</option>
-                    </select>
-                    <select id="masivoObligacion" onchange="autoCompletarFechas()">
-                        <option value="">-- Seleccionar Obligación --</option>
-                        <option value="931">931 + Boletas Sindicales</option>
-                        <option value="iva">IVA DJ</option>
-                        <option value="iva_diferido">IVA Pago Diferido</option>
-                        <option value="monotributo">Pago Monotributo</option>
-                        <option value="recat_monotributo">Recategorización Monotributo</option>
-                        <option value="iibb_agip">IIBB AGIP Local</option>
-                        <option value="iibb_arba">IIBB ARBA Local</option>
-                        <option value="iibb_cm">IIBB Convenio Multilateral</option>
-                        <option value="sueldos_emp">Sueldos Empresas</option>
-                        <option value="sueldos_casas">Sueldos Casas Particulares</option>
-                        <option value="autonomos">Autónomos</option>
-                        <option value="pago_sicore">Pago a cuenta SICORE</option>
-                        <option value="dj_sicore">DJ SICORE</option>
-                        <option value="anticipo_ganancias">Anticipo Ganancias</option>
-                        <option value="anticipo_bienes">Anticipo Bienes Personales</option>
-                        <option value="dj_ganancias">DJ Ganancias</option>
-                        <option value="dj_bienes">DJ Bienes Personales</option>
-                    </select>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px;">
-                        <div><label style="font-size:12px;">Term. 0</label><input type="date" id="fecha_0" style="margin:0;"></div>
-                        <div><label style="font-size:12px;">Term. 1</label><input type="date" id="fecha_1" style="margin:0;"></div>
-                        <div><label style="font-size:12px;">Term. 2</label><input type="date" id="fecha_2" style="margin:0;"></div>
-                        <div><label style="font-size:12px;">Term. 3</label><input type="date" id="fecha_3" style="margin:0;"></div>
-                        <div><label style="font-size:12px;">Term. 4</label><input type="date" id="fecha_4" style="margin:0;"></div>
-                        
-                        <div><label style="font-size:12px;">Term. 5</label><input type="date" id="fecha_5" style="margin:0;"></div>
-                        <div><label style="font-size:12px;">Term. 6</label><input type="date" id="fecha_6" style="margin:0;"></div>
-                        <div><label style="font-size:12px;">Term. 7</label><input type="date" id="fecha_7" style="margin:0;"></div>
-                        <div><label style="font-size:12px;">Term. 8</label><input type="date" id="fecha_8" style="margin:0;"></div>
-                        <div><label style="font-size:12px;">Term. 9</label><input type="date" id="fecha_9" style="margin:0;"></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">Mes Base de Generación</label>
+                            <select id="masivoMes" style="margin:0;">
+                                <option value="10-2026">Octubre 2026</option>
+                                <option value="11-2026" selected>Noviembre 2026</option>
+                                <option value="12-2026">Diciembre 2026</option>
+                                <option value="01-2027">Enero 2027</option>
+                                <option value="02-2027">Febrero 2027</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">Obligación Fiscal</label>
+                            <select id="masivoObligacion" onchange="autoCompletarFechas()" style="margin:0;">
+                                <option value="">-- Seleccionar Obligación --</option>
+                                <option value="931">931 + Boletas Sindicales</option>
+                                <option value="iva">IVA DJ</option>
+                                <option value="iva_diferido">IVA Pago Diferido</option>
+                                <option value="monotributo">Pago Monotributo</option>
+                                <option value="recat_monotributo">Recategorización Monotributo</option>
+                                <option value="iibb_agip">IIBB AGIP Local</option>
+                                <option value="iibb_arba">IIBB ARBA Local</option>
+                                <option value="iibb_cm">IIBB Convenio Multilateral</option>
+                                <option value="sueldos_emp">Sueldos Empresas</option>
+                                <option value="sueldos_casas">Sueldos Casas Particulares</option>
+                                <option value="autonomos">Autónomos</option>
+                                <option value="pago_sicore">Pago a cuenta SICORE</option>
+                                <option value="dj_sicore">DJ SICORE</option>
+                                <option value="anticipo_ganancias_pf">Anticipo Ganancias (Pers. Físicas)</option>
+                                <option value="anticipo_ganancias_soc">Anticipo Ganancias (Sociedades)</option>
+                                <option value="anticipo_bienes_pf">Anticipo Bienes Personales (Pers. Físicas)</option>
+                                <option value="anticipo_bienes_soc">Anticipo Bienes Personales (Sociedades)</option>
+                                <option value="dj_ganancias_pf">DJ Ganancias (Pers. Físicas)</option>
+                                <option value="dj_ganancias_soc">DJ Ganancias (Sociedades)</option>
+                                <option value="dj_bienes_pf">DJ Bienes Personales (Pers. Físicas)</option>
+                                <option value="dj_bienes_soc">DJ Bienes Personales (Sociedades)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:bold;">Tipo de Tarea Generada</label>
+                            <select id="masivoTipoOb" style="margin:0;">
+                                <option value="presentacion">📁 Es Presentación / DJ</option>
+                                <option value="pago">💰 Es un Pago a Realizar</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <button class="btn-green" onclick="generarMasivas()" style="margin-top: 15px;">Generar Vencimientos en el Calendario</button>
+                    <label style="font-size:12px; font-weight:bold;">Fechas de Vencimiento según Terminación de CUIT</label>
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 5px;">
+                        <div><label style="font-size:11px;">Term. 0</label><input type="date" id="fecha_0" style="margin:0; font-size:12px;"></div>
+                        <div><label style="font-size:11px;">Term. 1</label><input type="date" id="fecha_1" style="margin:0; font-size:12px;"></div>
+                        <div><label style="font-size:11px;">Term. 2</label><input type="date" id="fecha_2" style="margin:0; font-size:12px;"></div>
+                        <div><label style="font-size:11px;">Term. 3</label><input type="date" id="fecha_3" style="margin:0; font-size:12px;"></div>
+                        <div><label style="font-size:11px;">Term. 4</label><input type="date" id="fecha_4" style="margin:0; font-size:12px;"></div>
+                        
+                        <div><label style="font-size:11px;">Term. 5</label><input type="date" id="fecha_5" style="margin:0; font-size:12px;"></div>
+                        <div><label style="font-size:11px;">Term. 6</label><input type="date" id="fecha_6" style="margin:0; font-size:12px;"></div>
+                        <div><label style="font-size:11px;">Term. 7</label><input type="date" id="fecha_7" style="margin:0; font-size:12px;"></div>
+                        <div><label style="font-size:11px;">Term. 8</label><input type="date" id="fecha_8" style="margin:0; font-size:12px;"></div>
+                        <div><label style="font-size:11px;">Term. 9</label><input type="date" id="fecha_9" style="margin:0; font-size:12px;"></div>
+                    </div>
+                    
+                    <button class="btn-green" onclick="generarMasivas()" style="margin-top: 20px;">🚀 Generar Vencimientos en el Calendario</button>
                 </div>
             </div>
 
@@ -377,25 +450,28 @@
             <div id="clientes" class="section">
                 <h2>Gestión de Clientes</h2>
                 
-                <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc;">
-                    <h3>📥 Importar Base de Datos</h3>
-                    <input type="file" id="csvFile" accept=".csv" style="background: white;">
-                    <button id="btnImportar" onclick="importarCSV()" style="background: #2980b9; color:white; border:none; font-weight:bold;">Importar a Firebase</button>
+                <div class="form-container" style="background: #e8f4f8; border: 1px solid #b3d4fc; margin-bottom: 10px; padding: 15px;">
+                    <h3 style="margin-top:0; font-size:14px;">📥 Importar Base de Datos desde Excel/CSV</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="file" id="csvFile" accept=".csv" style="background: white; margin:0; flex:1;">
+                        <button id="btnImportar" onclick="importarCSV()" style="background: #2980b9; color:white; border:none; font-weight:bold; padding:10px 20px; border-radius:4px; cursor:pointer;">Importar</button>
+                    </div>
                 </div>
 
                 <div class="form-container" id="form-cliente-container">
-                    <h3 id="formClientTitle">Agregar Nuevo Cliente</h3>
-                    <input type="text" id="clientName" placeholder="Razón Social / Nombre completo">
+                    <h3 id="formClientTitle" style="margin-top:0;">Ficha de Cliente</h3>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <input type="text" id="clientCuit" placeholder="CUIT (Sin guiones)">
-                        <input type="email" id="clientEmailLogin" placeholder="Email de acceso para el Portal (Opcional)">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
+                        <div><label style="font-size:12px; font-weight:bold;">Razón Social / Nombre</label><input type="text" id="clientName" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">CUIT (Sin guiones)</label><input type="text" id="clientCuit" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">WhatsApp (Ej: 54911...)</label><input type="text" id="clientTel" placeholder="Para alertas automáticas" style="margin:0;"></div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                        <input type="text" id="clientARCA" placeholder="Clave ARCA">
-                        <input type="text" id="clientAGIP" placeholder="Clave AGIP">
-                        <input type="text" id="clientARBA" placeholder="Clave ARBA">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div><label style="font-size:12px; font-weight:bold;">Email (Acceso al Portal)</label><input type="email" id="clientEmailLogin" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Clave ARCA</label><input type="text" id="clientARCA" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Clave AGIP</label><input type="text" id="clientAGIP" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Clave ARBA</label><input type="text" id="clientARBA" style="margin:0;"></div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
@@ -419,9 +495,9 @@
                         </div>
                     </div>
 
-                    <textarea id="clientObs" placeholder="Observaciones..." style="margin-top: 10px;"></textarea>
+                    <textarea id="clientObs" placeholder="Observaciones..." style="margin-top: 15px; min-height:60px;"></textarea>
                     
-                    <label style="font-weight: bold; display: block; margin-top: 10px;">Obligaciones Activas:</label>
+                    <label style="font-weight: bold; display: block; margin-top: 10px; font-size: 13px; color:#2c3e50; border-bottom:1px solid #ecf0f1; padding-bottom:5px;">Obligaciones Activas para Generación Masiva:</label>
                     <div class="checkbox-grid">
                         <div class="checkbox-item"><input type="checkbox" id="chk_931" value="931"> 931 + Sindicatos</div>
                         <div class="checkbox-item"><input type="checkbox" id="chk_iva" value="iva"> IVA DJ</div>
@@ -436,45 +512,53 @@
                         <div class="checkbox-item"><input type="checkbox" id="chk_autonomos" value="autonomos"> Autónomos</div>
                         <div class="checkbox-item"><input type="checkbox" id="chk_pago_sicore" value="pago_sicore"> Pago a cuenta SICORE</div>
                         <div class="checkbox-item"><input type="checkbox" id="chk_dj_sicore" value="dj_sicore"> DJ SICORE</div>
-                        <div class="checkbox-item"><input type="checkbox" id="chk_anticipo_ganancias" value="anticipo_ganancias"> Ant. Ganancias</div>
-                        <div class="checkbox-item"><input type="checkbox" id="chk_anticipo_bienes" value="anticipo_bienes"> Ant. Bienes Pers.</div>
-                        <div class="checkbox-item"><input type="checkbox" id="chk_dj_ganancias" value="dj_ganancias"> DJ Ganancias</div>
-                        <div class="checkbox-item"><input type="checkbox" id="chk_dj_bienes" value="dj_bienes"> DJ Bienes Pers.</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_anticipo_ganancias_pf" value="anticipo_ganancias_pf"> Ant. Gcias (Pers.Físicas)</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_anticipo_ganancias_soc" value="anticipo_ganancias_soc"> Ant. Gcias (Sociedades)</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_anticipo_bienes_pf" value="anticipo_bienes_pf"> Ant. Bienes (Pers.Físicas)</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_anticipo_bienes_soc" value="anticipo_bienes_soc"> Ant. Bienes (Sociedades)</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_dj_ganancias_pf" value="dj_ganancias_pf"> DJ Ganancias (Pers.Físicas)</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_dj_ganancias_soc" value="dj_ganancias_soc"> DJ Ganancias (Sociedades)</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_dj_bienes_pf" value="dj_bienes_pf"> DJ Bienes (Pers.Físicas)</div>
+                        <div class="checkbox-item"><input type="checkbox" id="chk_dj_bienes_soc" value="dj_bienes_soc"> DJ Bienes (Sociedades)</div>
                     </div>
-                    <button id="btnSaveClient" class="btn-green" onclick="saveClient()">Guardar Cliente</button>
-                    <button id="btnCancelEdit" onclick="cancelEdit()" style="display:none; background:#7f8c8d; color:white; border:none; font-weight:bold;">Cancelar Edición</button>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <button id="btnSaveClient" class="btn-green" onclick="saveClient()" style="padding:10px 20px;">Guardar Ficha de Cliente</button>
+                        <button id="btnCancelEdit" onclick="cancelEdit()" style="display:none; background:#7f8c8d; color:white; border:none; font-weight:bold; padding:10px 20px; border-radius:4px; cursor:pointer;">Cancelar Edición</button>
+                    </div>
                 </div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background:white; padding:15px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                     <div>
-                        <span style="background: #27ae60; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-right: 5px;" id="countActivos">Activos: 0</span>
-                        <span style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 13px;" id="countInactivos">Inactivos: 0</span>
+                        <span style="background: #27ae60; color: white; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-right: 5px;" id="countActivos">Activos: 0</span>
+                        <span style="background: #e74c3c; color: white; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px;" id="countInactivos">Inactivos: 0</span>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <select id="filterClientStatus" onchange="renderClientes()" style="margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                            <option value="todos">Todos los estados</option>
-                            <option value="activos">Solo Activos</option>
-                            <option value="inactivos">Solo Inactivos</option>
+                        <select id="filterClientStatus" onchange="renderClientes()" style="margin: 0; padding: 8px 15px; border-radius: 4px; border:1px solid #bdc3c7;">
+                            <option value="activos">Mostrar Activos</option>
+                            <option value="inactivos">Mostrar Inactivos</option>
+                            <option value="todos">Mostrar Todos</option>
                         </select>
-                        <input type="text" id="searchClient" placeholder="🔍 Buscar por nombre o CUIT..." oninput="renderClientes()" style="width: 300px; margin: 0; padding: 8px;">
+                        <input type="text" id="searchClient" placeholder="🔍 Buscar por nombre o CUIT..." oninput="renderClientes()" style="width: 300px; margin: 0; padding: 8px 15px; border:1px solid #bdc3c7; border-radius:4px;">
                     </div>
                 </div>
 
                 <table id="clientsTable">
-                    <thead><tr><th>Nombre / CUIT</th><th>Acceso Portal</th><th>Claves</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Cliente / Razón Social</th><th>Contacto y Acceso</th><th>Claves Fiscales</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE -->
+    <!-- SCRIPT FIREBASE Y LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, deleteDoc, doc, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
+        // CONFIGURACIÓN DE FIREBASE (NO TOCAR)
         const firebaseConfig = {
             apiKey: "AIzaSyCUGSTBjTNr-FSOqcysoMvUc4kKMh0Ekg0",
             authDomain: "un-paso-mas-dashboard.firebaseapp.com",
@@ -489,15 +573,16 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
         
+        // VARIABLES GLOBALES
         let clientesActivos = [];
         let tareasActuales = []; 
         let editingClientId = null;
         let editingTaskId = null; 
         let listeners = [];
         let isUserAdmin = false;
+        let currentUserEmail = "";
 
         let currentCalDate = new Date(); 
-        
         window.currentGroupTasks = []; 
 
         const ADMIN_EMAILS = [
@@ -506,8 +591,10 @@
             "ivan.ritvo@estudioritvo.com.ar"
         ];
 
+        // CONTROL DE SESIÓN
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                currentUserEmail = user.email;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
                 
@@ -537,6 +624,7 @@
                 document.getElementById('loginError').style.display = 'block';
             });
         }
+        
         window.logout = function() { signOut(auth); }
 
         window.toggleSidebar = function() {
@@ -555,6 +643,7 @@
             }
         }
 
+        // CALENDARIO LÓGICA
         window.changeMonth = function(dir) {
             currentCalDate.setMonth(currentCalDate.getMonth() + dir);
             renderCalendar();
@@ -610,14 +699,13 @@
 
                 let tasksHtml = '';
                 for (const group in groupedTasks) {
-                    tasksHtml += `<div class="cal-group-title" onclick="openGroupModal('${group}', '${dateString}')" title="Ver detalles y opciones"><span>${group}</span> <span>⚙️</span></div>`;
+                    tasksHtml += `<div class="cal-group-title" onclick="openGroupModal('${group}', '${dateString}')" title="Ver clientes y opciones"><span>${group}</span> <span>⚙️</span></div>`;
                     
                     groupedTasks[group].forEach(t => {
-                        let pillClass = 'cal-pendientes';
-                        if(t.estado === 'proceso') pillClass = 'cal-proceso';
-                        if(t.estado === 'listas') pillClass = 'cal-listas';
+                        let pillClass = t.estado === 'listas' ? 'cal-listas' : (t.estado === 'proceso' ? 'cal-proceso' : 'cal-pendientes');
+                        let badgePago = t.tipoObligacion === 'pago' ? '💰 ' : '📁 ';
 
-                        tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${t.shortName}">${t.shortName}</div>`;
+                        tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${t.shortName}">${badgePago}${t.shortName}</div>`;
                     });
                 }
 
@@ -630,6 +718,7 @@
             }
         }
 
+        // MODALES
         window.openVencModal = function() {
             document.getElementById('createVencModal').style.display = 'flex';
         }
@@ -646,7 +735,7 @@
             
             document.getElementById('groupModalTitle').innerText = groupName;
             
-            let html = '<ul style="list-style:none; padding:0; margin:0; max-height:200px; overflow-y:auto;">';
+            let html = '<ul style="list-style:none; padding:0; margin:0; max-height:300px; overflow-y:auto;">';
             window.currentGroupTasks.forEach(t => {
                 let statusText = t.estado === 'listas' ? '✅ Finalizada' : (t.estado === 'proceso' ? '⏳ Proceso' : '🕒 Pendiente');
                 let color = t.estado === 'listas' ? '#27ae60' : (t.estado === 'proceso' ? '#e67e22' : '#3498db');
@@ -654,8 +743,10 @@
                 const splitIndex = t.titulo.indexOf(' - ');
                 const shortName = splitIndex !== -1 ? t.titulo.substring(splitIndex + 3) : t.titulo;
                 
-                html += `<li style="padding:8px 5px; border-bottom:1px solid #ecf0f1; display:flex; justify-content:space-between; font-size:13px;">
-                    <span style="font-weight:500;">${shortName}</span>
+                let payBadge = t.tipoObligacion === 'pago' ? '<span style="background:#e74c3c; color:white; padding:2px 5px; border-radius:3px; font-size:9px; margin-right:5px;">PAGO</span>' : '<span style="background:#8e44ad; color:white; padding:2px 5px; border-radius:3px; font-size:9px; margin-right:5px;">PRES.</span>';
+
+                html += `<li style="padding:10px 5px; border-bottom:1px solid #ecf0f1; display:flex; justify-content:space-between; align-items:center; font-size:13px;">
+                    <div>${payBadge} <span style="font-weight:500;">${shortName}</span></div>
                     <span style="color:${color}; font-weight:bold; font-size:11px;">${statusText}</span>
                 </li>`;
             });
@@ -674,7 +765,7 @@
             if(!confirm("¿Estás seguro de marcar TODOS estos vencimientos como FINALIZADOS?")) return;
             
             const btn = document.getElementById('btnMarkAllFinished');
-            btn.innerText = "Actualizando...";
+            btn.innerText = "Actualizando Base de Datos...";
             btn.disabled = true;
             
             try {
@@ -698,50 +789,75 @@
                 alert("Hubo un error al actualizar los vencimientos.");
             }
             
-            btn.innerText = "✅ Marcar Todas como Finalizadas";
+            btn.innerText = "✅ Marcar Todas Finalizadas";
             btn.disabled = false;
         }
 
+        // PORTAL CLIENTE LÓGICA
         function iniciarCargaDatosCliente(email) {
             const unsubCliente = onSnapshot(query(collection(db, "clientes"), where("emailPortal", "==", email)), (snapCliente) => {
                 if(snapCliente.empty) {
-                    document.getElementById('clientDashboardGrid').innerHTML = '<p>No se encontró un cliente asociado a este correo. Comunícate con el Estudio.</p>';
+                    document.getElementById('clientDashboardGrid').innerHTML = '<p>No se encontró una ficha de cliente asociada a este correo electrónico. Comunícate con el Estudio.</p>';
                     return;
                 }
                 
-                const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", snapCliente.docs[0].id)), (snapTareas) => {
+                const clienteId = snapCliente.docs[0].id;
+                
+                const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", clienteId)), (snapTareas) => {
                     const grid = document.getElementById('clientDashboardGrid');
                     grid.innerHTML = '';
                     
-                    snapTareas.forEach(doc => {
-                        const t = doc.data();
+                    snapTareas.forEach(docu => {
+                        const t = docu.data();
+                        const id = docu.id;
+                        
                         const isFinalizada = t.estado === 'listas';
                         const badgeColor = isFinalizada ? '#27ae60' : '#e67e22';
-                        const estadoText = isFinalizada ? 'Presentado / Finalizado' : 'Pendiente de Gestión';
+                        const estadoText = isFinalizada ? '✅ Completado / Finalizado' : '⏳ Pendiente de Gestión';
                         
                         let fileBtn = '';
                         if(t.archivoUrl) {
-                            fileBtn = `<a href="${t.archivoUrl}" target="_blank" style="display:inline-block; margin-top:15px; padding:10px 15px; background:#3498db; color:white; text-decoration:none; border-radius:4px; font-weight:bold;">📥 Descargar Comprobante / VEP</a>`;
-                        } else if(isFinalizada) {
-                            fileBtn = `<p style="font-size:12px; color:#7f8c8d; margin-top:15px;">Finalizado sin comprobantes adjuntos.</p>`;
-                        } else {
-                            fileBtn = `<p style="font-size:12px; color:#7f8c8d; margin-top:15px;">A la espera de la gestión del estudio.</p>`;
+                            fileBtn = `<a href="${t.archivoUrl}" target="_blank" style="display:block; margin-top:10px; padding:10px; background:#3498db; color:white; text-decoration:none; border-radius:4px; font-weight:bold; text-align:center; transition:0.3s;">📥 Descargar Comprobante</a>`;
+                        }
+                        
+                        let payBtn = '';
+                        if(t.tipoObligacion === 'pago' && !isFinalizada) {
+                            payBtn = `<button onclick="marcarPagadoCliente('${id}')" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; margin-top:10px; width:100%; transition:0.3s;">💳 Marcar como Pagado</button>`;
+                        }
+
+                        let montoHtml = '';
+                        if(t.monto) {
+                            montoHtml = `<p style="font-size:22px; font-weight:bold; color:#2c3e50; margin:10px 0 5px 0;">$ ${t.monto}</p>`;
+                        }
+                        
+                        let posHtml = '';
+                        if(t.posicion) {
+                            posHtml = `<p style="font-size:13px; color:#7f8c8d; margin:0 0 10px 0; padding:5px; background:#ecf0f1; border-radius:4px;"><i>${t.posicion}</i></p>`;
                         }
 
                         grid.innerHTML += `
                             <div class="client-task-card ${isFinalizada ? 'finalizada' : ''}">
-                                <div style="display:inline-block; padding:4px 8px; background:${badgeColor}; color:white; font-size:11px; border-radius:12px; margin-bottom:10px; font-weight:bold;">
-                                    ${estadoText}
+                                <div>
+                                    <div style="display:inline-block; padding:4px 10px; background:${badgeColor}; color:white; font-size:11px; border-radius:12px; margin-bottom:10px; font-weight:bold; letter-spacing:0.5px;">
+                                        ${estadoText}
+                                    </div>
+                                    <h3 style="margin:0 0 5px 0; font-size:18px; color:#2c3e50; line-height:1.2;">${t.titulo}</h3>
+                                    ${montoHtml}
+                                    ${posHtml}
+                                    ${t.vencimiento ? `<p style="margin:10px 0 0 0; font-size:13px; color:#c0392b; font-weight:bold;">📅 Vencimiento: ${t.vencimiento}</p>` : ''}
                                 </div>
-                                <h3 style="margin:0 0 10px 0; font-size:18px; color:#2c3e50;">${t.titulo}</h3>
-                                ${t.vencimiento ? `<p style="margin:0 0 5px 0; font-size:13px; color:#c0392b;"><strong>Vencimiento:</strong> ${t.vencimiento}</p>` : ''}
-                                ${fileBtn}
+                                <div style="display:flex; flex-direction:column; margin-top:15px; border-top:1px solid #ecf0f1; padding-top:10px;">
+                                    ${fileBtn}
+                                    ${payBtn}
+                                    ${(!fileBtn && !payBtn && !isFinalizada) ? '<p style="font-size:12px; color:#95a5a6; text-align:center; margin:10px 0 0 0;">A la espera del estudio.</p>' : ''}
+                                    ${(isFinalizada && !fileBtn) ? '<p style="font-size:12px; color:#95a5a6; text-align:center; margin:10px 0 0 0;">Finalizado sin adjuntos.</p>' : ''}
+                                </div>
                             </div>
                         `;
                     });
                     
                     if(snapTareas.empty) {
-                        grid.innerHTML = '<p>No tienes presentaciones o tareas pendientes.</p>';
+                        grid.innerHTML = '<div style="background:white; padding:30px; border-radius:8px; text-align:center; grid-column: 1 / -1;"><h3 style="color:#7f8c8d; margin:0;">No tienes tareas o presentaciones pendientes.</h3></div>';
                     }
                 });
                 listeners.push(unsubTareas);
@@ -749,6 +865,23 @@
             listeners.push(unsubCliente);
         }
 
+        window.marcarPagadoCliente = async function(id) {
+            if(confirm("¿Confirmas que ya realizaste el pago de esta obligación? Se notificará al estudio.")) {
+                const auditText = `Marcado como pagado por el cliente (${currentUserEmail}) el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}`;
+                
+                try {
+                    await updateDoc(doc(db, "tareas", id), { 
+                        estado: 'listas',
+                        auditoriaPago: auditText
+                    });
+                    alert("¡Gracias! El pago fue registrado con éxito.");
+                } catch(e) {
+                    alert("Hubo un error al registrar el pago.");
+                }
+            }
+        }
+
+        // KANBAN DRAG & DROP
         window.allowDrop = function(ev) { ev.preventDefault(); }
         window.drag = function(ev, id) { ev.dataTransfer.setData("text", id); }
         window.drop = async function(ev, estadoDestino) {
@@ -760,23 +893,37 @@
             }
         }
 
+        // TAREAS GLOBALES (MANUALES Y VENCIMIENTOS) LÓGICA DE EDICIÓN
         window.openTaskModal = function(id) {
             const t = tareasActuales.find(x => x.id === id);
             if(!t) return;
             editingTaskId = id;
+            
             document.getElementById('editTaskTitle').value = t.titulo || '';
+            document.getElementById('editTaskTipoOb').value = t.tipoObligacion || 'presentacion';
             document.getElementById('editTaskResp').value = t.responsable || 'Un Paso Mas';
             document.getElementById('editTaskDate').value = t.vencimiento || '';
             document.getElementById('editTaskEstado').value = t.estado || 'pendientes';
+            document.getElementById('editTaskMonto').value = t.monto || '';
+            document.getElementById('editTaskPosicion').value = t.posicion || '';
             document.getElementById('editTaskDesc').value = t.descripcion || '';
+            
+            const auditLog = document.getElementById('editAuditLog');
+            if(t.auditoriaPago) {
+                auditLog.innerText = `🔍 Auditoría: ${t.auditoriaPago}`;
+                auditLog.style.display = 'block';
+            } else {
+                auditLog.style.display = 'none';
+            }
             
             const linkBox = document.getElementById('editTaskFileLink');
             if(t.archivoUrl) {
-                linkBox.innerHTML = `<a href="${t.archivoUrl}" target="_blank">📎 Ver Archivo Actual</a> (Sube uno nuevo para reemplazar)`;
+                linkBox.innerHTML = `<a href="${t.archivoUrl}" target="_blank" style="display:inline-block; padding:5px 10px; background:#ecf0f1; border-radius:4px; text-decoration:none; font-weight:bold; color:#2c3e50;">📎 Ver Archivo Actual</a> (Sube uno nuevo para reemplazar)`;
             } else {
                 linkBox.innerHTML = 'Sin archivo adjunto.';
             }
             document.getElementById('editTaskFile').value = '';
+            
             document.getElementById('taskModal').style.display = 'flex';
         }
 
@@ -795,9 +942,12 @@
             
             let updateData = {
                 titulo: titulo,
+                tipoObligacion: document.getElementById('editTaskTipoOb').value,
                 responsable: document.getElementById('editTaskResp').value,
                 vencimiento: document.getElementById('editTaskDate').value,
                 estado: document.getElementById('editTaskEstado').value,
+                monto: document.getElementById('editTaskMonto').value,
+                posicion: document.getElementById('editTaskPosicion').value,
                 descripcion: document.getElementById('editTaskDesc').value
             };
 
@@ -816,12 +966,13 @@
 
         window.deleteTask = async function() {
             if(!editingTaskId) return;
-            if(confirm("¿Estás seguro de que deseas ELIMINAR esta tarea permanentemente?")) {
+            if(confirm("¿Estás seguro de que deseas ELIMINAR esta tarea permanentemente? (No se puede deshacer)")) {
                 await deleteDoc(doc(db, "tareas", editingTaskId));
                 closeTaskModal();
             }
         }
 
+        // CARGA PRINCIPAL ADMIN
         function iniciarCargaDatosAdmin() {
             const unsubClientes = onSnapshot(query(collection(db, "clientes")), (snapshot) => {
                 clientesActivos = [];
@@ -871,25 +1022,26 @@
 
             filtradosFinal.forEach(c => {
                 let clavesHtml = '';
-                if(c.clave_arca) clavesHtml += `<span class="clave-tag"><strong>ARCA:</strong> ${c.clave_arca}</span>`;
-                if(c.clave_agip) clavesHtml += `<span class="clave-tag"><strong>AGIP:</strong> ${c.clave_agip}</span>`;
+                if(c.clave_arca) clavesHtml += `<span class="clave-tag"><strong>ARCA:</strong> ${c.clave_arca}</span><br>`;
+                if(c.clave_agip) clavesHtml += `<span class="clave-tag"><strong>AGIP:</strong> ${c.clave_agip}</span><br>`;
                 if(c.clave_arba) clavesHtml += `<span class="clave-tag"><strong>ARBA:</strong> ${c.clave_arba}</span>`;
                 
                 let condTags = '';
                 if(c.condIva) condTags += `<span style="font-size:10px; background:#f39c12; color:white; padding:2px 5px; border-radius:3px; margin-right:3px; font-weight:bold;">${c.condIva}</span>`;
                 if(c.condGanancias) condTags += `<span style="font-size:10px; background:#8e44ad; color:white; padding:2px 5px; border-radius:3px; font-weight:bold;">Gcias: ${c.condGanancias}</span>`;
                 
-                const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${c.emailPortal}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso</span>';
+                const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${c.emailPortal}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso Portal</span>';
+                const telTag = c.telefono ? `<span style="font-size:11px; color:#27ae60; font-weight:bold; display:block; margin-top:3px;">📱 ${c.telefono}</span>` : '';
 
                 tbodyHtml += `
-                    <tr style="background: ${c.activo ? 'transparent' : '#f9ebea'};">
-                        <td><strong>${c.nombre}</strong><br><small>CUIT: ${c.cuit}</small><br><div style="margin-top:5px;">${condTags}</div></td>
-                        <td>${portalTag}</td>
+                    <tr style="background: ${c.activo ? 'transparent' : '#f9ebea'}; border-bottom:1px solid #ecf0f1;">
+                        <td><strong>${c.nombre}</strong><br><small style="color:#7f8c8d;">CUIT: ${c.cuit}</small><div style="margin-top:5px;">${condTags}</div></td>
+                        <td>${portalTag}${telTag}</td>
                         <td>${clavesHtml}</td>
-                        <td>${c.activo ? '<span style="color:green; font-weight:bold;">Activo</span>' : '<span style="color:red; font-weight:bold;">Inactivo</span>'}</td>
+                        <td>${c.activo ? '<span style="color:#27ae60; font-weight:bold;">Activo</span>' : '<span style="color:#e74c3c; font-weight:bold;">Inactivo</span>'}</td>
                         <td>
-                            <button class="action-btn" style="background:#f39c12; color:white; border:none; cursor:pointer;" onclick="loadEditClient('${c.id}')">✏️ Editar</button>
-                            <button class="action-btn" style="background:${c.activo ? '#e74c3c' : '#27ae60'}; color:white; border:none; cursor:pointer;" onclick="toggleStatus('${c.id}', ${c.activo})">${c.activo ? '⛔ Baja' : '✅ Activar'}</button>
+                            <button class="action-btn" style="background:#f39c12; color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px; font-weight:bold;" onclick="loadEditClient('${c.id}')">✏️ Editar</button>
+                            <button class="action-btn" style="background:${c.activo ? '#e74c3c' : '#27ae60'}; color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px; font-weight:bold;" onclick="toggleStatus('${c.id}', ${c.activo})">${c.activo ? '⛔ Baja' : '✅ Alta'}</button>
                         </td>
                     </tr>
                 `;
@@ -900,6 +1052,27 @@
             document.getElementById('vencClient').innerHTML = selectHtml;
             document.getElementById('countActivos').innerText = `Activos: ${countAct}`;
             document.getElementById('countInactivos').innerText = `Inactivos: ${countInact}`;
+        }
+
+        // GENERADOR DE LINK WHATSAPP
+        function generarLinkWpp(telefono, titulo, monto, fecha) {
+            if(!telefono) return '';
+            
+            // Limpiar el teléfono de espacios o guiones
+            const telLimpio = telefono.replace(/\D/g,'');
+            
+            let mensaje = `Hola! Te escribimos del Estudio Un Paso Mas para avisarte de tu próximo vencimiento: *${titulo}*.`;
+            if (monto) mensaje += ` El monto a pagar es de *$${monto}*.`;
+            if (fecha) {
+                // Formatear la fecha de YYYY-MM-DD a DD/MM/YYYY
+                const partes = fecha.split('-');
+                if(partes.length === 3) mensaje += ` Vence el día ${partes[2]}/${partes[1]}/${partes[0]}.`;
+            }
+            mensaje += ` Cualquier duda consultanos. Saludos!`;
+            
+            const url = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
+            
+            return `<a href="${url}" target="_blank" class="btn-wpp" title="Enviar aviso por WhatsApp">💬 WhatsApp</a>`;
         }
 
         window.renderTareas = function() {
@@ -917,17 +1090,43 @@
             });
 
             filtradas.forEach(t => {
+                let badgeTipo = '';
+                if(t.tipoObligacion === 'pago') badgeTipo = '<span class="task-badge badge-pago">💰 Pago</span>';
+                else badgeTipo = '<span class="task-badge badge-pres">📁 Presentación</span>';
+
+                let montoHtml = '';
+                if(t.monto) montoHtml = `<p style="font-size:16px; font-weight:bold; color:#27ae60; margin:5px 0;">$ ${t.monto}</p>`;
+
+                let posHtml = '';
+                if(t.posicion) posHtml = `<p style="font-size:11px; color:#7f8c8d; margin:0 0 5px 0;"><i>${t.posicion}</i></p>`;
+
                 const descPreview = t.descripcion ? (t.descripcion.length > 40 ? t.descripcion.substring(0, 40) + '...' : t.descripcion) : '';
                 const descHtml = descPreview ? `<div style="font-size:12px; color:#7f8c8d; margin-bottom:5px; padding-left:5px; border-left: 2px solid #bdc3c7;"><i>${descPreview}</i></div>` : '';
                 const fileHtml = t.archivoUrl ? `<a href="${t.archivoUrl}" target="_blank" style="font-size:12px; color:#2980b9; text-decoration:none; display:block; margin-bottom:10px;">📎 Archivo adjunto</a>` : '<div style="margin-bottom:10px;"></div>';
                 
+                // Buscar telefono del cliente
+                let telCliente = '';
+                if(t.clienteId) {
+                    const cli = clientesActivos.find(c => c.id === t.clienteId);
+                    if(cli && cli.telefono) telCliente = cli.telefono;
+                }
+                const wppBtn = generarLinkWpp(telCliente, t.titulo, t.monto, t.vencimiento);
+
                 const card = `<div class="task-card" draggable="true" ondragstart="drag(event, '${t.id}')">
-                    <span class="task-badge">${t.responsable}</span>
-                    <strong style="cursor:pointer;" onclick="openTaskModal('${t.id}')">${t.titulo}</strong>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        ${badgeTipo}
+                        <span style="font-size:10px; color:#7f8c8d; font-weight:bold;">${t.responsable}</span>
+                    </div>
+                    <strong style="cursor:pointer; color:#2c3e50; font-size:14px; margin-bottom:0;" onclick="openTaskModal('${t.id}')">${t.titulo}</strong>
+                    ${montoHtml}
+                    ${posHtml}
                     ${descHtml}
                     ${t.vencimiento ? `<div style="font-size:12px; font-weight:bold; color:#c0392b; margin-bottom:5px;">📅 Vence: ${t.vencimiento}</div>` : ''}
                     ${fileHtml}
-                    <button style="background:#3498db; color:white; border:none; cursor:pointer; padding:5px; font-size:12px; border-radius:4px; width:100%; margin-top:auto;" onclick="openTaskModal('${t.id}')">👁️ Ver / Editar</button>
+                    <div style="display:flex; gap:5px; margin-top:auto;">
+                        <button style="background:#3498db; color:white; border:none; cursor:pointer; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:bold; flex:1;" onclick="openTaskModal('${t.id}')">👁️ Abrir</button>
+                        ${wppBtn}
+                    </div>
                 </div>`;
                 
                 if (t.estado === 'pendientes') htmlPendientes += card;
@@ -967,10 +1166,13 @@
 
             await addDoc(collection(db, "tareas"), { 
                 titulo: t + nombreParaTitulo, 
-                tipo: 'tarea', 
+                tipo: 'tarea',
+                tipoObligacion: document.getElementById('taskTipoOb').value,
                 responsable: document.getElementById('taskResponsible').value, 
                 vencimiento: document.getElementById('taskDueDate').value,
                 descripcion: document.getElementById('taskDesc').value,
+                monto: "",
+                posicion: "",
                 archivoUrl: archivoUrl,
                 clienteId: clientId, 
                 estado: "pendientes", 
@@ -985,7 +1187,7 @@
             const t = document.getElementById('vencTitle').value;
             const clientId = document.getElementById('vencClient').value;
             
-            if(!t) return alert("El título / obligación es obligatorio.");
+            if(!t) return alert("La obligación es obligatoria.");
             
             const btn = document.getElementById('btnCreateVenc');
             btn.innerText = "Subiendo...";
@@ -1008,18 +1210,21 @@
 
             await addDoc(collection(db, "tareas"), { 
                 titulo: t + nombreParaTitulo, 
-                tipo: 'vencimiento', 
+                tipo: 'vencimiento',
+                tipoObligacion: document.getElementById('vencTipoOb').value,
+                monto: document.getElementById('vencMonto').value,
                 responsable: document.getElementById('vencResp').value, 
                 vencimiento: document.getElementById('vencDate').value,
                 descripcion: document.getElementById('vencDesc').value,
+                posicion: "",
                 archivoUrl: archivoUrl,
                 clienteId: clientId, 
                 estado: "pendientes", 
                 fechaCreacion: new Date().toISOString() 
             }); 
             
-            document.getElementById('vencTitle').value = ''; document.getElementById('vencDate').value = ''; document.getElementById('vencDesc').value = ''; document.getElementById('vencFile').value = '';
-            btn.innerText = "Guardar Vencimiento";
+            document.getElementById('vencTitle').value = ''; document.getElementById('vencDate').value = ''; document.getElementById('vencDesc').value = ''; document.getElementById('vencFile').value = ''; document.getElementById('vencMonto').value = '';
+            btn.innerText = "+ Agregar al Calendario";
             closeVencModal();
         }
 
@@ -1038,22 +1243,23 @@
                         const nombre = (cols[0] || '').trim().replace(/^"|"$/g, ''); const cuit = (cols[1] || '').trim().replace(/^"|"$/g, '');
                         if(nombre && cuit) {
                             if(clientesActivos.find(c => c.cuit === cuit) || nuevos.find(n => n.cuit === cuit)) duplicados++;
-                            else nuevos.push({ nombre, cuit, emailPortal: "", condIva: "", condGanancias: "", clave_arca: (cols[2]||'').replace(/^"|"$/g, ''), clave_agip: (cols[3]||'').replace(/^"|"$/g, ''), clave_arba: (cols[4]||'').replace(/^"|"$/g, ''), observaciones: (cols[5]||'').replace(/^"|"$/g, ''), activo: true, obligaciones: [] });
+                            else nuevos.push({ nombre, cuit, telefono: "", emailPortal: "", condIva: "", condGanancias: "", clave_arca: (cols[2]||'').replace(/^"|"$/g, ''), clave_agip: (cols[3]||'').replace(/^"|"$/g, ''), clave_arba: (cols[4]||'').replace(/^"|"$/g, ''), observaciones: (cols[5]||'').replace(/^"|"$/g, ''), activo: true, obligaciones: [] });
                         }
                     }
                 }
-                if(duplicados > 0 && !confirm(`Se detectaron ${duplicados} clientes duplicados.\n\n¿Omitir duplicados e importar los ${nuevos.length} nuevos?`)) { document.getElementById('btnImportar').innerText = "Importar a Firebase"; return; }
-                if(nuevos.length === 0) { alert("No hay clientes nuevos para importar."); document.getElementById('btnImportar').innerText = "Importar a Firebase"; return; }
+                if(duplicados > 0 && !confirm(`Se detectaron ${duplicados} clientes duplicados.\n\n¿Omitir duplicados e importar los ${nuevos.length} nuevos?`)) { document.getElementById('btnImportar').innerText = "Importar"; return; }
+                if(nuevos.length === 0) { alert("No hay clientes nuevos para importar."); document.getElementById('btnImportar').innerText = "Importar"; return; }
                 document.getElementById('btnImportar').innerText = "Guardando...";
                 for (const n of nuevos) await addDoc(collection(db, "clientes"), n);
                 alert(`Se cargaron ${nuevos.length} clientes nuevos.`);
-                document.getElementById('btnImportar').innerText = "Importar a Firebase"; document.getElementById('csvFile').value = '';
+                document.getElementById('btnImportar').innerText = "Importar"; document.getElementById('csvFile').value = '';
             };
             reader.readAsText(file);
         }
 
         window.saveClient = async function() {
-            const name = document.getElementById('clientName').value; const cuit = document.getElementById('clientCuit').value;
+            const name = document.getElementById('clientName').value; 
+            const cuit = document.getElementById('clientCuit').value;
             const emailPortal = document.getElementById('clientEmailLogin').value.trim().toLowerCase();
             
             if(!name || !cuit) return alert("Completa nombre y CUIT");
@@ -1069,7 +1275,8 @@
 
             const data = { 
                 nombre: name, 
-                cuit: cuit, 
+                cuit: cuit,
+                telefono: document.getElementById('clientTel').value,
                 emailPortal: emailPortal,
                 condIva: document.getElementById('clientCondIva').value,
                 condGanancias: document.getElementById('clientCondGanancias').value,
@@ -1090,6 +1297,7 @@
             editingClientId = id;
             document.getElementById('clientName').value = c.nombre||''; 
             document.getElementById('clientCuit').value = c.cuit||''; 
+            document.getElementById('clientTel').value = c.telefono||''; 
             document.getElementById('clientEmailLogin').value = c.emailPortal||''; 
             document.getElementById('clientCondIva').value = c.condIva||''; 
             document.getElementById('clientCondGanancias').value = c.condGanancias||''; 
@@ -1099,7 +1307,7 @@
             document.getElementById('clientObs').value = c.observaciones||'';
             
             document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = c.obligaciones && c.obligaciones.includes(cb.value));
-            document.getElementById('btnSaveClient').innerText = "Actualizar"; document.getElementById('btnCancelEdit').style.display = "inline-block";
+            document.getElementById('btnSaveClient').innerText = "Actualizar Ficha"; document.getElementById('btnCancelEdit').style.display = "inline-block";
             document.getElementById('form-cliente-container').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -1107,6 +1315,7 @@
             editingClientId = null; 
             document.getElementById('clientName').value = ''; 
             document.getElementById('clientCuit').value = ''; 
+            document.getElementById('clientTel').value = ''; 
             document.getElementById('clientEmailLogin').value = ''; 
             document.getElementById('clientCondIva').value = ''; 
             document.getElementById('clientCondGanancias').value = ''; 
@@ -1120,7 +1329,7 @@
             document.getElementById('btnCancelEdit').style.display = "none";
         }
 
-        window.toggleStatus = async function(id, st) { if(confirm(`¿Deseas ${!st ? "activar" : "desactivar"} este cliente?`)) await updateDoc(doc(db, "clientes", id), { activo: !st }); }
+        window.toggleStatus = async function(id, st) { if(confirm(`¿Deseas ${!st ? "dar de ALTA" : "dar de BAJA"} este cliente?`)) await updateDoc(doc(db, "clientes", id), { activo: !st }); }
         
         window.autoCompletarFechas = function() {
             const ob = document.getElementById('masivoObligacion').value;
@@ -1134,12 +1343,45 @@
             }
         }
 
+        // LÓGICA INTELIGENTE DE PERÍODOS MASIVOS
         window.generarMasivas = async function() {
             const obSelect = document.getElementById('masivoObligacion');
             const ob = obSelect.value; 
-            if(!ob) return alert("Selecciona obligación.");
+            if(!ob) return alert("Selecciona la obligación fiscal a generar.");
             
-            const mesSeleccionado = document.getElementById('masivoMes').options[document.getElementById('masivoMes').selectedIndex].text;
+            const tipoOb = document.getElementById('masivoTipoOb').value;
+            
+            const mesValue = document.getElementById('masivoMes').value; 
+            const [mesStr, anioStr] = mesValue.split('-');
+            let mesNum = parseInt(mesStr, 10);
+            let anioNum = parseInt(anioStr, 10);
+            
+            const impuestosMesActual = ['monotributo', 'recat_monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
+            const impuestosAnuales = ['dj_ganancias_pf', 'dj_ganancias_soc', 'dj_bienes_pf', 'dj_bienes_soc'];
+            
+            let periodoTexto = "";
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+            if (impuestosAnuales.includes(ob)) {
+                // Impuestos anuales siempre son del año anterior al seleccionado
+                periodoTexto = `Período ${anioNum - 1}`;
+            } else if (impuestosMesActual.includes(ob)) {
+                // Impuestos del mes actual (Anticipos, Monotributo)
+                periodoTexto = `${monthNames[mesNum - 1]} ${anioNum}`;
+            } else {
+                // Impuestos a mes vencido (IVA, 931, IIBB, DJ SICORE)
+                let mesVencido = mesNum - 2; // JS usa meses del 0 al 11. Para "11-2026" (Nov), mesNum es 11. Restamos 2 para llegar a índice 9 (Octubre).
+                let anioVencido = anioNum;
+                
+                if (mesVencido < 0) {
+                    mesVencido = 11; // Si estabas en Enero, pasa a Diciembre
+                    anioVencido--;
+                }
+                periodoTexto = `${monthNames[mesVencido]} ${anioVencido}`;
+            }
+            
+            const nombreImpuesto = obSelect.options[obSelect.selectedIndex].text;
+            const tituloGrupo = `${nombreImpuesto} (${periodoTexto})`;
             
             const f = { 
                 '0': document.getElementById('fecha_0').value, 
@@ -1160,8 +1402,11 @@
                     const fv = f[c.cuit.slice(-1)]; 
                     if (fv) { 
                         await addDoc(collection(db, "tareas"), { 
-                            titulo: `${obSelect.options[obSelect.selectedIndex].text} (${mesSeleccionado}) - ${c.nombre}`, 
-                            tipo: 'vencimiento', 
+                            titulo: `${tituloGrupo} - ${c.nombre}`, 
+                            tipo: 'vencimiento',
+                            tipoObligacion: tipoOb,
+                            monto: "",
+                            posicion: "",
                             responsable: "Un Paso Mas", 
                             estado: "pendientes", 
                             vencimiento: fv, 
@@ -1171,8 +1416,8 @@
                     } 
                 }
             }
-            if(gen > 0) alert(`¡Se generaron ${gen} vencimientos en el calendario!`); 
-            else alert("Revisa las fechas. Asegúrate de completarlas para las terminaciones correspondientes.");
+            if(gen > 0) alert(`¡Éxito! Se generaron ${gen} vencimientos en el calendario correspondientes a: ${tituloGrupo}.`); 
+            else alert("Revisa las fechas. Asegúrate de completarlas para las terminaciones correspondientes a tus clientes activos.");
         }
     </script>
 </body>
