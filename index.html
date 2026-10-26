@@ -713,18 +713,46 @@
             }
         }
 
-        // GENERADOR DE LINK WHATSAPP
-        function generarLinkWpp(telefono, titulo, monto, fecha) {
+        // GENERADOR DE LINK WHATSAPP MEJORADO (CON EXTRACCIÓN INTELIGENTE DEL TÍTULO)
+        function generarLinkWpp(telefono, tituloCompleto, monto, fecha) {
             if(!telefono) return '';
             const telLimpio = telefono.replace(/\D/g,'');
             
-            let mensaje = `Hola! Te escribimos del Estudio Un Paso Mas para avisarte de tu próximo vencimiento: *${titulo}*.`;
-            if (monto) mensaje += ` El monto a pagar es de *$${monto}*.`;
+            let nombreCliente = "Cliente";
+            let obligacion = tituloCompleto;
+            let periodo = "";
+
+            // Desarmar el título (ej: "IVA DJ (Septiembre 2026) - JAVIER MARTIN")
+            const splitIndex = tituloCompleto.indexOf(' - ');
+            if (splitIndex !== -1) {
+                obligacion = tituloCompleto.substring(0, splitIndex); // "IVA DJ (Septiembre 2026)"
+                nombreCliente = tituloCompleto.substring(splitIndex + 3); // "JAVIER MARTIN"
+            }
+
+            // Extraer el período de los paréntesis
+            const match = obligacion.match(/(.*)\s\((.*)\)/);
+            if (match) {
+                obligacion = match[1].trim();
+                periodo = match[2].trim();
+            }
+
+            // Formatear la fecha
+            let fechaStr = fecha || 'próximamente';
             if (fecha) {
                 const partes = fecha.split('-');
-                if(partes.length === 3) mensaje += ` Vence el día ${partes[2]}/${partes[1]}/${partes[0]}.`;
+                if(partes.length === 3) fechaStr = `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
-            mensaje += ` Cualquier duda consultanos. Saludos!`;
+
+            // Armar el mensaje con la plantilla solicitada
+            let mensaje = `${nombreCliente}
+Te recordamos que el día *${fechaStr}* vence el pago de *${obligacion}*`;
+            if (periodo) mensaje += ` correspondiente al período *${periodo}*`;
+            if (monto) mensaje += ` por un monto de *$${monto}*`;
+            mensaje += `.
+
+Te recomendamos abonarlo en tiempo y forma. Cualquier consulta estamos a disposición.
+
+Saludos, el equipo de Un Paso Mas`;
             
             const url = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
             return `<a href="${url}" target="_blank" class="btn-wpp" title="Enviar aviso por WhatsApp">💬 Avisar</a>`;
@@ -811,7 +839,7 @@
                 alert("Hubo un error al actualizar los vencimientos.");
             }
             
-            btn.innerText = "✅ Marcar Todas Finalizadas";
+            btn.innerText = "✅ Marcar Todos como Finalizados";
             btn.disabled = false;
         }
 
@@ -1100,6 +1128,7 @@
             let htmlProceso = '';
             let htmlListas = '';
 
+            // Solo muestra tareas internas en el tablero
             const filtradas = tareasActuales.filter(t => {
                 return t.titulo.toLowerCase().includes(term) && 
                        (resp === "" || t.responsable === resp) &&
@@ -1109,13 +1138,7 @@
             filtradas.forEach(t => {
                 let badgeTipo = '';
                 if(t.tipoObligacion === 'pago') badgeTipo = '<span class="task-badge badge-pago">💰 Pago</span>';
-                else badgeTipo = '<span class="task-badge badge-pres">📁 Presentación</span>';
-
-                let montoHtml = '';
-                if(t.monto) montoHtml = `<p style="font-size:16px; font-weight:bold; color:#27ae60; margin:5px 0;">$ ${t.monto}</p>`;
-
-                let posHtml = '';
-                if(t.posicion) posHtml = `<p style="font-size:11px; color:#7f8c8d; margin:0 0 5px 0;"><i>${t.posicion}</i></p>`;
+                else badgeTipo = '<span class="task-badge badge-pres">📁 Tarea Interna</span>';
 
                 const descPreview = t.descripcion ? (t.descripcion.length > 40 ? t.descripcion.substring(0, 40) + '...' : t.descripcion) : '';
                 const descHtml = descPreview ? `<div style="font-size:12px; color:#7f8c8d; margin-bottom:5px; padding-left:5px; border-left: 2px solid #bdc3c7;"><i>${descPreview}</i></div>` : '';
@@ -1127,8 +1150,6 @@
                         <span style="font-size:10px; color:#7f8c8d; font-weight:bold;">${t.responsable}</span>
                     </div>
                     <strong style="cursor:pointer; color:#2c3e50; font-size:14px; margin-bottom:0;" onclick="openTaskModal('${t.id}')">${t.titulo}</strong>
-                    ${montoHtml}
-                    ${posHtml}
                     ${descHtml}
                     ${t.vencimiento ? `<div style="font-size:12px; font-weight:bold; color:#c0392b; margin-bottom:5px;">📅 Vence: ${t.vencimiento}</div>` : ''}
                     ${fileHtml}
@@ -1357,7 +1378,6 @@
             const ob = obSelect.value; 
             if(!ob) return alert("Selecciona la obligación fiscal a generar.");
             
-            // Auto clasificar como PAGO o PRESENTACIÓN según la obligación
             const soloPagos = ['iva_diferido', 'monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
             const tipoOb = soloPagos.includes(ob) ? 'pago' : 'presentacion';
             
@@ -1378,12 +1398,10 @@
             } else if (impuestosMesActual.includes(ob)) {
                 periodoTexto = `${monthNames[mesNum - 1]} ${anioNum}`;
             } else if (impuestosIvaDiferido.includes(ob)) {
-                // Cálculo preciso restando 3 meses
                 let d = new Date(anioNum, mesNum - 1, 1);
                 d.setMonth(d.getMonth() - 3);
                 periodoTexto = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
             } else {
-                // Mes vencido: restando 1 mes
                 let d = new Date(anioNum, mesNum - 1, 1);
                 d.setMonth(d.getMonth() - 1);
                 periodoTexto = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
