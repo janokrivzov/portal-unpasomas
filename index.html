@@ -23,7 +23,6 @@
         .sidebar.collapsed .menu-btn { text-align: center; padding: 15px 0; justify-content: center;}
         
         #sidebarHeader { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #34495e; padding-bottom: 15px; margin-bottom: 15px; }
-        
         .menu-btn { background: none; border: none; color: #ecf0f1; padding: 15px 10px; text-align: left; font-size: 16px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
         .menu-btn:hover, .menu-btn.active { background: #34495e; }
         .logout-btn { margin-top: auto; background: #c0392b; justify-content: center; }
@@ -97,17 +96,13 @@
             overflow: hidden; 
         }
         .calendar-cell.empty { background: transparent; border: none; box-shadow: none; }
-        
         .calendar-date-number { font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-align: right; font-size: 14px; flex-shrink: 0;}
-        
         .calendar-cell-content { flex: 1; overflow-y: auto; padding-right: 4px; }
         .calendar-cell-content::-webkit-scrollbar { width: 4px; }
         .calendar-cell-content::-webkit-scrollbar-thumb { background-color: #bdc3c7; border-radius: 4px; }
-
         .cal-group-title { font-size: 11px; font-weight: bold; color: #2c3e50; margin: 8px 0 4px 0; border-bottom: 1px solid #bdc3c7; padding-bottom: 2px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;}
         .cal-group-title:first-child { margin-top: 0; }
         .cal-group-title:hover { color: #2980b9; background:#f4f7f6; border-radius:3px; padding-left:2px;}
-        
         .cal-task-pill { font-size: 10px; padding: 4px 6px; border-radius: 3px; color: white; margin-bottom: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
         .cal-task-pill:hover { opacity: 0.8; }
         .cal-pendientes { background: #3498db; }
@@ -128,18 +123,13 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDICIÓN GENÉRICO (TAREAS Y VENCIMIENTOS) -->
+    <!-- MODAL DE EDICIÓN GENÉRICO -->
     <div id="taskModal" class="modal-overlay">
         <div class="modal-content">
             <h3>Editar / Ver Detalles</h3>
-            
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                    <label style="font-size:12px; font-weight:bold;">Título</label>
-                    <input type="text" id="editTaskTitle" style="margin:0;">
-                </div>
-                <div>
-                    <label style="font-size:12px; font-weight:bold;">Tipo de Obligación</label>
+                <div><label style="font-size:12px; font-weight:bold;">Título</label><input type="text" id="editTaskTitle" style="margin:0;"></div>
+                <div><label style="font-size:12px; font-weight:bold;">Tipo de Obligación</label>
                     <select id="editTaskTipoOb" style="margin:0;">
                         <option value="presentacion">📁 Presentación / Mixto</option>
                         <option value="pago">💰 Solo Pago</option>
@@ -148,20 +138,15 @@
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                    <label style="font-size:12px; font-weight:bold;">Responsable</label>
+                <div><label style="font-size:12px; font-weight:bold;">Responsable</label>
                     <select id="editTaskResp" style="margin:0;">
                         <option value="Ivan Ritvo">Ivan Ritvo</option>
                         <option value="Jano Krivzov">Jano Krivzov</option>
                         <option value="Un Paso Mas">Un Paso Mas</option>
                     </select>
                 </div>
-                <div>
-                    <label style="font-size:12px; font-weight:bold;">Vencimiento</label>
-                    <input type="date" id="editTaskDate" style="margin:0;">
-                </div>
-                <div>
-                    <label style="font-size:12px; font-weight:bold;">Estado Actual</label>
+                <div><label style="font-size:12px; font-weight:bold;">Vencimiento</label><input type="date" id="editTaskDate" style="margin:0;"></div>
+                <div><label style="font-size:12px; font-weight:bold;">Estado Actual</label>
                     <select id="editTaskEstado" style="margin:0;">
                         <option value="pendientes">Pendiente</option>
                         <option value="proceso">En Proceso</option>
@@ -171,14 +156,8 @@
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                    <label style="font-size:12px; font-weight:bold;">Monto ($)</label>
-                    <input type="number" id="editTaskMonto" placeholder="Ej: 15000" style="margin:0;">
-                </div>
-                <div>
-                    <label style="font-size:12px; font-weight:bold;">Posición / Detalles extra</label>
-                    <input type="text" id="editTaskPosicion" placeholder="Ej: Saldo a favor $2000" style="margin:0;">
-                </div>
+                <div><label style="font-size:12px; font-weight:bold;">Monto ($)</label><input type="number" id="editTaskMonto" placeholder="Ej: 15000" style="margin:0;"></div>
+                <div><label style="font-size:12px; font-weight:bold;">Posición / Detalles extra</label><input type="text" id="editTaskPosicion" placeholder="Ej: Saldo a favor $2000" style="margin:0;"></div>
             </div>
             
             <label style="font-size:12px; font-weight:bold;">Descripción / Notas Internas</label>
@@ -205,9 +184,7 @@
             <h3 id="groupModalTitle" style="color:#2980b9;">Nombre del Grupo</h3>
             <p style="font-size:12px; color:#7f8c8d; margin-top:-5px; margin-bottom:15px;">Gestiona el estado de todos los clientes de este vencimiento y envía avisos.</p>
             
-            <div id="groupModalList" style="margin-bottom:15px; border:1px solid #ecf0f1; border-radius:4px; padding:10px; background:#f9f9f9;">
-                <!-- Aquí se inyecta la lista de clientes con sus botones WPP -->
-            </div>
+            <div id="groupModalList" style="margin-bottom:15px; border:1px solid #ecf0f1; border-radius:4px; padding:10px; background:#f9f9f9;"></div>
             
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button id="btnMarkAllFinished" onclick="markAllAsFinished()" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">✅ Marcar Todos como Finalizados</button>
@@ -216,19 +193,16 @@
         </div>
     </div>
 
-    <!-- MODAL PARA CREAR VENCIMIENTO MANUAL DESDE EL CALENDARIO -->
+    <!-- MODAL PARA CREAR VENCIMIENTO MANUAL -->
     <div id="createVencModal" class="modal-overlay">
         <div class="modal-content">
             <h3>Crear Vencimiento Manual</h3>
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div><label style="font-size:12px; font-weight:bold;">Título / Obligación</label><input type="text" id="vencTitle" placeholder="Ej: Plan de Pagos 08/25" style="margin:0;"></div>
                 <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="vencClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
             </div>
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                    <label style="font-size:12px; font-weight:bold;">Tipo</label>
+                <div><label style="font-size:12px; font-weight:bold;">Tipo</label>
                     <select id="vencTipoOb" style="margin:0;">
                         <option value="pago">💰 Solo Pago</option>
                         <option value="presentacion">📁 Presentación / Mixto</option>
@@ -237,10 +211,8 @@
                 <div><label style="font-size:12px; font-weight:bold;">Monto ($)</label><input type="number" id="vencMonto" placeholder="Opcional" style="margin:0;"></div>
                 <div><label style="font-size:12px; font-weight:bold;">Fecha Exacta</label><input type="date" id="vencDate" style="margin:0;"></div>
             </div>
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div>
-                    <label style="font-size:12px; font-weight:bold;">Responsable</label>
+                <div><label style="font-size:12px; font-weight:bold;">Responsable</label>
                     <select id="vencResp" style="margin:0;">
                         <option value="Ivan Ritvo">Ivan Ritvo</option>
                         <option value="Jano Krivzov">Jano Krivzov</option>
@@ -249,10 +221,8 @@
                 </div>
                 <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="vencFile" style="margin:0;"></div>
             </div>
-            
             <label style="font-size:12px; font-weight:bold;">Descripción / Notas</label>
             <textarea id="vencDesc" placeholder="Observaciones o detalles del vencimiento..." style="min-height: 70px; margin-bottom:0;"></textarea>
-            
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button id="btnCreateVenc" onclick="addVencimiento()" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar Vencimiento</button>
                 <button onclick="closeVencModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cancelar</button>
@@ -378,19 +348,15 @@
             <!-- SECCIÓN VENCIMIENTOS MASIVOS -->
             <div id="vencimientos" class="section">
                 <h2>Generador Masivo Inteligente</h2>
-                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">El sistema ajustará el período al mes vencido o actual según la lógica del impuesto elegido.</p>
+                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Selecciona el mes y la obligación. Las fechas se autocompletarán si corresponden a la base oficial (Nov/Dic 2026).</p>
                 
                 <div class="form-container">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
                         <div>
                             <label style="font-size:12px; font-weight:bold;">Mes Base de Generación</label>
-                            <select id="masivoMes" style="margin:0;">
-                                <option value="09-2026">Septiembre 2026</option>
-                                <option value="10-2026" selected>Octubre 2026</option>
-                                <option value="11-2026">Noviembre 2026</option>
+                            <select id="masivoMes" onchange="autoCompletarFechas()" style="margin:0;">
+                                <option value="11-2026" selected>Noviembre 2026</option>
                                 <option value="12-2026">Diciembre 2026</option>
-                                <option value="01-2027">Enero 2027</option>
-                                <option value="02-2027">Febrero 2027</option>
                             </select>
                         </div>
                         <div>
@@ -422,19 +388,15 @@
                         </div>
                     </div>
                     
-                    <label style="font-size:12px; font-weight:bold;">Fechas de Vencimiento según Terminación de CUIT</label>
-                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 5px;">
-                        <div><label style="font-size:11px;">Term. 0</label><input type="date" id="fecha_0" style="margin:0; font-size:12px;"></div>
-                        <div><label style="font-size:11px;">Term. 1</label><input type="date" id="fecha_1" style="margin:0; font-size:12px;"></div>
-                        <div><label style="font-size:11px;">Term. 2</label><input type="date" id="fecha_2" style="margin:0; font-size:12px;"></div>
-                        <div><label style="font-size:11px;">Term. 3</label><input type="date" id="fecha_3" style="margin:0; font-size:12px;"></div>
-                        <div><label style="font-size:11px;">Term. 4</label><input type="date" id="fecha_4" style="margin:0; font-size:12px;"></div>
-                        
-                        <div><label style="font-size:11px;">Term. 5</label><input type="date" id="fecha_5" style="margin:0; font-size:12px;"></div>
-                        <div><label style="font-size:11px;">Term. 6</label><input type="date" id="fecha_6" style="margin:0; font-size:12px;"></div>
-                        <div><label style="font-size:11px;">Term. 7</label><input type="date" id="fecha_7" style="margin:0; font-size:12px;"></div>
-                        <div><label style="font-size:11px;">Term. 8</label><input type="date" id="fecha_8" style="margin:0; font-size:12px;"></div>
-                        <div><label style="font-size:11px;">Term. 9</label><input type="date" id="fecha_9" style="margin:0; font-size:12px;"></div>
+                    <div id="cajaFechasTerminacion">
+                        <label style="font-size:12px; font-weight:bold;">Fechas de Vencimiento según Terminación de CUIT</label>
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 5px;">
+                            <div><label style="font-size:11px;">Term. 0-1</label><input type="date" id="fecha_01" style="margin:0; font-size:12px;"></div>
+                            <div><label style="font-size:11px;">Term. 2-3</label><input type="date" id="fecha_23" style="margin:0; font-size:12px;"></div>
+                            <div><label style="font-size:11px;">Term. 4-5</label><input type="date" id="fecha_45" style="margin:0; font-size:12px;"></div>
+                            <div><label style="font-size:11px;">Term. 6-7</label><input type="date" id="fecha_67" style="margin:0; font-size:12px;"></div>
+                            <div><label style="font-size:11px;">Term. 8-9</label><input type="date" id="fecha_89" style="margin:0; font-size:12px;"></div>
+                        </div>
                     </div>
                     
                     <button class="btn-green" onclick="generarMasivas()" style="margin-top: 20px;">🚀 Generar Vencimientos en el Calendario</button>
@@ -455,7 +417,6 @@
 
                 <div class="form-container" id="form-cliente-container">
                     <h3 id="formClientTitle" style="margin-top:0;">Ficha de Cliente</h3>
-                    
                     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
                         <div><label style="font-size:12px; font-weight:bold;">Razón Social / Nombre</label><input type="text" id="clientName" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">CUIT (Sin guiones)</label><input type="text" id="clientCuit" style="margin:0;"></div>
@@ -470,8 +431,7 @@
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                        <div>
-                            <label style="font-size:12px; font-weight:bold;">Condición frente al IVA</label>
+                        <div><label style="font-size:12px; font-weight:bold;">Condición frente al IVA</label>
                             <select id="clientCondIva" style="margin:0;">
                                 <option value="">-- Seleccionar --</option>
                                 <option value="Responsable Inscripto">Responsable Inscripto</option>
@@ -480,8 +440,7 @@
                                 <option value="No Inscripto">No Inscripto</option>
                             </select>
                         </div>
-                        <div>
-                            <label style="font-size:12px; font-weight:bold;">Condición en Ganancias</label>
+                        <div><label style="font-size:12px; font-weight:bold;">Condición en Ganancias</label>
                             <select id="clientCondGanancias" style="margin:0;">
                                 <option value="">-- Seleccionar --</option>
                                 <option value="Inscripto">Inscripto</option>
@@ -568,7 +527,6 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
         
-        // VARIABLES GLOBALES
         let clientesActivos = [];
         let tareasActuales = []; 
         let editingClientId = null;
@@ -576,7 +534,6 @@
         let listeners = [];
         let isUserAdmin = false;
         let currentUserEmail = "";
-
         let currentCalDate = new Date(); 
         window.currentGroupTasks = []; 
 
@@ -592,7 +549,6 @@
                 currentUserEmail = user.email;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
-                
                 isUserAdmin = ADMIN_EMAILS.includes(user.email);
 
                 if(isUserAdmin) {
@@ -614,17 +570,9 @@
             }
         });
 
-        window.login = function() {
-            signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value).catch(() => {
-                document.getElementById('loginError').style.display = 'block';
-            });
-        }
-        
+        window.login = function() { signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value).catch(() => { document.getElementById('loginError').style.display = 'block'; }); }
         window.logout = function() { signOut(auth); }
-
-        window.toggleSidebar = function() {
-            document.getElementById('adminSidebar').classList.toggle('collapsed');
-        }
+        window.toggleSidebar = function() { document.getElementById('adminSidebar').classList.toggle('collapsed'); }
 
         window.showSection = function(sectionId, btnElement) {
             if(!isUserAdmin) return;
@@ -632,10 +580,7 @@
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
             if(btnElement) btnElement.classList.add('active');
-            
-            if(sectionId === 'calendario') {
-                renderCalendar();
-            }
+            if(sectionId === 'calendario') renderCalendar();
         }
 
         // CALENDARIO LÓGICA
@@ -647,7 +592,6 @@
         window.renderCalendar = function() {
             const year = currentCalDate.getFullYear();
             const month = currentCalDate.getMonth();
-            
             const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             document.getElementById('calendarMonthYear').innerText = `${monthNames[month]} ${year}`;
 
@@ -656,12 +600,9 @@
 
             let firstDay = new Date(year, month, 1).getDay();
             let emptyDays = firstDay === 0 ? 0 : firstDay - 1; 
-            
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            for(let i = 0; i < emptyDays; i++) {
-                grid.innerHTML += `<div class="calendar-cell empty"></div>`;
-            }
+            for(let i = 0; i < emptyDays; i++) grid.innerHTML += `<div class="calendar-cell empty"></div>`;
 
             for(let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(year, month, day);
@@ -672,12 +613,11 @@
                 const dateString = `${year}-${strMonth}-${strDay}`;
 
                 const tasksForDay = tareasActuales.filter(t => t.vencimiento === dateString && t.tipo === 'vencimiento');
-                
                 const groupedTasks = {};
+                
                 tasksForDay.forEach(t => {
                     let groupName = t.titulo;
                     let clientName = t.titulo;
-                    
                     const splitIndex = t.titulo.indexOf(' - ');
                     if(splitIndex !== -1) {
                         groupName = t.titulo.substring(0, splitIndex);
@@ -685,35 +625,24 @@
                     } else {
                         groupName = "Otros Vencimientos";
                     }
-
-                    if(!groupedTasks[groupName]) {
-                        groupedTasks[groupName] = [];
-                    }
+                    if(!groupedTasks[groupName]) groupedTasks[groupName] = [];
                     groupedTasks[groupName].push({ ...t, shortName: clientName });
                 });
 
                 let tasksHtml = '';
                 for (const group in groupedTasks) {
                     tasksHtml += `<div class="cal-group-title" onclick="openGroupModal('${group}', '${dateString}')" title="Ver clientes y opciones"><span>${group}</span> <span>⚙️</span></div>`;
-                    
                     groupedTasks[group].forEach(t => {
                         let pillClass = t.estado === 'listas' ? 'cal-listas' : (t.estado === 'proceso' ? 'cal-proceso' : 'cal-pendientes');
                         let badgePago = t.tipoObligacion === 'pago' ? '💰 ' : '📁 ';
-
                         tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${t.shortName}">${badgePago}${t.shortName}</div>`;
                     });
                 }
-
-                grid.innerHTML += `
-                    <div class="calendar-cell">
-                        <div class="calendar-date-number">${day}</div>
-                        <div class="calendar-cell-content">${tasksHtml}</div>
-                    </div>
-                `;
+                grid.innerHTML += `<div class="calendar-cell"><div class="calendar-date-number">${day}</div><div class="calendar-cell-content">${tasksHtml}</div></div>`;
             }
         }
 
-        // GENERADOR DE LINK WHATSAPP MEJORADO (CON EXTRACCIÓN INTELIGENTE DEL TÍTULO)
+        // GENERADOR DE LINK WHATSAPP
         function generarLinkWpp(telefono, tituloCompleto, monto, fecha) {
             if(!telefono) return '';
             const telLimpio = telefono.replace(/\D/g,'');
@@ -722,49 +651,36 @@
             let obligacion = tituloCompleto;
             let periodo = "";
 
-            // Desarmar el título (ej: "IVA DJ (Septiembre 2026) - JAVIER MARTIN")
             const splitIndex = tituloCompleto.indexOf(' - ');
             if (splitIndex !== -1) {
-                obligacion = tituloCompleto.substring(0, splitIndex); // "IVA DJ (Septiembre 2026)"
-                nombreCliente = tituloCompleto.substring(splitIndex + 3); // "JAVIER MARTIN"
+                obligacion = tituloCompleto.substring(0, splitIndex);
+                nombreCliente = tituloCompleto.substring(splitIndex + 3);
             }
 
-            // Extraer el período de los paréntesis
             const match = obligacion.match(/(.*)\s\((.*)\)/);
             if (match) {
                 obligacion = match[1].trim();
                 periodo = match[2].trim();
             }
 
-            // Formatear la fecha
             let fechaStr = fecha || 'próximamente';
             if (fecha) {
                 const partes = fecha.split('-');
                 if(partes.length === 3) fechaStr = `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
 
-            // Armar el mensaje con la plantilla solicitada
-            let mensaje = `${nombreCliente}
-Te recordamos que el día *${fechaStr}* vence el pago de *${obligacion}*`;
+            let mensaje = `${nombreCliente}\nTe recordamos que el día *${fechaStr}* vence el pago de *${obligacion}*`;
             if (periodo) mensaje += ` correspondiente al período *${periodo}*`;
             if (monto) mensaje += ` por un monto de *$${monto}*`;
-            mensaje += `.
-
-Te recomendamos abonarlo en tiempo y forma. Cualquier consulta estamos a disposición.
-
-Saludos, el equipo de Un Paso Mas`;
+            mensaje += `.\n\nTe recomendamos abonarlo en tiempo y forma. Cualquier consulta estamos a disposición.\n\nSaludos, el equipo de Un Paso Mas`;
             
             const url = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
-            return `<a href="${url}" target="_blank" class="btn-wpp" title="Enviar aviso por WhatsApp">💬 Avisar</a>`;
+            return `<a href="${url}" target="_blank" class="btn-wpp" title="Enviar aviso">💬 Avisar</a>`;
         }
 
         // MODALES
-        window.openVencModal = function() {
-            document.getElementById('createVencModal').style.display = 'flex';
-        }
-        window.closeVencModal = function() {
-            document.getElementById('createVencModal').style.display = 'none';
-        }
+        window.openVencModal = function() { document.getElementById('createVencModal').style.display = 'flex'; }
+        window.closeVencModal = function() { document.getElementById('createVencModal').style.display = 'none'; }
 
         window.openGroupModal = function(groupName, dateString) {
             window.currentGroupTasks = tareasActuales.filter(t => 
@@ -800,9 +716,8 @@ Saludos, el equipo de Un Paso Mas`;
                     </div>
                 </li>`;
             });
-            html += '</ul>';
             
-            document.getElementById('groupModalList').innerHTML = html;
+            document.getElementById('groupModalList').innerHTML = html + '</ul>';
             document.getElementById('groupModal').style.display = 'flex';
         }
 
@@ -813,57 +728,35 @@ Saludos, el equipo de Un Paso Mas`;
 
         window.markAllAsFinished = async function() {
             if(!confirm("¿Estás seguro de marcar TODOS estos vencimientos como FINALIZADOS?")) return;
-            
             const btn = document.getElementById('btnMarkAllFinished');
-            btn.innerText = "Actualizando Base de Datos...";
-            btn.disabled = true;
-            
+            btn.innerText = "Actualizando Base de Datos..."; btn.disabled = true;
             try {
-                const batch = writeBatch(db);
-                let updates = 0;
-                
+                const batch = writeBatch(db); let updates = 0;
                 window.currentGroupTasks.forEach(t => {
                     if(t.estado !== 'listas') {
-                        const refDoc = doc(db, "tareas", t.id);
-                        batch.update(refDoc, { estado: 'listas' });
+                        batch.update(doc(db, "tareas", t.id), { estado: 'listas' });
                         updates++;
                     }
                 });
-                
-                if (updates > 0) {
-                    await batch.commit();
-                }
+                if (updates > 0) await batch.commit();
                 closeGroupModal();
-            } catch (e) {
-                console.error(e);
-                alert("Hubo un error al actualizar los vencimientos.");
-            }
-            
-            btn.innerText = "✅ Marcar Todos como Finalizados";
-            btn.disabled = false;
+            } catch (e) { alert("Hubo un error al actualizar los vencimientos."); }
+            btn.innerText = "✅ Marcar Todos como Finalizados"; btn.disabled = false;
         }
 
         // PORTAL CLIENTE LÓGICA
         function iniciarCargaDatosCliente(email) {
             const unsubCliente = onSnapshot(query(collection(db, "clientes"), where("emailPortal", "==", email)), (snapCliente) => {
                 if(snapCliente.empty) {
-                    document.getElementById('clientDashboardGrid').innerHTML = '<p>No se encontró una ficha de cliente asociada a este correo electrónico. Comunícate con el Estudio.</p>';
-                    return;
+                    document.getElementById('clientDashboardGrid').innerHTML = '<p>No se encontró una ficha de cliente asociada a este correo electrónico.</p>'; return;
                 }
-                
                 const clienteId = snapCliente.docs[0].id;
-                
                 const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", clienteId)), (snapTareas) => {
-                    const grid = document.getElementById('clientDashboardGrid');
-                    grid.innerHTML = '';
-                    
+                    const grid = document.getElementById('clientDashboardGrid'); grid.innerHTML = '';
                     const tareasDelCliente = [];
                     snapTareas.forEach(docu => {
                         const t = docu.data();
-                        if(t.tipo === 'vencimiento') {
-                            t.id = docu.id;
-                            tareasDelCliente.push(t);
-                        }
+                        if(t.tipo === 'vencimiento') { t.id = docu.id; tareasDelCliente.push(t); }
                     });
                     
                     tareasDelCliente.forEach(t => {
@@ -871,50 +764,27 @@ Saludos, el equipo de Un Paso Mas`;
                         const badgeColor = isFinalizada ? '#27ae60' : '#e67e22';
                         const estadoText = isFinalizada ? '✅ Completado / Finalizado' : '⏳ Pendiente de Gestión';
                         
-                        let fileBtn = '';
-                        if(t.archivoUrl) {
-                            fileBtn = `<a href="${t.archivoUrl}" target="_blank" style="display:block; margin-top:10px; padding:10px; background:#3498db; color:white; text-decoration:none; border-radius:4px; font-weight:bold; text-align:center; transition:0.3s;">📥 Descargar Comprobante</a>`;
-                        }
-                        
-                        let payBtn = '';
-                        if(t.tipoObligacion === 'pago' && !isFinalizada) {
-                            payBtn = `<button onclick="marcarPagadoCliente('${t.id}')" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; margin-top:10px; width:100%; transition:0.3s;">💳 Marcar como Pagado</button>`;
-                        }
-
-                        let montoHtml = '';
-                        if(t.monto) {
-                            montoHtml = `<p style="font-size:22px; font-weight:bold; color:#2c3e50; margin:10px 0 5px 0;">$ ${t.monto}</p>`;
-                        }
-                        
-                        let posHtml = '';
-                        if(t.posicion) {
-                            posHtml = `<p style="font-size:13px; color:#7f8c8d; margin:0 0 10px 0; padding:5px; background:#ecf0f1; border-radius:4px;"><i>${t.posicion}</i></p>`;
-                        }
+                        let fileBtn = t.archivoUrl ? `<a href="${t.archivoUrl}" target="_blank" style="display:block; margin-top:10px; padding:10px; background:#3498db; color:white; text-decoration:none; border-radius:4px; font-weight:bold; text-align:center;">📥 Descargar Comprobante</a>` : '';
+                        let payBtn = (t.tipoObligacion === 'pago' && !isFinalizada) ? `<button onclick="marcarPagadoCliente('${t.id}')" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; margin-top:10px; width:100%;">💳 Marcar como Pagado</button>` : '';
+                        let montoHtml = t.monto ? `<p style="font-size:22px; font-weight:bold; color:#2c3e50; margin:10px 0 5px 0;">$ ${t.monto}</p>` : '';
+                        let posHtml = t.posicion ? `<p style="font-size:13px; color:#7f8c8d; margin:0 0 10px 0; padding:5px; background:#ecf0f1; border-radius:4px;"><i>${t.posicion}</i></p>` : '';
 
                         grid.innerHTML += `
                             <div class="client-task-card ${isFinalizada ? 'finalizada' : ''}">
                                 <div>
-                                    <div style="display:inline-block; padding:4px 10px; background:${badgeColor}; color:white; font-size:11px; border-radius:12px; margin-bottom:10px; font-weight:bold; letter-spacing:0.5px;">
-                                        ${estadoText}
-                                    </div>
-                                    <h3 style="margin:0 0 5px 0; font-size:18px; color:#2c3e50; line-height:1.2;">${t.titulo}</h3>
-                                    ${montoHtml}
-                                    ${posHtml}
+                                    <div style="display:inline-block; padding:4px 10px; background:${badgeColor}; color:white; font-size:11px; border-radius:12px; margin-bottom:10px; font-weight:bold;">${estadoText}</div>
+                                    <h3 style="margin:0 0 5px 0; font-size:18px; color:#2c3e50;">${t.titulo}</h3>
+                                    ${montoHtml}${posHtml}
                                     ${t.vencimiento ? `<p style="margin:10px 0 0 0; font-size:13px; color:#c0392b; font-weight:bold;">📅 Vencimiento: ${t.vencimiento}</p>` : ''}
                                 </div>
                                 <div style="display:flex; flex-direction:column; margin-top:15px; border-top:1px solid #ecf0f1; padding-top:10px;">
-                                    ${fileBtn}
-                                    ${payBtn}
+                                    ${fileBtn}${payBtn}
                                     ${(!fileBtn && !payBtn && !isFinalizada) ? '<p style="font-size:12px; color:#95a5a6; text-align:center; margin:10px 0 0 0;">A la espera del estudio.</p>' : ''}
                                     ${(isFinalizada && !fileBtn) ? '<p style="font-size:12px; color:#95a5a6; text-align:center; margin:10px 0 0 0;">Finalizado sin adjuntos.</p>' : ''}
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                     });
-                    
-                    if(tareasDelCliente.length === 0) {
-                        grid.innerHTML = '<div style="background:white; padding:30px; border-radius:8px; text-align:center; grid-column: 1 / -1;"><h3 style="color:#7f8c8d; margin:0;">No tienes tareas o presentaciones pendientes.</h3></div>';
-                    }
+                    if(tareasDelCliente.length === 0) grid.innerHTML = '<div style="grid-column:1/-1; text-align:center;"><h3>No tienes presentaciones pendientes.</h3></div>';
                 });
                 listeners.push(unsubTareas);
             });
@@ -924,16 +794,10 @@ Saludos, el equipo de Un Paso Mas`;
         window.marcarPagadoCliente = async function(id) {
             if(confirm("¿Confirmas que ya realizaste el pago de esta obligación? Se notificará al estudio.")) {
                 const auditText = `Marcado como pagado por el cliente (${currentUserEmail}) el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}`;
-                
                 try {
-                    await updateDoc(doc(db, "tareas", id), { 
-                        estado: 'listas',
-                        auditoriaPago: auditText
-                    });
+                    await updateDoc(doc(db, "tareas", id), { estado: 'listas', auditoriaPago: auditText });
                     alert("¡Gracias! El pago fue registrado con éxito.");
-                } catch(e) {
-                    alert("Hubo un error al registrar el pago.");
-                }
+                } catch(e) { alert("Hubo un error al registrar el pago."); }
             }
         }
 
@@ -941,20 +805,14 @@ Saludos, el equipo de Un Paso Mas`;
         window.allowDrop = function(ev) { ev.preventDefault(); }
         window.drag = function(ev, id) { ev.dataTransfer.setData("text", id); }
         window.drop = async function(ev, estadoDestino) {
-            ev.preventDefault();
-            const id = ev.dataTransfer.getData("text");
-            if(id) {
-                await updateDoc(doc(db, "tareas", id), { estado: estadoDestino });
-                if(document.getElementById('calendario').classList.contains('active')) renderCalendar();
-            }
+            ev.preventDefault(); const id = ev.dataTransfer.getData("text");
+            if(id) { await updateDoc(doc(db, "tareas", id), { estado: estadoDestino }); if(document.getElementById('calendario').classList.contains('active')) renderCalendar(); }
         }
 
-        // TAREAS GLOBALES (MANUALES Y VENCIMIENTOS) LÓGICA DE EDICIÓN
+        // TAREAS GLOBALES DE EDICIÓN
         window.openTaskModal = function(id) {
-            const t = tareasActuales.find(x => x.id === id);
-            if(!t) return;
+            const t = tareasActuales.find(x => x.id === id); if(!t) return;
             editingTaskId = id;
-            
             document.getElementById('editTaskTitle').value = t.titulo || '';
             document.getElementById('editTaskTipoOb').value = t.tipoObligacion || 'presentacion';
             document.getElementById('editTaskResp').value = t.responsable || 'Un Paso Mas';
@@ -965,96 +823,60 @@ Saludos, el equipo de Un Paso Mas`;
             document.getElementById('editTaskDesc').value = t.descripcion || '';
             
             const auditLog = document.getElementById('editAuditLog');
-            if(t.auditoriaPago) {
-                auditLog.innerText = `🔍 Auditoría: ${t.auditoriaPago}`;
-                auditLog.style.display = 'block';
-            } else {
-                auditLog.style.display = 'none';
-            }
+            if(t.auditoriaPago) { auditLog.innerText = `🔍 Auditoría: ${t.auditoriaPago}`; auditLog.style.display = 'block'; } else { auditLog.style.display = 'none'; }
             
             const linkBox = document.getElementById('editTaskFileLink');
-            if(t.archivoUrl) {
-                linkBox.innerHTML = `<a href="${t.archivoUrl}" target="_blank" style="display:inline-block; padding:5px 10px; background:#ecf0f1; border-radius:4px; text-decoration:none; font-weight:bold; color:#2c3e50;">📎 Ver Archivo Actual</a> (Sube uno nuevo para reemplazar)`;
-            } else {
-                linkBox.innerHTML = 'Sin archivo adjunto.';
-            }
+            if(t.archivoUrl) linkBox.innerHTML = `<a href="${t.archivoUrl}" target="_blank">📎 Ver Archivo Actual</a> (Sube uno nuevo para reemplazar)`;
+            else linkBox.innerHTML = 'Sin archivo adjunto.';
             document.getElementById('editTaskFile').value = '';
             
-            // Botón WPP Dinámico en el modal (Solo para Vencimientos)
             const wppContainer = document.getElementById('editWppContainer');
             if(t.tipo === 'vencimiento' && t.clienteId) {
                 const cli = clientesActivos.find(c => c.id === t.clienteId);
                 if(cli) wppContainer.innerHTML = generarLinkWpp(cli.telefono, t.titulo, t.monto, t.vencimiento);
                 else wppContainer.innerHTML = '';
-            } else {
-                wppContainer.innerHTML = '';
-            }
+            } else { wppContainer.innerHTML = ''; }
             
             document.getElementById('taskModal').style.display = 'flex';
         }
 
-        window.closeTaskModal = function() {
-            editingTaskId = null;
-            document.getElementById('taskModal').style.display = 'none';
-        }
+        window.closeTaskModal = function() { editingTaskId = null; document.getElementById('taskModal').style.display = 'none'; }
 
         window.updateTaskDetails = async function() {
             if(!editingTaskId) return;
-            const titulo = document.getElementById('editTaskTitle').value;
-            if(!titulo) return alert("El título no puede estar vacío");
-            
-            const btn = document.getElementById('btnUpdateTask');
-            btn.innerText = "Guardando...";
+            const titulo = document.getElementById('editTaskTitle').value; if(!titulo) return alert("El título no puede estar vacío");
+            const btn = document.getElementById('btnUpdateTask'); btn.innerText = "Guardando...";
             
             let updateData = {
-                titulo: titulo,
-                tipoObligacion: document.getElementById('editTaskTipoOb').value,
-                responsable: document.getElementById('editTaskResp').value,
-                vencimiento: document.getElementById('editTaskDate').value,
-                estado: document.getElementById('editTaskEstado').value,
-                monto: document.getElementById('editTaskMonto').value,
-                posicion: document.getElementById('editTaskPosicion').value,
-                descripcion: document.getElementById('editTaskDesc').value
+                titulo: titulo, tipoObligacion: document.getElementById('editTaskTipoOb').value, responsable: document.getElementById('editTaskResp').value,
+                vencimiento: document.getElementById('editTaskDate').value, estado: document.getElementById('editTaskEstado').value,
+                monto: document.getElementById('editTaskMonto').value, posicion: document.getElementById('editTaskPosicion').value, descripcion: document.getElementById('editTaskDesc').value
             };
 
             const fileInput = document.getElementById('editTaskFile');
             if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const storageRef = ref(storage, `tareas/${Date.now()}_${file.name}`);
-                await uploadBytes(storageRef, file);
-                updateData.archivoUrl = await getDownloadURL(storageRef);
+                const file = fileInput.files[0]; const storageRef = ref(storage, `tareas/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file); updateData.archivoUrl = await getDownloadURL(storageRef);
             }
-            
             await updateDoc(doc(db, "tareas", editingTaskId), updateData);
-            btn.innerText = "Guardar";
-            closeTaskModal();
+            btn.innerText = "Guardar"; closeTaskModal();
         }
 
         window.deleteTask = async function() {
             if(!editingTaskId) return;
-            if(confirm("¿Estás seguro de que deseas ELIMINAR esta tarea permanentemente? (No se puede deshacer)")) {
-                await deleteDoc(doc(db, "tareas", editingTaskId));
-                closeTaskModal();
-            }
+            if(confirm("¿Estás seguro de que deseas ELIMINAR esta tarea permanentemente? (No se puede deshacer)")) { await deleteDoc(doc(db, "tareas", editingTaskId)); closeTaskModal(); }
         }
 
         // CARGA PRINCIPAL ADMIN
         function iniciarCargaDatosAdmin() {
             const unsubClientes = onSnapshot(query(collection(db, "clientes")), (snapshot) => {
-                clientesActivos = [];
-                snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesActivos.push(c); });
-                clientesActivos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-                renderClientes();
+                clientesActivos = []; snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesActivos.push(c); });
+                clientesActivos.sort((a, b) => a.nombre.localeCompare(b.nombre)); renderClientes();
             });
 
             const unsubTareas = onSnapshot(query(collection(db, "tareas")), (snapshot) => {
-                tareasActuales = [];
-                snapshot.forEach((documento) => {
-                    const t = documento.data(); t.id = documento.id;
-                    tareasActuales.push(t);
-                });
-                renderTareas();
-                if(document.getElementById('calendario').classList.contains('active')) renderCalendar();
+                tareasActuales = []; snapshot.forEach((documento) => { const t = documento.data(); t.id = documento.id; tareasActuales.push(t); });
+                renderTareas(); if(document.getElementById('calendario').classList.contains('active')) renderCalendar();
             });
             listeners.push(unsubClientes, unsubTareas);
         }
@@ -1062,40 +884,20 @@ Saludos, el equipo de Un Paso Mas`;
         window.renderClientes = function() {
             const term = document.getElementById('searchClient').value.toLowerCase();
             const statusFilter = document.getElementById('filterClientStatus').value;
-            
-            let tbodyHtml = '';
-            let selectHtml = '<option value="">-- Interna / Sin Cliente --</option>';
-            let countAct = 0;
-            let countInact = 0;
+            let tbodyHtml = ''; let selectHtml = '<option value="">-- Interna / Sin Cliente --</option>';
+            let countAct = 0; let countInact = 0;
 
-            clientesActivos.forEach(c => {
-                if (c.activo) selectHtml += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`;
-            });
-
-            const filtradosText = clientesActivos.filter(c => {
-                return c.nombre.toLowerCase().includes(term) || c.cuit.includes(term);
-            });
-
-            filtradosText.forEach(c => {
-                if (c.activo) countAct++; else countInact++;
-            });
-
-            const filtradosFinal = filtradosText.filter(c => {
-                if (statusFilter === 'activos' && !c.activo) return false;
-                if (statusFilter === 'inactivos' && c.activo) return false;
-                return true;
-            });
-
-            filtradosFinal.forEach(c => {
+            clientesActivos.forEach(c => { if (c.activo) selectHtml += `<option value="${c.id}">${c.nombre} (${c.cuit})</option>`; });
+            const filtrados = clientesActivos.filter(c => c.nombre.toLowerCase().includes(term) || c.cuit.includes(term));
+            filtrados.forEach(c => c.activo ? countAct++ : countInact++);
+            filtrados.filter(c => statusFilter === 'todos' ? true : (statusFilter === 'activos' ? c.activo : !c.activo)).forEach(c => {
                 let clavesHtml = '';
                 if(c.clave_arca) clavesHtml += `<span class="clave-tag"><strong>ARCA:</strong> ${c.clave_arca}</span><br>`;
                 if(c.clave_agip) clavesHtml += `<span class="clave-tag"><strong>AGIP:</strong> ${c.clave_agip}</span><br>`;
                 if(c.clave_arba) clavesHtml += `<span class="clave-tag"><strong>ARBA:</strong> ${c.clave_arba}</span>`;
-                
                 let condTags = '';
                 if(c.condIva) condTags += `<span style="font-size:10px; background:#f39c12; color:white; padding:2px 5px; border-radius:3px; margin-right:3px; font-weight:bold;">${c.condIva}</span>`;
                 if(c.condGanancias) condTags += `<span style="font-size:10px; background:#8e44ad; color:white; padding:2px 5px; border-radius:3px; font-weight:bold;">Gcias: ${c.condGanancias}</span>`;
-                
                 const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${c.emailPortal}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso Portal</span>';
                 const telTag = c.telefono ? `<span style="font-size:11px; color:#27ae60; font-weight:bold; display:block; margin-top:3px;">📱 ${c.telefono}</span>` : '';
 
@@ -1123,31 +925,17 @@ Saludos, el equipo de Un Paso Mas`;
         window.renderTareas = function() {
             const term = document.getElementById('searchTask').value.toLowerCase();
             const resp = document.getElementById('filterResponsible').value;
-            
-            let htmlPendientes = '';
-            let htmlProceso = '';
-            let htmlListas = '';
+            let htmlP = ''; let htmlPr = ''; let htmlL = '';
 
-            // Solo muestra tareas internas en el tablero
-            const filtradas = tareasActuales.filter(t => {
-                return t.titulo.toLowerCase().includes(term) && 
-                       (resp === "" || t.responsable === resp) &&
-                       t.tipo !== 'vencimiento'; 
-            });
-
-            filtradas.forEach(t => {
-                let badgeTipo = '';
-                if(t.tipoObligacion === 'pago') badgeTipo = '<span class="task-badge badge-pago">💰 Pago</span>';
-                else badgeTipo = '<span class="task-badge badge-pres">📁 Tarea Interna</span>';
-
+            tareasActuales.filter(t => t.titulo.toLowerCase().includes(term) && (resp === "" || t.responsable === resp) && t.tipo !== 'vencimiento').forEach(t => {
+                let badgeTipo = t.tipoObligacion === 'pago' ? '<span class="task-badge badge-pago">💰 Pago</span>' : '<span class="task-badge badge-pres">📁 Tarea Interna</span>';
                 const descPreview = t.descripcion ? (t.descripcion.length > 40 ? t.descripcion.substring(0, 40) + '...' : t.descripcion) : '';
                 const descHtml = descPreview ? `<div style="font-size:12px; color:#7f8c8d; margin-bottom:5px; padding-left:5px; border-left: 2px solid #bdc3c7;"><i>${descPreview}</i></div>` : '';
                 const fileHtml = t.archivoUrl ? `<a href="${t.archivoUrl}" target="_blank" style="font-size:12px; color:#2980b9; text-decoration:none; display:block; margin-bottom:10px;">📎 Archivo adjunto</a>` : '<div style="margin-bottom:10px;"></div>';
                 
                 const card = `<div class="task-card" draggable="true" ondragstart="drag(event, '${t.id}')">
                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        ${badgeTipo}
-                        <span style="font-size:10px; color:#7f8c8d; font-weight:bold;">${t.responsable}</span>
+                        ${badgeTipo} <span style="font-size:10px; color:#7f8c8d; font-weight:bold;">${t.responsable}</span>
                     </div>
                     <strong style="cursor:pointer; color:#2c3e50; font-size:14px; margin-bottom:0;" onclick="openTaskModal('${t.id}')">${t.titulo}</strong>
                     ${descHtml}
@@ -1158,113 +946,48 @@ Saludos, el equipo de Un Paso Mas`;
                     </div>
                 </div>`;
                 
-                if (t.estado === 'pendientes') htmlPendientes += card;
-                else if (t.estado === 'proceso') htmlProceso += card;
-                else if (t.estado === 'listas') htmlListas += card;
+                if (t.estado === 'pendientes') htmlP += card; else if (t.estado === 'proceso') htmlPr += card; else htmlL += card;
             });
             
-            document.getElementById('list-pendientes').innerHTML = htmlPendientes;
-            document.getElementById('list-proceso').innerHTML = htmlProceso;
-            document.getElementById('list-listas').innerHTML = htmlListas;
+            document.getElementById('list-pendientes').innerHTML = htmlP; document.getElementById('list-proceso').innerHTML = htmlPr; document.getElementById('list-listas').innerHTML = htmlL;
         }
 
         window.addTask = async function() {
-            const t = document.getElementById('taskTitle').value;
-            const clientId = document.getElementById('taskClient').value;
-            
+            const t = document.getElementById('taskTitle').value; const clientId = document.getElementById('taskClient').value;
             if(!t) return alert("El título es obligatorio.");
-            
-            const btn = document.getElementById('btnCreateTask');
-            btn.innerText = "Subiendo...";
-            
-            const fileInput = document.getElementById('taskFile');
-            let archivoUrl = "";
-            
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const storageRef = ref(storage, `tareas/${Date.now()}_${file.name}`);
-                await uploadBytes(storageRef, file);
-                archivoUrl = await getDownloadURL(storageRef);
-            }
-
-            let nombreParaTitulo = "";
-            if(clientId) {
-                const clienteData = clientesActivos.find(x => x.id === clientId);
-                nombreParaTitulo = clienteData ? ` - ${clienteData.nombre}` : "";
-            }
+            const btn = document.getElementById('btnCreateTask'); btn.innerText = "Subiendo...";
+            const fileInput = document.getElementById('taskFile'); let archivoUrl = "";
+            if (fileInput.files.length > 0) { const file = fileInput.files[0]; const storageRef = ref(storage, `tareas/${Date.now()}_${file.name}`); await uploadBytes(storageRef, file); archivoUrl = await getDownloadURL(storageRef); }
+            let nombreParaTitulo = ""; if(clientId) { const clienteData = clientesActivos.find(x => x.id === clientId); nombreParaTitulo = clienteData ? ` - ${clienteData.nombre}` : ""; }
 
             await addDoc(collection(db, "tareas"), { 
-                titulo: t + nombreParaTitulo, 
-                tipo: 'tarea',
-                tipoObligacion: document.getElementById('taskTipoOb').value,
-                responsable: document.getElementById('taskResponsible').value, 
-                vencimiento: document.getElementById('taskDueDate').value,
-                descripcion: document.getElementById('taskDesc').value,
-                monto: "",
-                posicion: "",
-                archivoUrl: archivoUrl,
-                clienteId: clientId, 
-                estado: "pendientes", 
-                fechaCreacion: new Date().toISOString() 
+                titulo: t + nombreParaTitulo, tipo: 'tarea', tipoObligacion: document.getElementById('taskTipoOb').value, responsable: document.getElementById('taskResponsible').value, vencimiento: document.getElementById('taskDueDate').value, descripcion: document.getElementById('taskDesc').value, monto: "", posicion: "", archivoUrl: archivoUrl, clienteId: clientId, estado: "pendientes", fechaCreacion: new Date().toISOString() 
             }); 
             
-            document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = ''; document.getElementById('taskFile').value = '';
-            btn.innerText = "+ Agregar Tarea al Tablero";
+            document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = ''; document.getElementById('taskFile').value = ''; btn.innerText = "+ Agregar Tarea al Tablero";
         }
 
         window.addVencimiento = async function() {
-            const t = document.getElementById('vencTitle').value;
-            const clientId = document.getElementById('vencClient').value;
-            
+            const t = document.getElementById('vencTitle').value; const clientId = document.getElementById('vencClient').value;
             if(!t) return alert("La obligación es obligatoria.");
-            
-            const btn = document.getElementById('btnCreateVenc');
-            btn.innerText = "Subiendo...";
-            
-            const fileInput = document.getElementById('vencFile');
-            let archivoUrl = "";
-            
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const storageRef = ref(storage, `tareas/${Date.now()}_${file.name}`);
-                await uploadBytes(storageRef, file);
-                archivoUrl = await getDownloadURL(storageRef);
-            }
-
-            let nombreParaTitulo = "";
-            if(clientId) {
-                const clienteData = clientesActivos.find(x => x.id === clientId);
-                nombreParaTitulo = clienteData ? ` - ${clienteData.nombre}` : "";
-            }
+            const btn = document.getElementById('btnCreateVenc'); btn.innerText = "Subiendo...";
+            const fileInput = document.getElementById('vencFile'); let archivoUrl = "";
+            if (fileInput.files.length > 0) { const file = fileInput.files[0]; const storageRef = ref(storage, `tareas/${Date.now()}_${file.name}`); await uploadBytes(storageRef, file); archivoUrl = await getDownloadURL(storageRef); }
+            let nombreParaTitulo = ""; if(clientId) { const clienteData = clientesActivos.find(x => x.id === clientId); nombreParaTitulo = clienteData ? ` - ${clienteData.nombre}` : ""; }
 
             await addDoc(collection(db, "tareas"), { 
-                titulo: t + nombreParaTitulo, 
-                tipo: 'vencimiento',
-                tipoObligacion: document.getElementById('vencTipoOb').value,
-                monto: document.getElementById('vencMonto').value,
-                responsable: document.getElementById('vencResp').value, 
-                vencimiento: document.getElementById('vencDate').value,
-                descripcion: document.getElementById('vencDesc').value,
-                posicion: "",
-                archivoUrl: archivoUrl,
-                clienteId: clientId, 
-                estado: "pendientes", 
-                fechaCreacion: new Date().toISOString() 
+                titulo: t + nombreParaTitulo, tipo: 'vencimiento', tipoObligacion: document.getElementById('vencTipoOb').value, monto: document.getElementById('vencMonto').value, responsable: document.getElementById('vencResp').value, vencimiento: document.getElementById('vencDate').value, descripcion: document.getElementById('vencDesc').value, posicion: "", archivoUrl: archivoUrl, clienteId: clientId, estado: "pendientes", fechaCreacion: new Date().toISOString() 
             }); 
             
-            document.getElementById('vencTitle').value = ''; document.getElementById('vencDate').value = ''; document.getElementById('vencDesc').value = ''; document.getElementById('vencFile').value = ''; document.getElementById('vencMonto').value = '';
-            btn.innerText = "Guardar Vencimiento";
-            closeVencModal();
+            document.getElementById('vencTitle').value=''; document.getElementById('vencDate').value=''; document.getElementById('vencDesc').value=''; document.getElementById('vencFile').value=''; document.getElementById('vencMonto').value='';
+            btn.innerText = "Guardar Vencimiento"; closeVencModal();
         }
 
         window.importarCSV = async function() {
-            const file = document.getElementById('csvFile').files[0];
-            if(!file) return alert("Selecciona un archivo .csv");
+            const file = document.getElementById('csvFile').files[0]; if(!file) return alert("Selecciona un archivo .csv");
             const reader = new FileReader();
             reader.onload = async function(e) {
-                const rows = e.target.result.split('\n');
-                let nuevos = []; let duplicados = 0;
-                const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+                const rows = e.target.result.split('\n'); let nuevos = []; let duplicados = 0; const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
                 document.getElementById('btnImportar').innerText = "Analizando...";
                 for(let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(regex);
@@ -1280,95 +1003,102 @@ Saludos, el equipo de Un Paso Mas`;
                 if(nuevos.length === 0) { alert("No hay clientes nuevos para importar."); document.getElementById('btnImportar').innerText = "Importar"; return; }
                 document.getElementById('btnImportar').innerText = "Guardando...";
                 for (const n of nuevos) await addDoc(collection(db, "clientes"), n);
-                alert(`Se cargaron ${nuevos.length} clientes nuevos.`);
-                document.getElementById('btnImportar').innerText = "Importar"; document.getElementById('csvFile').value = '';
+                alert(`Se cargaron ${nuevos.length} clientes nuevos.`); document.getElementById('btnImportar').innerText = "Importar"; document.getElementById('csvFile').value = '';
             };
             reader.readAsText(file);
         }
 
         window.saveClient = async function() {
-            const name = document.getElementById('clientName').value; 
-            const cuit = document.getElementById('clientCuit').value;
-            const emailPortal = document.getElementById('clientEmailLogin').value.trim().toLowerCase();
-            
+            const name = document.getElementById('clientName').value; const cuit = document.getElementById('clientCuit').value; const emailPortal = document.getElementById('clientEmailLogin').value.trim().toLowerCase();
             if(!name || !cuit) return alert("Completa nombre y CUIT");
             if(clientesActivos.find(c => c.cuit === cuit && c.id !== editingClientId)) return alert("CUIT ya registrado.");
-            
-            if (emailPortal) {
-                try {
-                    await createUserWithEmailAndPassword(auth, emailPortal, cuit);
-                } catch(e) {
-                    console.log("El usuario ya existe en Auth o hubo un error al crearlo.", e);
-                }
-            }
+            if (emailPortal) { try { await createUserWithEmailAndPassword(auth, emailPortal, cuit); } catch(e) { console.log("Usuario existe en Auth.", e); } }
 
             const data = { 
-                nombre: name, 
-                cuit: cuit,
-                telefono: document.getElementById('clientTel').value,
-                emailPortal: emailPortal,
-                condIva: document.getElementById('clientCondIva').value,
-                condGanancias: document.getElementById('clientCondGanancias').value,
-                clave_arca: document.getElementById('clientARCA').value, 
-                clave_agip: document.getElementById('clientAGIP').value, 
-                clave_arba: document.getElementById('clientARBA').value, 
-                observaciones: document.getElementById('clientObs').value, 
+                nombre: name, cuit: cuit, telefono: document.getElementById('clientTel').value, emailPortal: emailPortal, condIva: document.getElementById('clientCondIva').value, condGanancias: document.getElementById('clientCondGanancias').value, clave_arca: document.getElementById('clientARCA').value, clave_agip: document.getElementById('clientAGIP').value, clave_arba: document.getElementById('clientARBA').value, observaciones: document.getElementById('clientObs').value, 
                 obligaciones: Array.from(document.querySelectorAll('.checkbox-grid input:checked')).map(cb => cb.value) 
             };
-            
-            if(editingClientId) await updateDoc(doc(db, "clientes", editingClientId), data);
-            else { data.activo = true; await addDoc(collection(db, "clientes"), data); }
+            if(editingClientId) await updateDoc(doc(db, "clientes", editingClientId), data); else { data.activo = true; await addDoc(collection(db, "clientes"), data); }
             cancelEdit();
         }
 
         window.loadEditClient = function(id) {
-            const c = clientesActivos.find(x => x.id === id); if(!c) return;
-            editingClientId = id;
-            document.getElementById('clientName').value = c.nombre||''; 
-            document.getElementById('clientCuit').value = c.cuit||''; 
-            document.getElementById('clientTel').value = c.telefono||''; 
-            document.getElementById('clientEmailLogin').value = c.emailPortal||''; 
-            document.getElementById('clientCondIva').value = c.condIva||''; 
-            document.getElementById('clientCondGanancias').value = c.condGanancias||''; 
-            document.getElementById('clientARCA').value = c.clave_arca||''; 
-            document.getElementById('clientAGIP').value = c.clave_agip||''; 
-            document.getElementById('clientARBA').value = c.clave_arba||''; 
-            document.getElementById('clientObs').value = c.observaciones||'';
-            
+            const c = clientesActivos.find(x => x.id === id); if(!c) return; editingClientId = id;
+            document.getElementById('clientName').value = c.nombre||''; document.getElementById('clientCuit').value = c.cuit||''; document.getElementById('clientTel').value = c.telefono||''; document.getElementById('clientEmailLogin').value = c.emailPortal||''; document.getElementById('clientCondIva').value = c.condIva||''; document.getElementById('clientCondGanancias').value = c.condGanancias||''; document.getElementById('clientARCA').value = c.clave_arca||''; document.getElementById('clientAGIP').value = c.clave_agip||''; document.getElementById('clientARBA').value = c.clave_arba||''; document.getElementById('clientObs').value = c.observaciones||'';
             document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = c.obligaciones && c.obligaciones.includes(cb.value));
-            document.getElementById('btnSaveClient').innerText = "Actualizar Ficha"; document.getElementById('btnCancelEdit').style.display = "inline-block";
-            document.getElementById('form-cliente-container').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('btnSaveClient').innerText = "Actualizar Ficha"; document.getElementById('btnCancelEdit').style.display = "inline-block"; document.getElementById('form-cliente-container').scrollIntoView({ behavior: 'smooth' });
         }
 
         window.cancelEdit = function() {
-            editingClientId = null; 
-            document.getElementById('clientName').value = ''; 
-            document.getElementById('clientCuit').value = ''; 
-            document.getElementById('clientTel').value = ''; 
-            document.getElementById('clientEmailLogin').value = ''; 
-            document.getElementById('clientCondIva').value = ''; 
-            document.getElementById('clientCondGanancias').value = ''; 
-            document.getElementById('clientARCA').value = ''; 
-            document.getElementById('clientAGIP').value = ''; 
-            document.getElementById('clientARBA').value = ''; 
-            document.getElementById('clientObs').value = '';
-            
-            document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = false); 
-            document.getElementById('btnSaveClient').innerText = "Guardar Cliente"; 
-            document.getElementById('btnCancelEdit').style.display = "none";
+            editingClientId = null; document.getElementById('clientName').value = ''; document.getElementById('clientCuit').value = ''; document.getElementById('clientTel').value = ''; document.getElementById('clientEmailLogin').value = ''; document.getElementById('clientCondIva').value = ''; document.getElementById('clientCondGanancias').value = ''; document.getElementById('clientARCA').value = ''; document.getElementById('clientAGIP').value = ''; document.getElementById('clientARBA').value = ''; document.getElementById('clientObs').value = '';
+            document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = false); document.getElementById('btnSaveClient').innerText = "Guardar Cliente"; document.getElementById('btnCancelEdit').style.display = "none";
         }
 
         window.toggleStatus = async function(id, st) { if(confirm(`¿Deseas ${!st ? "dar de ALTA" : "dar de BAJA"} este cliente?`)) await updateDoc(doc(db, "clientes", id), { activo: !st }); }
         
+        // BASE DE DATOS AUTOMÁTICA DE VENCIMIENTOS (EXTRACCION PDF OFICIAL)
         window.autoCompletarFechas = function() {
             const ob = document.getElementById('masivoObligacion').value;
-            if(ob === 'sueldos_emp' || ob === 'sueldos_casas') {
-                const mes = document.getElementById('masivoMes').value.split('-'); let ld = new Date(mes[1], mes[0], 0); 
-                if (ld.getDay() === 6) ld.setDate(ld.getDate() - 1); if (ld.getDay() === 0) ld.setDate(ld.getDate() - 2); 
+            const mes = document.getElementById('masivoMes').value;
+            const ids = ['fecha_01', 'fecha_23', 'fecha_45', 'fecha_67', 'fecha_89'];
+            
+            // Sueldos a fin de mes (Cálculo dinámico matemático)
+            if (ob === 'sueldos_emp' || ob === 'sueldos_casas') {
+                const [m, a] = mes.split('-'); 
+                let ld = new Date(a, m, 0); 
+                if (ld.getDay() === 6) ld.setDate(ld.getDate() - 1); 
+                if (ld.getDay() === 0) ld.setDate(ld.getDate() - 2); 
+                // Excepción Asueto Fin de Año
+                if (mes === '12-2026') ld = new Date(2026, 11, 30);
+                
                 const s = ld.toISOString().split('T')[0]; 
-                ['fecha_0', 'fecha_1', 'fecha_2', 'fecha_3', 'fecha_4', 'fecha_5', 'fecha_6', 'fecha_7', 'fecha_8', 'fecha_9'].forEach(id => document.getElementById(id).value = s);
-            } else { 
-                ['fecha_0', 'fecha_1', 'fecha_2', 'fecha_3', 'fecha_4', 'fecha_5', 'fecha_6', 'fecha_7', 'fecha_8', 'fecha_9'].forEach(id => document.getElementById(id).value = ''); 
+                ids.forEach(id => document.getElementById(id).value = s);
+                return;
+            }
+
+            // Repositorio Automático Extraído de Errepar
+            const bd = {
+                "11-2026": {
+                    "931": ["2026-11-12", "2026-11-13", "2026-11-16", "2026-11-17", "2026-11-18"],
+                    "iva": ["2026-11-18", "2026-11-19", "2026-11-20", "2026-11-23", "2026-11-24"],
+                    "iva_diferido": ["2026-11-18", "2026-11-19", "2026-11-20", "2026-11-23", "2026-11-24"],
+                    "monotributo": ["2026-11-20", "2026-11-20", "2026-11-20", "2026-11-20", "2026-11-20"],
+                    "iibb_agip": ["2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20"],
+                    "iibb_arba": ["2026-11-18", "2026-11-19", "2026-11-20", "2026-11-23", "2026-11-24"],
+                    "iibb_cm": ["2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20"],
+                    "autonomos": ["2026-11-04", "2026-11-05", "2026-11-06", "2026-11-12", "2026-11-13"],
+                    "dj_sicore": ["2026-11-12", "2026-11-13", "2026-11-16", "2026-11-17", "2026-11-18"],
+                    "pago_sicore": ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27"],
+                    "anticipo_ganancias_pf": ["2026-11-12", "2026-11-13", "2026-11-16", "2026-11-17", "2026-11-18"],
+                    "anticipo_ganancias_soc": ["2026-11-12", "2026-11-13", "2026-11-16", "2026-11-17", "2026-11-18"],
+                    "anticipo_bienes_pf": ["2026-11-12", "2026-11-13", "2026-11-16", "2026-11-17", "2026-11-18"],
+                    "anticipo_bienes_soc": ["2026-11-12", "2026-11-13", "2026-11-16", "2026-11-17", "2026-11-18"],
+                    "dj_ganancias_pf": [], "dj_ganancias_soc": [], "dj_bienes_pf": [], "dj_bienes_soc": [] 
+                },
+                "12-2026": {
+                    "931": ["2026-12-09", "2026-12-10", "2026-12-11", "2026-12-14", "2026-12-15"],
+                    "iva": ["2026-12-18", "2026-12-21", "2026-12-22", "2026-12-23", "2026-12-28"],
+                    "iva_diferido": ["2026-12-18", "2026-12-21", "2026-12-22", "2026-12-23", "2026-12-28"],
+                    "monotributo": ["2026-12-21", "2026-12-21", "2026-12-21", "2026-12-21", "2026-12-21"],
+                    "iibb_agip": ["2026-12-15", "2026-12-16", "2026-12-17", "2026-12-18", "2026-12-21"],
+                    "iibb_arba": ["2026-12-18", "2026-12-21", "2026-12-22", "2026-12-23", "2026-12-28"],
+                    "iibb_cm": ["2026-12-15", "2026-12-16", "2026-12-17", "2026-12-18", "2026-12-21"],
+                    "autonomos": ["2026-12-04", "2026-12-09", "2026-12-10", "2026-12-11", "2026-12-14"],
+                    "dj_sicore": ["2026-12-09", "2026-12-10", "2026-12-11", "2026-12-14", "2026-12-15"],
+                    "pago_sicore": ["2026-12-22", "2026-12-23", "2026-12-28", "2026-12-29", "2026-12-30"],
+                    "anticipo_ganancias_pf": ["2026-12-14", "2026-12-15", "2026-12-16", "2026-12-17", "2026-12-18"],
+                    "anticipo_ganancias_soc": ["2026-12-14", "2026-12-15", "2026-12-16", "2026-12-17", "2026-12-18"],
+                    "anticipo_bienes_pf": ["2026-12-14", "2026-12-15", "2026-12-16", "2026-12-17", "2026-12-18"],
+                    "anticipo_bienes_soc": ["2026-12-14", "2026-12-15", "2026-12-16", "2026-12-17", "2026-12-18"]
+                }
+            };
+
+            if (bd[mes] && bd[mes][ob] && bd[mes][ob].length === 5) {
+                const fechas = bd[mes][ob];
+                ids.forEach((id, index) => document.getElementById(id).value = fechas[index]);
+            } else {
+                // Si el mes o impuesto no está en la base, blanquea para carga manual
+                ids.forEach(id => document.getElementById(id).value = '');
             }
         }
 
@@ -1385,6 +1115,10 @@ Saludos, el equipo de Un Paso Mas`;
             const [mesStr, anioStr] = mesValue.split('-');
             let mesNum = parseInt(mesStr, 10);
             let anioNum = parseInt(anioStr, 10);
+            
+            if (ob === 'recat_monotributo' && mesNum !== 2 && mesNum !== 8) {
+                return alert("La recategorización de monotributo solo se genera en los meses de Febrero y Agosto.");
+            }
             
             const impuestosMesActual = ['monotributo', 'recat_monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
             const impuestosAnuales = ['dj_ganancias_pf', 'dj_ganancias_soc', 'dj_bienes_pf', 'dj_bienes_soc'];
@@ -1411,16 +1145,11 @@ Saludos, el equipo de Un Paso Mas`;
             const tituloGrupo = `${nombreImpuesto} (${periodoTexto})`;
             
             const f = { 
-                '0': document.getElementById('fecha_0').value, 
-                '1': document.getElementById('fecha_1').value, 
-                '2': document.getElementById('fecha_2').value, 
-                '3': document.getElementById('fecha_3').value, 
-                '4': document.getElementById('fecha_4').value, 
-                '5': document.getElementById('fecha_5').value, 
-                '6': document.getElementById('fecha_6').value, 
-                '7': document.getElementById('fecha_7').value, 
-                '8': document.getElementById('fecha_8').value, 
-                '9': document.getElementById('fecha_9').value 
+                '0': document.getElementById('fecha_01').value, '1': document.getElementById('fecha_01').value, 
+                '2': document.getElementById('fecha_23').value, '3': document.getElementById('fecha_23').value, 
+                '4': document.getElementById('fecha_45').value, '5': document.getElementById('fecha_45').value, 
+                '6': document.getElementById('fecha_67').value, '7': document.getElementById('fecha_67').value, 
+                '8': document.getElementById('fecha_89').value, '9': document.getElementById('fecha_89').value 
             };
             
             let gen = 0;
@@ -1430,21 +1159,15 @@ Saludos, el equipo de Un Paso Mas`;
                     if (fv) { 
                         await addDoc(collection(db, "tareas"), { 
                             titulo: `${tituloGrupo} - ${c.nombre}`, 
-                            tipo: 'vencimiento',
-                            tipoObligacion: tipoOb,
-                            monto: "",
-                            posicion: "",
-                            responsable: "Un Paso Mas", 
-                            estado: "pendientes", 
-                            vencimiento: fv, 
-                            clienteId: c.id 
+                            tipo: 'vencimiento', tipoObligacion: tipoOb, monto: "", posicion: "",
+                            responsable: "Un Paso Mas", estado: "pendientes", vencimiento: fv, clienteId: c.id 
                         }); 
                         gen++; 
                     } 
                 }
             }
             if(gen > 0) alert(`¡Éxito! Se generaron ${gen} vencimientos en el calendario correspondientes a: ${tituloGrupo}.`); 
-            else alert("Revisa las fechas. Asegúrate de completarlas para las terminaciones correspondientes a tus clientes activos.");
+            else alert("Faltan fechas o no tenés clientes activos con esta obligación.");
         }
     </script>
 </body>
