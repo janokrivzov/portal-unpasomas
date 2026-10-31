@@ -178,7 +178,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE GESTIÓN DE GRUPO (MASIVO EN EL CALENDARIO) -->
+    <!-- MODAL DE GESTIÓN DE GRUPO -->
     <div id="groupModal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="groupModalTitle" style="color:#2980b9;">Nombre del Grupo</h3>
@@ -606,7 +606,7 @@
 
             for(let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(year, month, day);
-                if(dateObj.getDay() === 0) continue; // Excluye domingos
+                if(dateObj.getDay() === 0) continue; 
 
                 const strMonth = (month + 1).toString().padStart(2, '0');
                 const strDay = day.toString().padStart(2, '0');
@@ -1066,7 +1066,7 @@
                     "iibb_agip": ["2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20"],
                     "iibb_arba": ["2026-11-18", "2026-11-19", "2026-11-20", "2026-11-23", "2026-11-24"],
                     "iibb_cm": ["2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20"],
-                    "autonomos": ["2026-11-04", "2026-11-05", "2026-11-06", "2026-11-12", "2026-11-13"],
+                    "autonomos": ["2026-11-05", "2026-11-06", "2026-11-12", "2026-11-13", "2026-11-16"], 
                     "dj_sicore": ["2026-11-12", "2026-11-13", "2026-11-16", "2026-11-17", "2026-11-18"],
                     "pago_sicore": ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27"],
                     "anticipo_ganancias_pf": ["2026-11-12", "2026-11-13", "2026-11-16", "2026-11-17", "2026-11-18"],
@@ -1083,7 +1083,7 @@
                     "iibb_agip": ["2026-12-15", "2026-12-16", "2026-12-17", "2026-12-18", "2026-12-21"],
                     "iibb_arba": ["2026-12-18", "2026-12-21", "2026-12-22", "2026-12-23", "2026-12-28"],
                     "iibb_cm": ["2026-12-15", "2026-12-16", "2026-12-17", "2026-12-18", "2026-12-21"],
-                    "autonomos": ["2026-12-04", "2026-12-09", "2026-12-10", "2026-12-11", "2026-12-14"],
+                    "autonomos": ["2026-12-09", "2026-12-10", "2026-12-11", "2026-12-14", "2026-12-15"],
                     "dj_sicore": ["2026-12-09", "2026-12-10", "2026-12-11", "2026-12-14", "2026-12-15"],
                     "pago_sicore": ["2026-12-22", "2026-12-23", "2026-12-28", "2026-12-29", "2026-12-30"],
                     "anticipo_ganancias_pf": ["2026-12-14", "2026-12-15", "2026-12-16", "2026-12-17", "2026-12-18"],
@@ -1097,7 +1097,6 @@
                 const fechas = bd[mes][ob];
                 ids.forEach((id, index) => document.getElementById(id).value = fechas[index]);
             } else {
-                // Si el mes o impuesto no está en la base, blanquea para carga manual
                 ids.forEach(id => document.getElementById(id).value = '');
             }
         }
