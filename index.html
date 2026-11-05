@@ -57,12 +57,71 @@
         
         .filter-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d4fc;}
         
-        /* Portal Cliente */
-        .client-portal-header { background: #34495e; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;}
-        .client-task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;}
-        .client-task-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-top: 5px solid #3498db; display:flex; flex-direction:column; justify-content:space-between;}
-        .client-task-card.finalizada { border-top-color: #27ae60; opacity: 0.8; }
-        
+        /* ===== Portal Cliente ===== */
+        #portalCliente { max-width: 1100px; margin: 0 auto; color: #2c3e50; }
+        .pc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; gap:10px; }
+        .pc-brand { font-weight:700; font-size:18px; color:#2c3e50; }
+        .pc-brand span { color:#27ae60; }
+        .pc-logout { width:auto; margin:0; padding:8px 16px; background:white; color:#c0392b; border:1px solid #e6b0aa; border-radius:20px; cursor:pointer; font-weight:600; }
+        .pc-logout:hover { background:#fdedec; }
+        .pc-hero { background: linear-gradient(135deg, #2c3e50 0%, #34607f 100%); color:white; padding:26px 28px; border-radius:14px; margin-bottom:20px; }
+        .pc-hero h2 { margin:0 0 6px 0; font-size:24px; font-weight:600; }
+        .pc-hero p { margin:0; opacity:0.85; font-size:14px; }
+        .pc-hero .pc-datos { margin-top:14px; display:flex; flex-wrap:wrap; gap:8px; }
+        .pc-chip { background: rgba(255,255,255,0.15); padding:5px 12px; border-radius:20px; font-size:12px; }
+        .pc-stats { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:14px; margin-bottom:22px; }
+        .pc-stat { background:white; border-radius:12px; padding:16px 18px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+        .pc-stat .lbl { font-size:12px; color:#7f8c8d; text-transform:uppercase; letter-spacing:0.5px; }
+        .pc-stat .val { font-size:26px; font-weight:700; margin-top:4px; }
+        .pc-stat .sub { font-size:12px; color:#7f8c8d; margin-top:2px; }
+        .pc-alerta { background:#fdedec; border:1px solid #f5b7b1; color:#922b21; padding:12px 16px; border-radius:10px; margin-bottom:18px; font-size:14px; }
+        .pc-tabs { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+        .pc-tab { width:auto; margin:0; padding:8px 16px; border-radius:20px; border:1px solid #d5dbdb; background:white; color:#2c3e50; cursor:pointer; font-weight:600; font-size:13px; }
+        .pc-tab.active { background:#2c3e50; color:white; border-color:#2c3e50; }
+        .pc-layout { display:grid; grid-template-columns: 1fr 300px; gap:20px; align-items:start; }
+        .pc-mes { font-size:13px; font-weight:700; color:#7f8c8d; text-transform:uppercase; letter-spacing:0.5px; margin:18px 0 8px 2px; }
+        .pc-mes:first-child { margin-top:0; }
+        .pc-item { background:white; border-radius:12px; padding:16px 18px; margin-bottom:10px; box-shadow:0 2px 8px rgba(0,0,0,0.05); display:flex; gap:16px; align-items:center; border-left:5px solid #3498db; }
+        .pc-item.urgente { border-left-color:#e67e22; }
+        .pc-item.vencido { border-left-color:#e74c3c; }
+        .pc-item.hecho { border-left-color:#27ae60; opacity:0.85; }
+        .pc-fecha { text-align:center; min-width:54px; }
+        .pc-fecha .d { font-size:24px; font-weight:700; line-height:1; }
+        .pc-fecha .m { font-size:11px; text-transform:uppercase; color:#7f8c8d; margin-top:3px; }
+        .pc-info { flex:1; min-width:0; }
+        .pc-info h4 { margin:0 0 4px 0; font-size:15px; }
+        .pc-info .det { font-size:12px; color:#7f8c8d; }
+        .pc-badge { display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:12px; margin-right:6px; }
+        .b-pago { background:#fdebd0; color:#a04000; }
+        .b-pres { background:#e8daef; color:#6c3483; }
+        .b-ok { background:#d5f5e3; color:#1e8449; }
+        .b-venc { background:#fadbd8; color:#922b21; }
+        .b-urg { background:#fdebd0; color:#a04000; }
+        .b-prox { background:#d6eaf8; color:#1f618d; }
+        .pc-monto { font-size:18px; font-weight:700; white-space:nowrap; }
+        .pc-acciones { display:flex; flex-direction:column; gap:6px; min-width:150px; }
+        .pc-btn { margin:0; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:600; font-size:13px; text-align:center; text-decoration:none; display:block; }
+        .pc-btn-azul { background:#3498db; color:white; }
+        .pc-btn-verde { background:#27ae60; color:white; }
+        .pc-btn:hover { opacity:0.9; }
+        .pc-nota { font-size:11px; color:#7f8c8d; text-align:center; }
+        .pc-side .pc-card { background:white; border-radius:12px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:16px; font-size:13px; }
+        .pc-side h4 { margin:0 0 10px 0; font-size:14px; }
+        .pc-side ul { margin:0; padding-left:18px; color:#555; }
+        .pc-side li { margin-bottom:4px; }
+        .pc-leyenda div { display:flex; align-items:center; gap:8px; margin-bottom:6px; color:#555; }
+        .pc-dot { width:10px; height:10px; border-radius:50%; display:inline-block; flex-shrink:0; }
+        .pc-vacio { background:white; border-radius:12px; padding:30px; text-align:center; color:#7f8c8d; }
+        @media (max-width: 800px) {
+            .main-content { padding: 14px; }
+            .pc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .pc-stat .val { font-size:22px; }
+            .pc-layout { grid-template-columns: 1fr; }
+            .pc-item { flex-wrap:wrap; }
+            .pc-acciones { width:100%; }
+            .pc-hero { padding:20px; }
+        }
+
         /* Modales */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 600px; max-width: 95%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;}
@@ -245,14 +304,42 @@
             
             <!-- PORTAL CLIENTE -->
             <div id="portalCliente" class="section">
-                <div class="client-portal-header">
-                    <h2>Portal de Servicios - Un Paso Más</h2>
-                    <p style="margin:0; font-size:14px; opacity:0.8;">Bienvenido. Aquí puedes descargar tus comprobantes y gestionar tus pagos.</p>
+                <div class="pc-top">
+                    <div class="pc-brand">Un Paso <span>Más</span> · Portal de Clientes</div>
+                    <button class="pc-logout" onclick="logout()">Cerrar sesión</button>
                 </div>
-                <div style="text-align: right; margin-bottom: 20px;">
-                    <button onclick="logout()" style="background: #e74c3c; width: auto; padding: 8px 15px;">Cerrar Sesión</button>
+                <div class="pc-hero">
+                    <h2 id="pcSaludo">¡Hola!</h2>
+                    <p>Acá podés ver tus vencimientos, descargar tus comprobantes y avisarnos cuando realizás un pago.</p>
+                    <div class="pc-datos" id="pcDatos"></div>
                 </div>
-                <div class="client-task-grid" id="clientDashboardGrid"></div>
+                <div id="pcAlerta"></div>
+                <div class="pc-stats" id="pcStats"></div>
+                <div class="pc-layout">
+                    <div>
+                        <div class="pc-tabs">
+                            <button class="pc-tab active" data-f="pendientes" onclick="pcFiltro('pendientes')">Pendientes</button>
+                            <button class="pc-tab" data-f="finalizados" onclick="pcFiltro('finalizados')">Finalizados</button>
+                            <button class="pc-tab" data-f="todos" onclick="pcFiltro('todos')">Todos</button>
+                        </div>
+                        <div id="clientDashboardGrid"></div>
+                    </div>
+                    <div class="pc-side">
+                        <div class="pc-card" id="pcContacto"></div>
+                        <div class="pc-card">
+                            <h4>Obligaciones que gestionamos</h4>
+                            <ul id="pcObligaciones"><li>—</li></ul>
+                        </div>
+                        <div class="pc-card pc-leyenda">
+                            <h4>¿Qué significa cada color?</h4>
+                            <div><span class="pc-dot" style="background:#e74c3c"></span> Vencido</div>
+                            <div><span class="pc-dot" style="background:#e67e22"></span> Vence en los próximos 3 días</div>
+                            <div><span class="pc-dot" style="background:#3498db"></span> Próximo vencimiento</div>
+                            <div><span class="pc-dot" style="background:#27ae60"></span> Finalizado</div>
+                            <p style="margin:10px 0 0 0; color:#7f8c8d; font-size:12px;"><b>Pago:</b> lo abonás vos; cuando lo hagas, tocá "Ya lo pagué".<br><b>Presentación:</b> la realiza el estudio; no tenés que hacer nada.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- SECCIÓN TABLERO -->
@@ -792,64 +879,162 @@
         }
 
         // PORTAL CLIENTE LÓGICA
+        // Datos de contacto que ve el cliente (completar el WhatsApp del estudio, solo números, ej: 5491112345678)
+        const ESTUDIO_WHATSAPP = "";
+        const ESTUDIO_EMAIL = "info@estudioritvo.com.ar";
+
+        const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+        let pcCliente = null; let pcTareas = []; let pcFiltroActual = 'pendientes';
+
+        function diasHasta(fecha) {
+            if (!fecha) return null;
+            const [a, m, d] = fecha.split('-').map(Number);
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            return Math.round((new Date(a, m - 1, d) - hoy) / 86400000);
+        }
+        function pesos(v) {
+            const n = parseFloat(String(v).replace(',', '.'));
+            return isNaN(n) ? esc(v) : '$ ' + n.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        }
+        // En el portal no hace falta repetir el nombre del cliente en cada título
+        function tituloCorto(t) { const i = (t || '').lastIndexOf(' - '); return i !== -1 ? t.substring(0, i) : (t || ''); }
+
         function iniciarCargaDatosCliente(email) {
             const unsubCliente = onSnapshot(query(collection(db, "clientes"), where("emailPortal", "==", email)), (snapCliente) => {
                 if(snapCliente.empty) {
-                    document.getElementById('clientDashboardGrid').innerHTML = '<p>No se encontró una ficha de cliente asociada a este correo electrónico.</p>'; return;
+                    document.getElementById('clientDashboardGrid').innerHTML = '<div class="pc-vacio">No encontramos una ficha de cliente asociada a este correo. Comunicate con el estudio.</div>'; return;
                 }
-                const clienteId = snapCliente.docs[0].id;
-                const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", clienteId), where("tipo", "==", "vencimiento")), (snapTareas) => {
-                    const grid = document.getElementById('clientDashboardGrid'); grid.innerHTML = '';
-                    const tareasDelCliente = [];
-                    snapTareas.forEach(docu => {
-                        const t = docu.data();
-                        if(t.tipo === 'vencimiento') { t.id = docu.id; tareasDelCliente.push(t); }
-                    });
-                    
-                    // Primero las pendientes, ordenadas por fecha de vencimiento
-                    tareasDelCliente.sort((a, b) => ((a.estado === 'listas') - (b.estado === 'listas')) || (a.vencimiento || '9999').localeCompare(b.vencimiento || '9999'));
-                    tareasDelCliente.forEach(t => {
-                        const isFinalizada = t.estado === 'listas';
-                        const badgeColor = isFinalizada ? '#27ae60' : '#e67e22';
-                        const estadoText = isFinalizada ? '✅ Completado / Finalizado' : '⏳ Pendiente de Gestión';
-                        
-                        let fileBtn = t.archivoUrl ? `<a href="${t.archivoUrl}" target="_blank" style="display:block; margin-top:10px; padding:10px; background:#3498db; color:white; text-decoration:none; border-radius:4px; font-weight:bold; text-align:center;">📥 Descargar Comprobante</a>` : '';
-                        let payBtn = (t.tipoObligacion === 'pago' && !isFinalizada) ? `<button onclick="marcarPagadoCliente('${t.id}')" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; margin-top:10px; width:100%;">💳 Marcar como Pagado</button>` : '';
-                        let montoHtml = t.monto ? `<p style="font-size:22px; font-weight:bold; color:#2c3e50; margin:10px 0 5px 0;">$ ${esc(t.monto)}</p>` : '';
-                        let posHtml = t.posicion ? `<p style="font-size:13px; color:#7f8c8d; margin:0 0 10px 0; padding:5px; background:#ecf0f1; border-radius:4px;"><i>${esc(t.posicion)}</i></p>` : '';
-
-                        grid.innerHTML += `
-                            <div class="client-task-card ${isFinalizada ? 'finalizada' : ''}">
-                                <div>
-                                    <div style="display:inline-block; padding:4px 10px; background:${badgeColor}; color:white; font-size:11px; border-radius:12px; margin-bottom:10px; font-weight:bold;">${estadoText}</div>
-                                    <h3 style="margin:0 0 5px 0; font-size:18px; color:#2c3e50;">${esc(t.titulo)}</h3>
-                                    ${montoHtml}${posHtml}
-                                    ${t.vencimiento ? `<p style="margin:10px 0 0 0; font-size:13px; color:#c0392b; font-weight:bold;">📅 Vencimiento: ${fmtFecha(t.vencimiento)}</p>` : ''}
-                                </div>
-                                <div style="display:flex; flex-direction:column; margin-top:15px; border-top:1px solid #ecf0f1; padding-top:10px;">
-                                    ${fileBtn}${payBtn}
-                                    ${(!fileBtn && !payBtn && !isFinalizada) ? '<p style="font-size:12px; color:#95a5a6; text-align:center; margin:10px 0 0 0;">A la espera del estudio.</p>' : ''}
-                                    ${(isFinalizada && !fileBtn) ? '<p style="font-size:12px; color:#95a5a6; text-align:center; margin:10px 0 0 0;">Finalizado sin adjuntos.</p>' : ''}
-                                </div>
-                            </div>`;
-                    });
-                    if(tareasDelCliente.length === 0) grid.innerHTML = '<div style="grid-column:1/-1; text-align:center;"><h3>No tenés vencimientos cargados por el momento.</h3></div>';
-                });
+                pcCliente = { id: snapCliente.docs[0].id, ...snapCliente.docs[0].data() };
+                renderEncabezadoCliente();
+                const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", pcCliente.id), where("tipo", "==", "vencimiento")), (snapTareas) => {
+                    pcTareas = [];
+                    snapTareas.forEach(docu => { const t = docu.data(); t.id = docu.id; pcTareas.push(t); });
+                    renderPortalCliente();
+                }, errorPortal);
                 listeners.push(unsubTareas);
-            }, (err) => {
-                console.error(err);
-                document.getElementById('clientDashboardGrid').innerHTML = '<p>No pudimos cargar tu información. Probá cerrar sesión y volver a ingresar, o comunicate con el estudio.</p>';
-            });
+            }, errorPortal);
             listeners.push(unsubCliente);
         }
 
+        function errorPortal(err) {
+            console.error(err);
+            document.getElementById('clientDashboardGrid').innerHTML = '<div class="pc-vacio">No pudimos cargar tu información. Probá cerrar sesión y volver a ingresar, o comunicate con el estudio.</div>';
+        }
+
+        function renderEncabezadoCliente() {
+            const c = pcCliente;
+            document.getElementById('pcSaludo').innerText = `¡Hola, ${c.nombre || ''}!`;
+            let datos = '';
+            if (c.cuit) datos += `<span class="pc-chip">CUIT ${esc(c.cuit)}</span>`;
+            if (c.condIva) datos += `<span class="pc-chip">IVA: ${esc(c.condIva)}</span>`;
+            if (c.condGanancias) datos += `<span class="pc-chip">Ganancias: ${esc(c.condGanancias)}</span>`;
+            document.getElementById('pcDatos').innerHTML = datos;
+
+            const sel = document.getElementById('masivoObligacion');
+            const nombres = (c.obligaciones || []).map(v => { const o = sel.querySelector(`option[value="${v}"]`); return o ? o.textContent : v; });
+            document.getElementById('pcObligaciones').innerHTML = nombres.length ? nombres.map(n => `<li>${esc(n)}</li>`).join('') : '<li>Todavía no hay obligaciones cargadas.</li>';
+
+            let contacto = '<h4>¿Tenés dudas?</h4><p style="margin:0 0 10px 0; color:#555;">Escribinos y te respondemos a la brevedad.</p>';
+            if (ESTUDIO_WHATSAPP) contacto += `<a class="pc-btn pc-btn-verde" style="margin-bottom:6px;" target="_blank" href="https://wa.me/${ESTUDIO_WHATSAPP}?text=${encodeURIComponent('Hola, soy ' + (c.nombre || '') + '. Tengo una consulta:')}">💬 Escribir por WhatsApp</a>`;
+            if (ESTUDIO_EMAIL) contacto += `<a class="pc-btn pc-btn-azul" href="mailto:${ESTUDIO_EMAIL}?subject=${encodeURIComponent('Consulta - ' + (c.nombre || ''))}">✉️ Enviar un email</a>`;
+            document.getElementById('pcContacto').innerHTML = contacto;
+        }
+
+        window.pcFiltro = function(f) {
+            pcFiltroActual = f;
+            document.querySelectorAll('.pc-tab').forEach(b => b.classList.toggle('active', b.dataset.f === f));
+            renderPortalCliente();
+        }
+
+        function renderPortalCliente() {
+            const pendientes = pcTareas.filter(t => t.estado !== 'listas');
+            const finalizados = pcTareas.filter(t => t.estado === 'listas');
+            const vencidos = pendientes.filter(t => { const d = diasHasta(t.vencimiento); return d !== null && d < 0; });
+            const pagosPend = pendientes.filter(t => t.tipoObligacion === 'pago');
+            const totalPagos = pagosPend.reduce((s, t) => s + (parseFloat(String(t.monto).replace(',', '.')) || 0), 0);
+            const proximo = pendientes.filter(t => t.vencimiento && diasHasta(t.vencimiento) >= 0).sort((a, b) => a.vencimiento.localeCompare(b.vencimiento))[0];
+
+            // Tarjetas de resumen
+            let proxTxt = '—', proxSub = 'Sin vencimientos próximos';
+            if (proximo) {
+                const d = diasHasta(proximo.vencimiento);
+                proxTxt = d === 0 ? 'Hoy' : (d === 1 ? 'Mañana' : `${d} días`);
+                proxSub = `${tituloCorto(proximo.titulo)} · ${fmtFecha(proximo.vencimiento)}`;
+            }
+            document.getElementById('pcStats').innerHTML = `
+                <div class="pc-stat"><div class="lbl">Pendientes</div><div class="val">${pendientes.length}</div><div class="sub">vencimientos a gestionar</div></div>
+                <div class="pc-stat"><div class="lbl">Próximo vencimiento</div><div class="val" style="color:#e67e22;">${proxTxt}</div><div class="sub" title="${esc(proxSub)}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(proxSub)}</div></div>
+                <div class="pc-stat"><div class="lbl">Pagos pendientes</div><div class="val">${pagosPend.length}</div><div class="sub">${totalPagos ? 'Total informado: ' + pesos(totalPagos) : 'a cargo tuyo'}</div></div>
+                <div class="pc-stat"><div class="lbl">Finalizados</div><div class="val" style="color:#27ae60;">${finalizados.length}</div><div class="sub">con comprobante disponible: ${finalizados.filter(t => t.archivoUrl).length}</div></div>`;
+
+            document.getElementById('pcAlerta').innerHTML = vencidos.length
+                ? `<div class="pc-alerta">⚠️ Tenés <b>${vencidos.length}</b> ${vencidos.length === 1 ? 'vencimiento vencido' : 'vencimientos vencidos'} sin finalizar. Si ya lo pagaste, avisanos con el botón "Ya lo pagué"; si no, comunicate con el estudio.</div>` : '';
+
+            // Lista
+            let lista = pcFiltroActual === 'pendientes' ? pendientes : (pcFiltroActual === 'finalizados' ? finalizados : pcTareas.slice());
+            const asc = pcFiltroActual === 'pendientes';
+            lista.sort((a, b) => { const x = a.vencimiento || '9999', y = b.vencimiento || '9999'; return asc ? x.localeCompare(y) : y.localeCompare(x); });
+
+            const grid = document.getElementById('clientDashboardGrid');
+            if (!lista.length) {
+                grid.innerHTML = `<div class="pc-vacio">${pcFiltroActual === 'pendientes' ? '🎉 ¡Estás al día! No tenés vencimientos pendientes.' : 'No hay vencimientos para mostrar.'}</div>`;
+                return;
+            }
+            let html = ''; let mesActual = '';
+            lista.forEach(t => {
+                if (t.vencimiento) {
+                    const [a, m] = t.vencimiento.split('-');
+                    const mes = `${MESES[parseInt(m, 10) - 1]} ${a}`;
+                    if (mes !== mesActual) { html += `<div class="pc-mes">${mes}</div>`; mesActual = mes; }
+                }
+                html += itemPortal(t);
+            });
+            grid.innerHTML = html;
+        }
+
+        function itemPortal(t) {
+            const hecho = t.estado === 'listas';
+            const d = diasHasta(t.vencimiento);
+            const esPago = t.tipoObligacion === 'pago';
+            let clase = '', estado = '';
+            if (hecho) { clase = 'hecho'; estado = `<span class="pc-badge b-ok">✓ ${esPago ? 'Pagado' : 'Presentado'}</span>`; }
+            else if (d !== null && d < 0) { clase = 'vencido'; estado = `<span class="pc-badge b-venc">Venció hace ${-d} ${-d === 1 ? 'día' : 'días'}</span>`; }
+            else if (d !== null && d <= 3) { clase = 'urgente'; estado = `<span class="pc-badge b-urg">${d === 0 ? 'Vence hoy' : (d === 1 ? 'Vence mañana' : `Vence en ${d} días`)}</span>`; }
+            else if (d !== null) { estado = `<span class="pc-badge b-prox">Faltan ${d} días</span>`; }
+
+            const tipo = esPago ? '<span class="pc-badge b-pago">💰 Pago</span>' : '<span class="pc-badge b-pres">📁 Presentación</span>';
+            let detalle = '';
+            if (!hecho) detalle = esPago ? 'Lo abonás vos. Cuando lo pagues, avisanos.' : (t.monto ? 'La presenta el estudio. Te avisaremos cómo abonar el saldo.' : 'La realiza el estudio. No tenés que hacer nada.');
+            else if (t.auditoriaPago) detalle = 'Informaste el pago desde el portal.';
+            if (t.posicion) detalle += `${detalle ? '<br>' : ''}<i>${esc(t.posicion)}</i>`;
+
+            let fecha = '<div class="pc-fecha"><div class="d">—</div></div>';
+            if (t.vencimiento) { const [a, m, dd] = t.vencimiento.split('-'); fecha = `<div class="pc-fecha"><div class="d">${dd}</div><div class="m">${MESES[parseInt(m, 10) - 1].substring(0, 3)}</div></div>`; }
+
+            let acciones = '';
+            if (t.archivoUrl) acciones += `<a class="pc-btn pc-btn-azul" href="${esc(t.archivoUrl)}" target="_blank">📥 ${hecho ? 'Comprobante' : 'Descargar boleta'}</a>`;
+            if (esPago && !hecho) acciones += `<button class="pc-btn pc-btn-verde" onclick="marcarPagadoCliente('${t.id}')">✔ Ya lo pagué</button>`;
+            if (!acciones && !hecho) acciones = '<div class="pc-nota">El estudio está trabajando en esto</div>';
+
+            return `<div class="pc-item ${clase}">
+                ${fecha}
+                <div class="pc-info">
+                    <h4>${esc(tituloCorto(t.titulo))}</h4>
+                    <div style="margin-bottom:5px;">${tipo}${estado}</div>
+                    <div class="det">${detalle}</div>
+                </div>
+                ${t.monto ? `<div class="pc-monto">${pesos(t.monto)}</div>` : ''}
+                ${acciones ? `<div class="pc-acciones">${acciones}</div>` : ''}
+            </div>`;
+        }
+
         window.marcarPagadoCliente = async function(id) {
-            if(confirm("¿Confirmas que ya realizaste el pago de esta obligación? Se notificará al estudio.")) {
-                const auditText = `Marcado como pagado por el cliente (${currentUserEmail}) el ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}`;
+            if(confirm("¿Confirmás que ya realizaste este pago? Le vamos a avisar al estudio.")) {
+                const auditText = `Marcado como pagado por el cliente (${currentUserEmail}) el ${new Date().toLocaleDateString('es-AR')} a las ${new Date().toLocaleTimeString('es-AR')}`;
                 try {
                     await updateDoc(doc(db, "tareas", id), { estado: 'listas', auditoriaPago: auditText });
-                    alert("¡Gracias! El pago fue registrado con éxito.");
-                } catch(e) { alert("Hubo un error al registrar el pago."); }
+                    alert("¡Gracias! Registramos tu pago.");
+                } catch(e) { alert("Hubo un error al registrar el pago. Probá de nuevo o comunicate con el estudio."); }
             }
         }
 
