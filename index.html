@@ -582,10 +582,25 @@
         window.login = function() { document.getElementById('loginError').style.display = 'none'; signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value.trim(), document.getElementById('loginPassword').value).catch(() => { document.getElementById('loginError').style.display = 'block'; }); }
         window.logout = function() { signOut(auth); }
 
+        // Dirección del portal (se toma sola de la página, así sigue funcionando si cambia el link)
+        const PORTAL_URL = window.location.origin + window.location.pathname;
+
+        // Envía el mail para crear/cambiar contraseña con un botón "Continuar" que lleva al portal
+        async function enviarMailClave(email) {
+            try { await sendPasswordResetEmail(auth, email, { url: PORTAL_URL }); }
+            catch(e) {
+                // Si el dominio no está autorizado en Firebase, se envía igual pero sin el botón al portal
+                if (e.code === 'auth/unauthorized-continue-uri' || e.code === 'auth/invalid-continue-uri') {
+                    console.warn("Autorizá este dominio en Firebase > Authentication > Configuración > Dominios autorizados", e);
+                    await sendPasswordResetEmail(auth, email);
+                } else throw e;
+            }
+        }
+
         window.olvideClave = async function() {
             const email = document.getElementById('loginEmail').value.trim().toLowerCase();
             if(!email) return alert("Escribí tu correo electrónico en el campo de arriba y volvé a tocar este enlace.");
-            try { await sendPasswordResetEmail(auth, email); } catch(e) { console.log(e); }
+            try { await enviarMailClave(email); } catch(e) { console.log(e); }
             alert("Si el correo está registrado, vas a recibir un mail para crear una nueva contraseña.");
         }
 
@@ -598,7 +613,7 @@
             } catch(e) {
                 if (e.code !== 'auth/email-already-in-use') { alert("No se pudo crear el acceso al portal: " + e.message); return false; }
             }
-            try { await sendPasswordResetEmail(auth, email); return true; }
+            try { await enviarMailClave(email); return true; }
             catch(e) { alert("No se pudo enviar el mail de acceso: " + e.message); return false; }
         }
 
