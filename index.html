@@ -57,6 +57,90 @@
         
         .filter-bar { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b3d4fc;}
         
+        /* ===== Inicio (panel interno) ===== */
+        .kpi-grid { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:12px; margin-bottom:20px; }
+        .kpi { background:white; border-radius:10px; padding:14px 16px; box-shadow:0 1px 4px rgba(0,0,0,0.08); cursor:default; border-top:4px solid #3498db; }
+        .kpi .lbl { font-size:11px; color:#7f8c8d; text-transform:uppercase; font-weight:bold; letter-spacing:0.4px; }
+        .kpi .val { font-size:28px; font-weight:700; color:#2c3e50; margin-top:4px; }
+        .inicio-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+        .panel { background:white; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+        .panel h3 { margin:0 0 12px 0; font-size:15px; color:#2c3e50; }
+        .grp-row { display:grid; grid-template-columns: minmax(0,1.6fr) 110px minmax(0,1.3fr) 120px auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid #ecf0f1; font-size:13px; }
+        .grp-row:last-child { border-bottom:none; }
+        .grp-row input, .grp-row select { margin:0; padding:6px; font-size:12px; }
+        .grp-row .nom { font-weight:600; overflow:hidden; text-overflow:ellipsis; }
+        .grp-row .arch { font-size:11px; }
+        @media (max-width: 800px) { .grp-row { grid-template-columns: 1fr 1fr; } .grp-row .nom { grid-column: 1 / -1; } .grp-row .arch { grid-column: 1 / -1; } }
+        .ficha-datos { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:6px 16px; background:#f8f9f9; border-radius:8px; padding:12px; }
+        .ficha-datos div { overflow:hidden; text-overflow:ellipsis; }
+        .ficha-datos b { color:#7f8c8d; font-size:11px; text-transform:uppercase; display:block; }
+        @media (max-width: 800px) { .ficha-datos { grid-template-columns: 1fr 1fr; } }
+        .est { font-size:11px; font-weight:bold; padding:2px 8px; border-radius:10px; white-space:nowrap; }
+        .est-ok { background:#d5f5e3; color:#1e8449; } .est-pend { background:#d6eaf8; color:#1f618d; } .est-proc { background:#fdebd0; color:#a04000; } .est-venc { background:#fadbd8; color:#922b21; }
+        .coment { background:#f4f6f7; border-radius:6px; padding:8px 10px; margin-bottom:6px; font-size:13px; }
+        .coment small { color:#7f8c8d; display:block; font-size:11px; margin-bottom:2px; }
+        .fila { display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid #f0f3f4; font-size:13px; }
+        .fila:last-child { border-bottom:none; }
+        .fila .grow { flex:1; min-width:0; }
+        .fila .grow small { color:#7f8c8d; display:block; }
+        .fila button, .fila a.mini { width:auto; margin:0; padding:6px 10px; font-size:12px; border-radius:5px; border:none; cursor:pointer; font-weight:bold; white-space:nowrap; text-decoration:none; }
+        .fila-fecha { font-weight:bold; color:#c0392b; min-width:44px; font-size:12px; }
+        .vacio-mini { color:#95a5a6; font-size:13px; padding:8px 4px; }
+        .menu-badge { background:#e74c3c; color:white; border-radius:10px; font-size:11px; padding:1px 7px; margin-left:auto; font-weight:bold; }
+        .card-move { margin:6px 0 0 0; padding:6px; font-size:12px; }
+        .cal-dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; vertical-align:middle; }
+        .agenda-dia { background:white; border-radius:8px; padding:10px 12px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+        .agenda-dia h4 { margin:0 0 6px 0; font-size:14px; color:#2c3e50; display:flex; align-items:center; }
+        .btn-sec { background:#34495e; color:white; border:none; cursor:pointer; font-weight:bold; border-radius:4px; }
+        .btn-sec:hover { background:#3d566e; }
+        .mobile-topbar, .drawer-overlay { display:none; }
+
+        /* ===== Celular / pantallas chicas (parte interna) ===== */
+        @media (max-width: 800px) {
+            body { display:block; height:auto; min-height:100vh; overflow:auto; }
+            #app-container { height:auto; flex-direction:column; }
+            .main-content { padding:12px; overflow:visible; }
+            .mobile-topbar { display:flex; position:sticky; top:0; z-index:400; background:#2c3e50; color:white; align-items:center; gap:10px; padding:10px 12px; margin:-12px -12px 14px -12px; }
+            .mobile-topbar button { width:auto; margin:0; background:none; border:none; color:white; font-size:26px; padding:2px 8px; line-height:1; }
+            .mobile-topbar .t { font-weight:bold; font-size:17px; flex:1; }
+            .sidebar { position:fixed; top:0; left:0; bottom:0; width:270px !important; padding:20px !important; z-index:1500; transform:translateX(-105%); transition:transform 0.25s ease; overflow-y:auto; }
+            .sidebar.open { transform:none; }
+            .sidebar .menu-text { display:inline !important; }
+            .sidebar.collapsed { width:270px !important; }
+            #sidebarHeader button { display:none; }
+            .drawer-overlay.show { display:block; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1400; }
+            input, select, textarea { font-size:16px !important; }
+            .main-content [style*="grid-template-columns"], .modal-content [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+            .main-content div[style*="display: flex"], .modal-content div[style*="display: flex"] { flex-wrap:wrap; }
+            #searchClient { width:100% !important; }
+            .checkbox-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding:10px; }
+            .checkbox-item { font-size:13px; min-width:0; overflow-wrap:anywhere; }
+            .filter-bar { grid-template-columns: 1fr; }
+            .kanban-board { flex-direction:column; gap:12px; }
+            .kanban-col { width:100%; min-height:0; box-sizing:border-box; }
+            .form-container { padding:14px; }
+            h2 { font-size:20px; }
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            .inicio-grid { grid-template-columns: 1fr; }
+            #calendarDayNames { display:none; }
+            .calendar-grid.agenda { display:block; }
+            .calendar-header-bar { gap:6px; padding:10px; }
+            .calendar-header-bar button { padding:8px 10px !important; font-size:13px; }
+            .calendar-header-bar h3 { font-size:16px !important; text-align:center; }
+            .cal-task-pill { font-size:13px; padding:8px 10px; white-space:normal; }
+            .cal-group-title { font-size:13px; padding:6px 2px; }
+            .main-content table, .main-content thead, .main-content tbody, .main-content tr, .main-content td { display:block; width:100%; box-sizing:border-box; }
+            .main-content thead { display:none; }
+            .main-content table { box-shadow:none; background:transparent; }
+            .main-content tr { background:white; margin-bottom:10px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); padding:6px; }
+            .main-content td { border:none; padding:6px 8px; }
+            .main-content td[data-label]::before { content: attr(data-label); display:block; font-size:10px; color:#95a5a6; font-weight:bold; text-transform:uppercase; margin-bottom:2px; }
+            .action-btn { padding:10px 12px !important; font-size:14px !important; }
+            .modal-overlay { align-items:flex-end; }
+            .modal-content { width:100%; max-width:100%; border-radius:14px 14px 0 0; max-height:92vh; padding:18px; box-sizing:border-box; }
+            .modal-content button { min-height:42px; }
+        }
+
         /* ===== Portal Cliente ===== */
         #portalCliente { max-width: 1100px; margin: 0 auto; color: #2c3e50; }
         .pc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; gap:10px; }
@@ -221,12 +305,20 @@
                 <div><label style="font-size:12px; font-weight:bold;">Monto ($)</label><input type="number" id="editTaskMonto" placeholder="Ej: 15000" style="margin:0;"></div>
                 <div><label style="font-size:12px; font-weight:bold;">Posición / Detalles extra</label><input type="text" id="editTaskPosicion" placeholder="Ej: Saldo a favor $2000" style="margin:0;"></div>
             </div>
-            <label style="font-size:12px; font-weight:bold;">Descripción / Notas Internas</label>
+            <label style="font-size:12px; font-weight:bold;">Descripción</label>
             <textarea id="editTaskDesc" style="min-height: 60px; margin-bottom: 10px;"></textarea>
             <label style="font-size:12px; font-weight:bold; display:block;">Archivo Adjunto (Visible para el Cliente)</label>
             <div id="editTaskFileLink" style="font-size:12px; margin-bottom:10px; color:#2980b9;"></div>
             <input type="file" id="editTaskFile" style="margin-bottom: 10px;">
             <p id="editAuditLog" style="font-size:11px; color:#7f8c8d; margin-top:0; font-style:italic;"></p>
+            <div style="border-top:1px solid #ecf0f1; padding-top:10px;">
+                <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:6px;">💬 Comentarios internos <span style="font-weight:normal; color:#95a5a6;">(solo los ve el estudio)</span></label>
+                <div id="comentList"></div>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="comentInput" placeholder="Ej: falta que el cliente mande las facturas" style="margin:0; flex:1;" onkeydown="if(event.key==='Enter') agregarComentario()">
+                    <button onclick="agregarComentario()" style="width:auto; margin:0; background:#34495e; color:white; border:none; padding:10px 14px; border-radius:4px; font-weight:bold; cursor:pointer;">Enviar</button>
+                </div>
+            </div>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button id="btnUpdateTask" onclick="updateTaskDetails()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Guardar</button>
                 <button onclick="closeTaskModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">Cancelar</button>
@@ -238,14 +330,30 @@
 
     <!-- MODAL DE GESTIÓN DE GRUPO -->
     <div id="groupModal" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content" style="width:860px;">
             <h3 id="groupModalTitle" style="color:#2980b9;">Nombre del Grupo</h3>
-            <p style="font-size:12px; color:#7f8c8d; margin-top:-5px; margin-bottom:15px;">Gestiona el estado de todos los clientes de este vencimiento y envía avisos.</p>
-            <div id="groupModalList" style="margin-bottom:15px; border:1px solid #ecf0f1; border-radius:4px; padding:10px; background:#f9f9f9;"></div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button id="btnMarkAllFinished" onclick="markAllAsFinished()" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">✅ Marcar Todos como Finalizados</button>
+            <p id="groupModalSub" style="font-size:12px; color:#7f8c8d; margin-top:-5px; margin-bottom:12px;">Cargá montos, subí boletas, cambiá estados y avisá a los clientes, todo junto.</p>
+            <div id="wppCola" style="display:none; background:#eafaf1; border:1px solid #abebc6; border-radius:6px; padding:12px; margin-bottom:12px;"></div>
+            <div id="groupModalList" style="margin-bottom:12px; border:1px solid #ecf0f1; border-radius:6px; padding:6px 10px; background:#f9f9f9; max-height:50vh; overflow-y:auto;"></div>
+            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap:wrap;">
+                <button id="btnGuardarGrupo" onclick="guardarGrupo()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; flex:1; min-width:150px; font-weight:bold;">💾 Guardar cambios</button>
+                <button onclick="iniciarWppMasivo()" style="background:#25D366; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; flex:1; min-width:150px; font-weight:bold;">📲 Avisar a todos</button>
+                <button id="btnMarkAllFinished" onclick="markAllAsFinished()" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; flex:1; min-width:150px; font-weight:bold;">✅ Todos finalizados</button>
                 <button onclick="closeGroupModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">Cerrar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL FICHA DE CLIENTE -->
+    <div id="fichaModal" class="modal-overlay" onclick="if(event.target === this) cerrarFicha()">
+        <div class="modal-content" style="width:900px;">
+            <div style="display:flex; justify-content:space-between; align-items:start; gap:10px;">
+                <h3 id="fichaTitulo" style="border:none; margin-bottom:4px;">Cliente</h3>
+                <button onclick="cerrarFicha()" style="width:auto; margin:0; background:#ecf0f1; border:none; border-radius:4px; padding:6px 12px; cursor:pointer; font-weight:bold;">✕</button>
+            </div>
+            <div id="fichaDatos" style="font-size:13px; margin-bottom:12px;"></div>
+            <div class="pc-tabs" id="fichaTabs"></div>
+            <div id="fichaContenido"></div>
         </div>
     </div>
 
@@ -293,14 +401,23 @@
                 <h2 class="menu-text" style="margin:0; font-size:20px; flex:1; text-align:left;">Un Paso Más</h2>
                 <button onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer; padding:0; line-height:1;">☰</button>
             </div>
-            <button class="menu-btn active" onclick="showSection('tareas', this)"><span>📋</span> <span class="menu-text">Tablero Tareas</span></button>
-            <button class="menu-btn" onclick="showSection('calendario', this)"><span>📅</span> <span class="menu-text">Calendario</span></button>
-            <button class="menu-btn" onclick="showSection('vencimientos', this)"><span>🚀</span> <span class="menu-text">Venc. Masivos</span></button>
-            <button class="menu-btn" onclick="showSection('clientes', this)"><span>👥</span> <span class="menu-text">Gestión Clientes</span></button>
+            <button class="menu-btn active" data-sec="inicio" onclick="showSection('inicio')"><span>🏠</span> <span class="menu-text">Inicio</span><span class="menu-badge menu-text" id="badgePagos" style="display:none;"></span></button>
+            <button class="menu-btn" data-sec="tareas" onclick="showSection('tareas')"><span>📋</span> <span class="menu-text">Tablero Tareas</span></button>
+            <button class="menu-btn" data-sec="calendario" onclick="showSection('calendario')"><span>📅</span> <span class="menu-text">Calendario</span></button>
+            <button class="menu-btn" data-sec="vencimientos" onclick="showSection('vencimientos')"><span>🚀</span> <span class="menu-text">Venc. Masivos</span></button>
+            <button class="menu-btn" data-sec="clientes" onclick="showSection('clientes')"><span>👥</span> <span class="menu-text">Gestión Clientes</span></button>
+            <button class="menu-btn" data-sec="honorarios" onclick="showSection('honorarios')"><span>💵</span> <span class="menu-text">Honorarios</span></button>
+            <button class="menu-btn" data-sec="historial" onclick="showSection('historial')"><span>🕘</span> <span class="menu-text">Registro de cambios</span></button>
             <button class="menu-btn logout-btn" onclick="logout()"><span>🚪</span> <span class="menu-text">Cerrar Sesión</span></button>
         </div>
 
+        <div class="drawer-overlay" id="drawerOverlay" onclick="toggleSidebar(false)"></div>
+
         <div class="main-content">
+            <div class="mobile-topbar" id="mobileTopbar">
+                <button onclick="toggleSidebar(true)" aria-label="Abrir menú">☰</button>
+                <span class="t" id="mobileTitle">Un Paso Más</span>
+            </div>
             
             <!-- PORTAL CLIENTE -->
             <div id="portalCliente" class="section">
@@ -342,8 +459,21 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN INICIO -->
+            <div id="inicio" class="section active">
+                <h2 id="inicioSaludo" style="margin-bottom:2px;">Inicio</h2>
+                <p id="inicioFecha" style="margin-top:0; font-size:13px; color:#7f8c8d;"></p>
+                <div class="kpi-grid" id="inicioKpis"></div>
+                <div class="inicio-grid">
+                    <div class="panel"><h3>💳 Pagos informados por clientes <small style="color:#95a5a6; font-weight:normal;">(para controlar)</small></h3><div id="inicioPagos"></div></div>
+                    <div class="panel"><h3>⚠️ Vencidos sin finalizar</h3><div id="inicioVencidos"></div></div>
+                    <div class="panel"><h3>📅 Próximos 7 días</h3><div id="inicioSemana"></div></div>
+                    <div class="panel"><h3>👤 Mis tareas pendientes</h3><div id="inicioMias"></div></div>
+                </div>
+            </div>
+
             <!-- SECCIÓN TABLERO -->
-            <div id="tareas" class="section active">
+            <div id="tareas" class="section">
                 <h2>Tablero de Tareas Internas</h2>
                 <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Las tareas creadas aquí son de uso exclusivo del estudio. El cliente no las ve en su portal.</p>
                 
@@ -351,6 +481,7 @@
                     <input type="text" id="searchTask" placeholder="🔍 Buscar por título o cliente..." oninput="renderTareas()" style="margin:0;">
                     <select id="filterResponsible" onchange="renderTareas()" style="margin:0;">
                         <option value="">Todos los responsables</option>
+                        <option value="__mias">👤 Mis tareas</option>
                         <option value="Ivan Ritvo">Ivan Ritvo</option>
                         <option value="Jano Krivzov">Jano Krivzov</option>
                         <option value="Un Paso Mas">Un Paso Mas</option>
@@ -385,6 +516,19 @@
                     <button id="btnCreateTask" class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Agregar Tarea al Tablero</button>
                 </div>
                 
+                <details class="form-container" id="recBox" style="padding:14px 20px;">
+                    <summary style="cursor:pointer; font-weight:bold; font-size:15px;">🔁 Tareas que se repiten todos los meses <span id="recCount" style="font-weight:normal; color:#7f8c8d;"></span></summary>
+                    <p style="font-size:12px; color:#7f8c8d;">Se crean solas en el tablero cada mes (la del mes actual se crea al guardarla). Ej: "Liquidar sueldos", "Pedir extractos bancarios".</p>
+                    <div style="display:grid; grid-template-columns: 2fr 1.5fr 1fr 80px 1fr; gap:10px; align-items:end;">
+                        <div><label style="font-size:12px; font-weight:bold;">Título</label><input type="text" id="recTitulo" placeholder="Ej: Liquidar sueldos" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Cliente (opcional)</label><select id="recCliente" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Responsable</label><select id="recResp" style="margin:0;"><option value="Ivan Ritvo">Ivan Ritvo</option><option value="Jano Krivzov">Jano Krivzov</option><option value="Un Paso Mas">Un Paso Mas</option></select></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Día del mes</label><input type="number" id="recDia" min="1" max="31" value="10" style="margin:0;"></div>
+                        <div><button class="btn-green" onclick="crearRecurrente()" style="margin:0;">+ Agregar</button></div>
+                    </div>
+                    <div id="recList" style="margin-top:12px;"></div>
+                </details>
+
                 <div class="kanban-board">
                     <div class="kanban-col" ondrop="drop(event, 'pendientes')" ondragover="allowDrop(event)">
                         <h3>Pendientes</h3>
@@ -406,8 +550,9 @@
                 <h2>Calendario de Vencimientos</h2>
                 <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Aquí solo se muestran los vencimientos fiscales (Masivos o Manuales). Éstos SÍ se informan al Portal del Cliente.</p>
                 
-                <div style="margin-bottom: 20px;">
-                    <button class="btn-green" onclick="openVencModal()" style="width: auto; padding: 10px 20px;">+ Crear Vencimiento Manual</button>
+                <div style="margin-bottom: 20px; display:flex; gap:10px;">
+                    <button class="btn-green" onclick="openVencModal()" style="width: auto; padding: 10px 20px; margin:0;">+ Crear Vencimiento Manual</button>
+                    <button class="btn-sec" onclick="exportarVencimientosMes()" style="width: auto; padding: 10px 20px; margin:0;">📥 Exportar mes a Excel</button>
                 </div>
                 
                 <div class="calendar-header-bar">
@@ -416,7 +561,12 @@
                     <button onclick="changeMonth(1)" style="background:#34495e; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">Mes Siguiente &raquo;</button>
                 </div>
                 
-                <div class="calendar-grid">
+                <div style="font-size:12px; color:#7f8c8d; margin:-8px 0 12px 2px;">
+                    <span class="cal-dot" style="background:#e74c3c"></span>Hay vencidos sin terminar &nbsp;
+                    <span class="cal-dot" style="background:#e67e22"></span>Pendientes &nbsp;
+                    <span class="cal-dot" style="background:#27ae60"></span>Todo listo
+                </div>
+                <div class="calendar-grid" id="calendarDayNames">
                     <div class="calendar-day-name">Lunes</div>
                     <div class="calendar-day-name">Martes</div>
                     <div class="calendar-day-name">Miércoles</div>
@@ -487,8 +637,51 @@
                         </div>
                     </div>
                     
-                    <button class="btn-green" onclick="generarMasivas()" style="margin-top: 20px;">🚀 Generar Vencimientos en el Calendario</button>
+                    <div style="display:flex; gap:10px; margin-top:12px;">
+                        <button class="btn-sec" onclick="copiarFechaATodas()" style="width:auto; padding:10px 14px;">⇉ Copiar Term. 0 a todas</button>
+                        <button class="btn-sec" onclick="guardarFechas()" style="width:auto; padding:10px 14px;">💾 Guardar fechas</button>
+                    </div>
+                    <button class="btn-green" onclick="generarMasivas()" style="margin-top: 12px;">🚀 Generar Vencimientos en el Calendario</button>
                 </div>
+            </div>
+
+            <!-- SECCIÓN HONORARIOS -->
+            <div id="honorarios" class="section">
+                <h2>Honorarios y Cobranza</h2>
+                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Uso interno. El abono de cada cliente se carga en su ficha ("Abono mensual").</p>
+                <div class="form-container" style="max-width:none;">
+                    <div style="display:grid; grid-template-columns: 180px 1fr; gap:12px; align-items:end;">
+                        <div><label style="font-size:12px; font-weight:bold;">Mes</label><input type="month" id="honMes" onchange="renderHonorarios()" style="margin:0;"></div>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button class="btn-green" onclick="generarHonorarios()" style="width:auto; margin:0; padding:10px 14px;">⚡ Generar honorarios del mes</button>
+                            <button class="btn-sec" onclick="abrirCargoExtra()" style="width:auto; margin:0; padding:10px 14px;">+ Cargo extra</button>
+                            <button class="btn-sec" onclick="exportarHonorarios()" style="width:auto; margin:0; padding:10px 14px;">📥 Excel</button>
+                        </div>
+                    </div>
+                    <div id="cargoExtraBox" style="display:none; margin-top:12px; background:#f8f9f9; padding:12px; border-radius:6px;">
+                        <div style="display:grid; grid-template-columns: 1.5fr 2fr 1fr auto; gap:10px; align-items:end;">
+                            <div><label style="font-size:12px; font-weight:bold;">Cliente</label><select id="extraCliente" style="margin:0;"></select></div>
+                            <div><label style="font-size:12px; font-weight:bold;">Concepto</label><input type="text" id="extraConcepto" placeholder="Ej: DJ Ganancias anual" style="margin:0;"></div>
+                            <div><label style="font-size:12px; font-weight:bold;">Monto ($)</label><input type="number" id="extraMonto" style="margin:0;"></div>
+                            <div><button class="btn-green" onclick="guardarCargoExtra()" style="margin:0; width:auto; padding:10px 14px;">Agregar</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-grid" id="honKpis" style="grid-template-columns: repeat(4, minmax(0,1fr));"></div>
+                <div class="inicio-grid" style="grid-template-columns: 2fr 1fr;">
+                    <div class="panel"><h3 id="honTituloMes">Honorarios del mes</h3>
+                        <input type="text" id="honBuscar" placeholder="🔍 Buscar cliente..." oninput="renderHonorarios()" style="margin-bottom:8px;">
+                        <div id="honLista"></div></div>
+                    <div class="panel"><h3>🔴 Deudores (todos los meses)</h3><div id="honDeudores"></div></div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN HISTORIAL -->
+            <div id="historial" class="section">
+                <h2>Registro de cambios</h2>
+                <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Últimos 300 movimientos: quién hizo qué y cuándo (ustedes y los clientes).</p>
+                <input type="text" id="histBuscar" placeholder="🔍 Buscar (cliente, acción, persona)..." oninput="renderHistorial()">
+                <div class="panel" id="histLista"></div>
             </div>
 
             <!-- SECCIÓN CLIENTES -->
@@ -537,6 +730,22 @@
                         </div>
                     </div>
 
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div><label style="font-size:12px; font-weight:bold;">Dirección</label><input type="text" id="clientDireccion" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Persona de contacto</label><input type="text" id="clientContacto" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Email de contacto</label><input type="email" id="clientEmailContacto" placeholder="Si es distinto al del portal" style="margin:0;"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div><label style="font-size:12px; font-weight:bold;">Actividad</label><input type="text" id="clientActividad" placeholder="Ej: Panadería" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Cliente desde</label><input type="date" id="clientFechaAlta" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Categoría Monotributo</label>
+                            <select id="clientCatMono" style="margin:0;"><option value="">—</option>
+                                <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option><option>J</option><option>K</option>
+                            </select></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Última recategorización</label><input type="date" id="clientFechaRecat" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Abono mensual ($)</label><input type="number" id="clientAbono" placeholder="Honorarios" style="margin:0;"></div>
+                    </div>
+
                     <textarea id="clientObs" placeholder="Observaciones..." style="margin-top: 15px; min-height:60px;"></textarea>
                     
                     <label style="font-weight: bold; display: block; margin-top: 10px; font-size: 13px; color:#2c3e50; border-bottom:1px solid #ecf0f1; padding-bottom:5px;">Obligaciones Activas para Generación Masiva:</label>
@@ -581,6 +790,7 @@
                             <option value="inactivos">Mostrar Inactivos</option>
                             <option value="todos">Mostrar Todos</option>
                         </select>
+                        <button class="btn-sec" onclick="exportarClientes()" style="width:auto; margin:0; padding:8px 14px;">📥 Excel</button>
                         <input type="text" id="searchClient" placeholder="🔍 Buscar por nombre o CUIT..." oninput="renderClientes()" style="width: 300px; margin: 0; padding: 8px 15px; border:1px solid #bdc3c7; border-radius:4px;">
                     </div>
                 </div>
@@ -597,7 +807,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, deleteDoc, doc, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, deleteDoc, doc, where, writeBatch, setDoc, getDoc, arrayUnion, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
         // CONFIGURACIÓN DE FIREBASE
@@ -639,6 +849,20 @@
             "ivan.ritvo@estudioritvo.com.ar"
         ];
 
+        // Nombre de cada usuario del estudio (para "Mis tareas")
+        const USUARIOS = {
+            "info@estudioritvo.com.ar": "Un Paso Mas",
+            "jano.krivzov@estudioritvo.com.ar": "Jano Krivzov",
+            "ivan.ritvo@estudioritvo.com.ar": "Ivan Ritvo"
+        };
+        let miNombre = "";
+        let calVencDB = {};      // fechas de vencimiento guardadas en el CRM
+        const MESES_N = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        function hoyStr(offset = 0) { const d = new Date(); d.setDate(d.getDate() + offset); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+        function esMovil() { return window.innerWidth <= 800; }
+        function grupoDe(t) { const i = (t.titulo || '').indexOf(' - '); return i !== -1 ? t.titulo.substring(0, i) : "Otros Vencimientos"; }
+        function nombreDe(t) { const i = (t.titulo || '').indexOf(' - '); return i !== -1 ? t.titulo.substring(i + 3) : (t.titulo || ''); }
+
         // CONTROL DE SESIÓN
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -649,11 +873,15 @@
 
                 if(isUserAdmin) {
                     document.getElementById('adminSidebar').style.display = 'flex';
+                    document.getElementById('mobileTopbar').style.removeProperty('display');
                     document.getElementById('portalCliente').classList.remove('active');
-                    showSection('tareas', document.querySelector('.menu-btn'));
+                    miNombre = USUARIOS[currentUserEmail] || "";
+                    if (miNombre) ['taskResponsible', 'vencResp'].forEach(id => { const s = document.getElementById(id); if (s) s.value = miNombre; });
+                    showSection('inicio');
                     iniciarCargaDatosAdmin();
                 } else {
                     document.getElementById('adminSidebar').style.display = 'none';
+                    document.getElementById('mobileTopbar').style.display = 'none';
                     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                     document.getElementById('portalCliente').classList.add('active');
                     iniciarCargaDatosCliente(currentUserEmail);
@@ -709,16 +937,129 @@
             if(!confirm(`¿Enviar a ${c.emailPortal} un mail para crear su contraseña del portal?`)) return;
             if(await enviarAccesoPortal(c.emailPortal)) alert(`Listo. Se envió el mail de acceso a ${c.emailPortal}.`);
         }
-        window.toggleSidebar = function() { document.getElementById('adminSidebar').classList.toggle('collapsed'); }
+        window.toggleSidebar = function(abrir) {
+            const sb = document.getElementById('adminSidebar');
+            if (esMovil()) {
+                const open = abrir === undefined ? !sb.classList.contains('open') : abrir;
+                sb.classList.toggle('open', open);
+                document.getElementById('drawerOverlay').classList.toggle('show', open);
+            } else if (abrir === undefined) sb.classList.toggle('collapsed');
+        }
 
-        window.showSection = function(sectionId, btnElement) {
+        window.showSection = function(sectionId) {
             if(!isUserAdmin) return;
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.toggle('active', b.dataset.sec === sectionId));
             document.getElementById(sectionId).classList.add('active');
-            if(btnElement) btnElement.classList.add('active');
+            const btn = document.querySelector(`.menu-btn[data-sec="${sectionId}"] .menu-text`);
+            document.getElementById('mobileTitle').innerText = btn ? btn.innerText : 'Un Paso Más';
+            toggleSidebar(false);
+            if (esMovil()) window.scrollTo(0, 0);
             if(sectionId === 'calendario') renderCalendar();
+            if(sectionId === 'inicio') renderInicio();
+            if (typeof window.alMostrarSeccion === 'function') window.alMostrarSeccion(sectionId);
         }
+
+        let anchoAnterior = esMovil();
+        window.addEventListener('resize', () => {
+            if (esMovil() !== anchoAnterior) {
+                anchoAnterior = esMovil();
+                if (!anchoAnterior) toggleSidebar(false);
+                if (document.getElementById('calendario').classList.contains('active')) renderCalendar();
+            }
+        });
+
+        // INICIO (resumen del día)
+        window.renderInicio = function() {
+            if (!isUserAdmin) return;
+            const hoy = hoyStr(), en7 = hoyStr(7);
+            const h = new Date();
+            document.getElementById('inicioSaludo').innerText = `¡Hola${miNombre && miNombre !== 'Un Paso Mas' ? ', ' + miNombre.split(' ')[0] : ''}!`;
+            document.getElementById('inicioFecha').innerText = h.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+            const pend = tareasActuales.filter(t => t.estado !== 'listas');
+            const vencs = pend.filter(t => t.tipo === 'vencimiento' && t.vencimiento);
+            const deHoy = pend.filter(t => t.vencimiento === hoy);
+            const semana = pend.filter(t => t.vencimiento && t.vencimiento >= hoy && t.vencimiento <= en7);
+            const vencidos = vencs.filter(t => t.vencimiento < hoy).sort((a, b) => a.vencimiento.localeCompare(b.vencimiento));
+            const pagos = tareasActuales.filter(t => t.auditoriaPago && !t.pagoRevisado);
+            const mias = pend.filter(t => t.tipo !== 'vencimiento' && miNombre && t.responsable === miNombre).sort((a, b) => (a.vencimiento || '9999').localeCompare(b.vencimiento || '9999'));
+
+            const kpi = (lbl, val, color, accion) => `<div class="kpi" style="border-top-color:${color}; ${accion ? 'cursor:pointer;' : ''}" ${accion ? `onclick="${accion}"` : ''}><div class="lbl">${lbl}</div><div class="val" style="color:${val ? color : '#2c3e50'}">${val}</div></div>`;
+            document.getElementById('inicioKpis').innerHTML =
+                kpi('Vencen hoy', deHoy.length, '#e67e22', "showSection('calendario')") +
+                kpi('Próximos 7 días', semana.length, '#3498db', "showSection('calendario')") +
+                kpi('Vencidos sin terminar', vencidos.length, '#e74c3c', '') +
+                kpi('Pagos a controlar', pagos.length, '#8e44ad', '') +
+                kpi('Mis tareas', mias.length, '#27ae60', "irAMisTareas()");
+
+            // Pagos informados por clientes
+            document.getElementById('inicioPagos').innerHTML = pagos.length ? pagos.map(t => `
+                <div class="fila">
+                    <div class="grow"><b>${esc(nombreDe(t))}</b><small>${esc(grupoDe(t))}${t.monto ? ' · ' + pesos(t.monto) : ''}</small><small>${esc(t.auditoriaPago)}</small></div>
+                    <button style="background:#27ae60; color:white;" onclick="revisarPago('${t.id}', true)" title="El pago está bien">✔ OK</button>
+                    <button style="background:#ecf0f1; color:#c0392b;" onclick="revisarPago('${t.id}', false)" title="Volver a pendiente">✖</button>
+                </div>`).join('') : '<div class="vacio-mini">No hay pagos nuevos para controlar.</div>';
+
+            // Vencidos
+            document.getElementById('inicioVencidos').innerHTML = vencidos.length ? vencidos.slice(0, 15).map(t => `
+                <div class="fila">
+                    <span class="fila-fecha">${fmtFecha(t.vencimiento).substring(0, 5)}</span>
+                    <div class="grow"><b>${esc(nombreDe(t))}</b><small>${esc(grupoDe(t))}</small></div>
+                    <button class="btn-sec" onclick="openTaskModal('${t.id}')">Abrir</button>
+                </div>`).join('') + (vencidos.length > 15 ? `<div class="vacio-mini">… y ${vencidos.length - 15} más</div>` : '')
+                : '<div class="vacio-mini">🎉 No hay vencimientos atrasados.</div>';
+
+            // Próximos 7 días: vencimientos agrupados por día y obligación + tareas
+            const porDia = {};
+            semana.forEach(t => { (porDia[t.vencimiento] = porDia[t.vencimiento] || []).push(t); });
+            let htmlSem = '';
+            Object.keys(porDia).sort().forEach(f => {
+                const lista = porDia[f];
+                const grupos = {};
+                lista.filter(t => t.tipo === 'vencimiento').forEach(t => { (grupos[grupoDe(t)] = grupos[grupoDe(t)] || []).push(t); });
+                const d = new Date(f + 'T12:00:00');
+                const nombreDia = f === hoy ? 'Hoy' : d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric' });
+                Object.keys(grupos).forEach(g => {
+                    const total = tareasActuales.filter(t => t.tipo === 'vencimiento' && t.vencimiento === f && grupoDe(t) === g).length;
+                    htmlSem += `<div class="fila"><span class="fila-fecha">${nombreDia}</span><div class="grow"><b>${esc(g)}</b><small>${grupos[g].length} pendientes de ${total}</small></div>
+                        <button class="btn-sec" data-g="${esc(g)}" onclick="openGroupModal(this.dataset.g, '${f}')">Ver</button></div>`;
+                });
+                lista.filter(t => t.tipo !== 'vencimiento').forEach(t => {
+                    htmlSem += `<div class="fila"><span class="fila-fecha">${nombreDia}</span><div class="grow"><b>${esc(t.titulo)}</b><small>Tarea interna · ${esc(t.responsable || '')}</small></div>
+                        <button class="btn-sec" onclick="openTaskModal('${t.id}')">Abrir</button></div>`;
+                });
+            });
+            document.getElementById('inicioSemana').innerHTML = htmlSem || '<div class="vacio-mini">Nada pendiente para los próximos 7 días.</div>';
+
+            // Mis tareas
+            document.getElementById('inicioMias').innerHTML = !miNombre ? '<div class="vacio-mini">Tu usuario no tiene un nombre asignado.</div>' : (mias.length ? mias.slice(0, 12).map(t => `
+                <div class="fila">
+                    <span class="fila-fecha">${t.vencimiento ? fmtFecha(t.vencimiento).substring(0, 5) : ''}</span>
+                    <div class="grow"><b>${esc(t.titulo)}</b><small>${t.estado === 'proceso' ? 'En proceso' : 'Pendiente'}</small></div>
+                    <button class="btn-sec" onclick="openTaskModal('${t.id}')">Abrir</button>
+                </div>`).join('') : '<div class="vacio-mini">No tenés tareas pendientes. 👌</div>');
+
+            const b = document.getElementById('badgePagos');
+            b.style.display = pagos.length ? '' : 'none'; b.innerText = pagos.length;
+        }
+
+        window.irAMisTareas = function() { document.getElementById('filterResponsible').value = '__mias'; showSection('tareas'); renderTareas(); }
+
+        window.revisarPago = async function(id, ok) {
+            const t = tareasActuales.find(x => x.id === id); if (!t) return;
+            try {
+                if (ok) { await updateDoc(doc(db, "tareas", id), { pagoRevisado: true }); registrar('Pago controlado', `${t.titulo}`); }
+                else {
+                    if (!confirm("¿Volver este vencimiento a 'Pendiente'? (por ejemplo, si el pago no se acreditó)")) return;
+                    await updateDoc(doc(db, "tareas", id), { estado: 'pendientes', pagoRevisado: true, auditoriaPago: '' });
+                    registrar('Pago rechazado', `${t.titulo}`);
+                }
+            } catch (e) { alert("No se pudo actualizar: " + e.message); }
+        }
+
+        // Registro de cambios (se completa más abajo)
+        window.registrar = function() {};
 
         // CALENDARIO LÓGICA
         window.changeMonth = function(dir) {
@@ -729,58 +1070,61 @@
         window.renderCalendar = function() {
             const year = currentCalDate.getFullYear();
             const month = currentCalDate.getMonth();
-            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            document.getElementById('calendarMonthYear').innerText = `${monthNames[month]} ${year}`;
-
+            document.getElementById('calendarMonthYear').innerText = `${MESES_N[month]} ${year}`;
             const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
+            const movil = esMovil();
+            grid.classList.toggle('agenda', movil);
+            const hoy = hoyStr();
+            let html = '';
 
-            let firstDay = new Date(year, month, 1).getDay();
-            let emptyDays = firstDay === 0 ? 0 : firstDay - 1; 
+            const firstDay = new Date(year, month, 1).getDay();
+            const emptyDays = firstDay === 0 ? 0 : firstDay - 1;
             const daysInMonth = new Date(year, month + 1, 0).getDate();
+            if (!movil) for (let i = 0; i < emptyDays; i++) html += `<div class="calendar-cell empty"></div>`;
 
-            for(let i = 0; i < emptyDays; i++) grid.innerHTML += `<div class="calendar-cell empty"></div>`;
-
-            for(let day = 1; day <= daysInMonth; day++) {
+            for (let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(year, month, day);
-                if(dateObj.getDay() === 0) continue; 
-
-                const strMonth = (month + 1).toString().padStart(2, '0');
-                const strDay = day.toString().padStart(2, '0');
-                const dateString = `${year}-${strMonth}-${strDay}`;
-
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const tasksForDay = tareasActuales.filter(t => t.vencimiento === dateString && t.tipo === 'vencimiento').sort((a, b) => (a.titulo || '').localeCompare(b.titulo || ''));
-                const groupedTasks = {};
-                
-                tasksForDay.forEach(t => {
-                    let groupName = t.titulo;
-                    let clientName = t.titulo;
-                    const splitIndex = t.titulo.indexOf(' - ');
-                    if(splitIndex !== -1) {
-                        groupName = t.titulo.substring(0, splitIndex);
-                        clientName = t.titulo.substring(splitIndex + 3);
-                    } else {
-                        groupName = "Otros Vencimientos";
-                    }
-                    if(!groupedTasks[groupName]) groupedTasks[groupName] = [];
-                    groupedTasks[groupName].push({ ...t, shortName: clientName });
-                });
+                if (dateObj.getDay() === 0 && !tasksForDay.length) continue;
+                if (movil && !tasksForDay.length) continue;
+
+                const grupos = {};
+                tasksForDay.forEach(t => { (grupos[grupoDe(t)] = grupos[grupoDe(t)] || []).push(t); });
+
+                // Semáforo del día
+                const pendientes = tasksForDay.filter(t => t.estado !== 'listas').length;
+                let dot = '';
+                if (tasksForDay.length) {
+                    const color = pendientes === 0 ? '#27ae60' : (dateString < hoy ? '#e74c3c' : '#e67e22');
+                    dot = `<span class="cal-dot" style="background:${color}" title="${pendientes ? pendientes + ' pendientes' : 'Todo listo'}"></span>`;
+                }
 
                 let tasksHtml = '';
-                for (const group in groupedTasks) {
-                    tasksHtml += `<div class="cal-group-title" data-group="${esc(group)}" onclick="openGroupModal(this.dataset.group, '${dateString}')" title="Ver clientes y opciones"><span>${esc(group)}</span> <span>⚙️</span></div>`;
-                    groupedTasks[group].forEach(t => {
-                        let pillClass = t.estado === 'listas' ? 'cal-listas' : (t.estado === 'proceso' ? 'cal-proceso' : 'cal-pendientes');
-                        let badgePago = t.tipoObligacion === 'pago' ? '💰 ' : '📁 ';
-                        tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${esc(t.shortName)}">${badgePago}${esc(t.shortName)}</div>`;
+                for (const g in grupos) {
+                    const lst = grupos[g];
+                    const listos = lst.filter(t => t.estado === 'listas').length;
+                    tasksHtml += `<div class="cal-group-title" data-group="${esc(g)}" onclick="openGroupModal(this.dataset.group, '${dateString}')" title="Ver clientes y opciones"><span>${esc(g)} <span style="font-weight:normal; color:#7f8c8d;">(${listos}/${lst.length})</span></span> <span>⚙️</span></div>`;
+                    lst.forEach(t => {
+                        const pillClass = t.estado === 'listas' ? 'cal-listas' : (t.estado === 'proceso' ? 'cal-proceso' : 'cal-pendientes');
+                        const ico = t.tipoObligacion === 'pago' ? '💰 ' : '📁 ';
+                        tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${esc(nombreDe(t))}">${ico}${esc(nombreDe(t))}</div>`;
                     });
                 }
-                grid.innerHTML += `<div class="calendar-cell"><div class="calendar-date-number">${day}</div><div class="calendar-cell-content">${tasksHtml}</div></div>`;
+                if (movil) {
+                    const nombreDia = dateObj.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' });
+                    html += `<div class="agenda-dia"><h4>${dot}${nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)}${dateString === hoy ? ' · HOY' : ''}</h4>${tasksHtml}</div>`;
+                } else {
+                    const esHoy = dateString === hoy ? 'border:2px solid #3498db;' : '';
+                    html += `<div class="calendar-cell" style="${esHoy}"><div class="calendar-date-number">${dot}${day}</div><div class="calendar-cell-content">${tasksHtml}</div></div>`;
+                }
             }
+            if (movil && !html) html = '<div class="agenda-dia" style="color:#7f8c8d;">No hay vencimientos cargados en este mes.</div>';
+            grid.innerHTML = html;
         }
 
         // GENERADOR DE LINK WHATSAPP
-        function generarLinkWpp(telefono, tituloCompleto, monto, fecha, tipoObligacion) {
+        function generarLinkWpp(telefono, tituloCompleto, monto, fecha, tipoObligacion, soloUrl) {
             if(!telefono || !tituloCompleto) return '';
             const telLimpio = telefono.replace(/\D/g,'');
             
@@ -809,6 +1153,7 @@
             mensaje += `.\n\nTe recomendamos abonarlo en tiempo y forma. Cualquier consulta estamos a disposición.\n\nSaludos, el equipo de Un Paso Mas`;
             
             const url = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
+            if (soloUrl) return url;
             return `<a href="${url}" target="_blank" class="btn-wpp" title="Enviar aviso">💬 Avisar</a>`;
         }
 
@@ -816,44 +1161,102 @@
         window.openVencModal = function() { document.getElementById('createVencModal').style.display = 'flex'; }
         window.closeVencModal = function() { document.getElementById('createVencModal').style.display = 'none'; }
 
+        let grupoAbierto = null;
         window.openGroupModal = function(groupName, dateString) {
-            window.currentGroupTasks = tareasActuales.filter(t => 
-                t.vencimiento === dateString && 
-                t.tipo === 'vencimiento' && 
-                (groupName === "Otros Vencimientos" ? (t.titulo || '').indexOf(' - ') === -1 : (t.titulo || '').startsWith(groupName + ' - '))
-            );
-            
+            grupoAbierto = { groupName, dateString };
+            window.currentGroupTasks = tareasActuales.filter(t =>
+                t.vencimiento === dateString && t.tipo === 'vencimiento' && grupoDe(t) === groupName
+            ).sort((a, b) => nombreDe(a).localeCompare(nombreDe(b)));
+
             document.getElementById('groupModalTitle').innerText = groupName;
-            
-            let html = '<ul style="list-style:none; padding:0; margin:0; max-height:300px; overflow-y:auto;">';
+            const listos = window.currentGroupTasks.filter(t => t.estado === 'listas').length;
+            document.getElementById('groupModalSub').innerText = `Vence el ${fmtFecha(dateString)} · ${window.currentGroupTasks.length} clientes · ${listos} finalizados. Cargá montos y boletas, cambiá estados y tocá "Guardar cambios".`;
+            document.getElementById('wppCola').style.display = 'none';
+
+            let html = '';
             window.currentGroupTasks.forEach(t => {
-                let statusText = t.estado === 'listas' ? '✅ Finalizada' : (t.estado === 'proceso' ? '⏳ Proceso' : '🕒 Pendiente');
-                let color = t.estado === 'listas' ? '#27ae60' : (t.estado === 'proceso' ? '#e67e22' : '#3498db');
-                
-                const splitIndex = t.titulo.indexOf(' - ');
-                const shortName = splitIndex !== -1 ? t.titulo.substring(splitIndex + 3) : t.titulo;
-                
-                let payBadge = t.tipoObligacion === 'pago' ? '<span style="background:#e74c3c; color:white; padding:2px 5px; border-radius:3px; font-size:9px; margin-right:5px;">PAGO</span>' : '<span style="background:#8e44ad; color:white; padding:2px 5px; border-radius:3px; font-size:9px; margin-right:5px;">PRES/PAGO</span>';
-
-                let telCliente = '';
-                if(t.clienteId) {
-                    const cli = clientesActivos.find(c => c.id === t.clienteId);
-                    if(cli && cli.telefono) telCliente = cli.telefono;
-                }
-                const wppBtn = generarLinkWpp(telCliente, t.titulo, t.monto, t.vencimiento, t.tipoObligacion);
-
-                html += `<li style="padding:10px 5px; border-bottom:1px solid #ecf0f1; display:flex; justify-content:space-between; align-items:center; font-size:13px;">
-                    <div style="flex:1;">${payBadge} <span style="font-weight:500;">${esc(shortName)}</span></div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        ${wppBtn}
-                        <span style="color:${color}; font-weight:bold; font-size:11px; width:70px; text-align:right;">${statusText}</span>
-                    </div>
-                </li>`;
+                const cli = clientesActivos.find(c => c.id === t.clienteId);
+                const tel = cli && cli.telefono ? cli.telefono : '';
+                const wppBtn = generarLinkWpp(tel, t.titulo, t.monto, t.vencimiento, t.tipoObligacion) || '<span style="font-size:11px; color:#bdc3c7;">sin WhatsApp</span>';
+                const badge = t.tipoObligacion === 'pago' ? '<span style="background:#e74c3c; color:white; padding:1px 5px; border-radius:3px; font-size:9px;">PAGO</span>' : '<span style="background:#8e44ad; color:white; padding:1px 5px; border-radius:3px; font-size:9px;">PRES</span>';
+                const pagoInf = t.auditoriaPago ? ' <span title="' + esc(t.auditoriaPago) + '">💳</span>' : '';
+                html += `<div class="grp-row" data-id="${t.id}">
+                    <div class="nom" title="${esc(nombreDe(t))}">${badge} ${esc(nombreDe(t))}${pagoInf}</div>
+                    <input type="number" class="g-monto" placeholder="Monto $" value="${esc(t.monto || '')}">
+                    <div class="arch">${t.archivoUrl ? `<a href="${esc(t.archivoUrl)}" target="_blank">📎 Ver</a> · reemplazar:` : 'Boleta/VEP:'}<input type="file" class="g-file"></div>
+                    <select class="g-estado">
+                        <option value="pendientes" ${t.estado === 'pendientes' ? 'selected' : ''}>🕒 Pendiente</option>
+                        <option value="proceso" ${t.estado === 'proceso' ? 'selected' : ''}>⏳ En proceso</option>
+                        <option value="listas" ${t.estado === 'listas' ? 'selected' : ''}>✅ Finalizada</option>
+                    </select>
+                    <div>${wppBtn}</div>
+                </div>`;
             });
-            
-            document.getElementById('groupModalList').innerHTML = html + '</ul>';
+            document.getElementById('groupModalList').innerHTML = html || '<div class="vacio-mini">No hay clientes en este vencimiento.</div>';
             document.getElementById('groupModal').style.display = 'flex';
         }
+
+        window.guardarGrupo = async function() {
+            const btn = document.getElementById('btnGuardarGrupo');
+            const filas = Array.from(document.querySelectorAll('#groupModalList .grp-row'));
+            const cambios = [];
+            for (const fila of filas) {
+                const t = tareasActuales.find(x => x.id === fila.dataset.id); if (!t) continue;
+                const upd = {};
+                const monto = fila.querySelector('.g-monto').value;
+                const estado = fila.querySelector('.g-estado').value;
+                const file = fila.querySelector('.g-file').files[0];
+                if (String(monto) !== String(t.monto || '')) upd.monto = monto;
+                if (estado !== t.estado) upd.estado = estado;
+                if (file || Object.keys(upd).length) cambios.push({ t, upd, file });
+            }
+            if (!cambios.length) return alert("No hay cambios para guardar.");
+            btn.disabled = true;
+            try {
+                let n = 0;
+                for (const c of cambios) {
+                    btn.innerText = `Guardando ${++n} de ${cambios.length}...`;
+                    if (c.file) c.upd.archivoUrl = await subirArchivo(c.file);
+                    await updateDoc(doc(db, "tareas", c.t.id), c.upd);
+                }
+                registrar('Carga masiva en vencimiento', `${grupoAbierto.groupName} (${fmtFecha(grupoAbierto.dateString)}): ${cambios.length} clientes actualizados`);
+                alert(`Listo, se actualizaron ${cambios.length} clientes.`);
+                setTimeout(() => openGroupModal(grupoAbierto.groupName, grupoAbierto.dateString), 300);
+            } catch (e) { alert("Error al guardar: " + e.message); }
+            btn.innerText = "💾 Guardar cambios"; btn.disabled = false;
+        }
+
+        // WhatsApp masivo: abre los avisos uno detrás del otro
+        let colaWpp = [], posWpp = 0;
+        window.iniciarWppMasivo = function() {
+            const pend = window.currentGroupTasks.filter(t => t.estado !== 'listas');
+            colaWpp = []; const sinTel = [];
+            pend.forEach(t => {
+                const cli = clientesActivos.find(c => c.id === t.clienteId);
+                const url = cli && cli.telefono ? generarLinkWpp(cli.telefono, t.titulo, t.monto, t.vencimiento, t.tipoObligacion, true) : '';
+                if (url) colaWpp.push({ nombre: nombreDe(t), url }); else sinTel.push(nombreDe(t));
+            });
+            posWpp = 0;
+            const box = document.getElementById('wppCola');
+            box.style.display = 'block';
+            box.dataset.sinTel = sinTel.length ? `Sin teléfono cargado (no se avisan): ${sinTel.join(', ')}` : '';
+            if (!colaWpp.length) { box.innerHTML = '<b>No hay clientes pendientes con WhatsApp cargado.</b><br><small>' + esc(box.dataset.sinTel) + '</small>'; return; }
+            pasoWpp();
+        }
+        function pasoWpp() {
+            const box = document.getElementById('wppCola');
+            if (posWpp >= colaWpp.length) {
+                box.innerHTML = `✅ <b>Listo: se abrieron los ${colaWpp.length} avisos.</b>${box.dataset.sinTel ? '<br><small>' + esc(box.dataset.sinTel) + '</small>' : ''}`;
+                registrar('Avisos de WhatsApp enviados', `${grupoAbierto.groupName}: ${colaWpp.length} clientes`);
+                return;
+            }
+            const c = colaWpp[posWpp];
+            box.innerHTML = `<div style="font-size:13px; margin-bottom:8px;">Aviso <b>${posWpp + 1} de ${colaWpp.length}</b>: ${esc(c.nombre)}<br><small style="color:#7f8c8d;">Tocá el botón, enviá el mensaje en WhatsApp y volvé para el siguiente.</small></div>
+                <div style="display:flex; gap:8px;"><button onclick="abrirWppActual()" style="background:#25D366; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; flex:1; margin:0;">💬 Abrir WhatsApp de ${esc(c.nombre)}</button>
+                <button onclick="saltarWpp()" style="background:#ecf0f1; border:none; padding:10px; border-radius:4px; cursor:pointer; width:auto; margin:0;">Saltar</button></div>`;
+        }
+        window.abrirWppActual = function() { window.open(colaWpp[posWpp].url, '_blank'); posWpp++; pasoWpp(); }
+        window.saltarWpp = function() { posWpp++; pasoWpp(); }
 
         window.closeGroupModal = function() {
             document.getElementById('groupModal').style.display = 'none';
@@ -872,7 +1275,7 @@
                         updates++;
                     }
                 });
-                if (updates > 0) await batch.commit();
+                if (updates > 0) { await batch.commit(); registrar('Vencimientos finalizados', `${grupoAbierto ? grupoAbierto.groupName : ''}: ${updates} clientes`); }
                 closeGroupModal();
             } catch (e) { alert("Hubo un error al actualizar los vencimientos."); }
             btn.innerText = "✅ Marcar Todos como Finalizados"; btn.disabled = false;
@@ -1033,6 +1436,8 @@
                 const auditText = `Marcado como pagado por el cliente (${currentUserEmail}) el ${new Date().toLocaleDateString('es-AR')} a las ${new Date().toLocaleTimeString('es-AR')}`;
                 try {
                     await updateDoc(doc(db, "tareas", id), { estado: 'listas', auditoriaPago: auditText });
+                    const tt = pcTareas.find(x => x.id === id);
+                    addDoc(collection(db, "historial"), { fecha: new Date().toISOString(), usuario: currentUserEmail, nombre: (pcCliente && pcCliente.nombre) || currentUserEmail, accion: 'Cliente informó un pago', detalle: tt ? tt.titulo : id }).catch(() => {});
                     alert("¡Gracias! Registramos tu pago.");
                 } catch(e) { alert("Hubo un error al registrar el pago. Probá de nuevo o comunicate con el estudio."); }
             }
@@ -1040,10 +1445,16 @@
 
         // KANBAN DRAG & DROP
         window.allowDrop = function(ev) { ev.preventDefault(); }
+        window.moverTarea = async function(id, estado) {
+            const t = tareasActuales.find(x => x.id === id);
+            if (!t || t.estado === estado) return;
+            try { await updateDoc(doc(db, "tareas", id), { estado }); registrar('Cambio de estado', `${t.titulo} → ${{pendientes:'Pendiente', proceso:'En proceso', listas:'Finalizada'}[estado]}`); }
+            catch(e) { alert("No se pudo mover la tarea: " + e.message); }
+        }
         window.drag = function(ev, id) { ev.dataTransfer.setData("text", id); }
         window.drop = async function(ev, estadoDestino) {
             ev.preventDefault(); const id = ev.dataTransfer.getData("text");
-            if(id) { try { await updateDoc(doc(db, "tareas", id), { estado: estadoDestino }); } catch(e) { alert("No se pudo mover la tarea: " + e.message); } }
+            if(id) moverTarea(id, estadoDestino);
         }
 
         async function subirArchivo(file) {
@@ -1081,10 +1492,30 @@
                 else wppContainer.innerHTML = '';
             } else { wppContainer.innerHTML = ''; }
             
+            // Comentarios de esta tarea
+            if (unsubComent) unsubComent();
+            document.getElementById('comentList').innerHTML = '';
+            document.getElementById('comentInput').value = '';
+            unsubComent = onSnapshot(query(collection(db, "comentarios"), where("tareaId", "==", id)), snap => {
+                const cs = []; snap.forEach(d => cs.push(d.data()));
+                cs.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+                document.getElementById('comentList').innerHTML = cs.map(c => `<div class="coment"><small>${esc(c.autor)} · ${new Date(c.fecha).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</small>${esc(c.texto)}</div>`).join('');
+            }, e => console.warn(e));
+
             document.getElementById('taskModal').style.display = 'flex';
         }
 
-        window.closeTaskModal = function() { editingTaskId = null; document.getElementById('taskModal').style.display = 'none'; }
+        let unsubComent = null;
+        window.agregarComentario = async function() {
+            const inp = document.getElementById('comentInput');
+            const texto = inp.value.trim(); if (!texto || !editingTaskId) return;
+            try {
+                await addDoc(collection(db, "comentarios"), { tareaId: editingTaskId, texto, autor: miNombre || currentUserEmail, email: currentUserEmail, fecha: new Date().toISOString() });
+                inp.value = '';
+            } catch (e) { alert("No se pudo guardar el comentario: " + e.message); }
+        }
+
+        window.closeTaskModal = function() { editingTaskId = null; if (unsubComent) { unsubComent(); unsubComent = null; } document.getElementById('taskModal').style.display = 'none'; }
 
         window.updateTaskDetails = async function() {
             if(!editingTaskId) return;
@@ -1102,6 +1533,7 @@
                 const fileInput = document.getElementById('editTaskFile');
                 if (fileInput.files.length > 0) updateData.archivoUrl = await subirArchivo(fileInput.files[0]);
                 await updateDoc(doc(db, "tareas", editingTaskId), updateData);
+                registrar('Tarea/vencimiento editado', updateData.titulo);
                 closeTaskModal();
             } catch(e) { alert("No se pudo guardar: " + e.message); }
             btn.innerText = "Guardar"; btn.disabled = false;
@@ -1109,21 +1541,272 @@
 
         window.deleteTask = async function() {
             if(!editingTaskId) return;
-            if(confirm("¿Estás seguro de que deseas ELIMINAR esta tarea permanentemente? (No se puede deshacer)")) { try { await deleteDoc(doc(db, "tareas", editingTaskId)); closeTaskModal(); } catch(e) { alert("No se pudo borrar: " + e.message); } }
+            if(confirm("¿Estás seguro de que deseas ELIMINAR esta tarea permanentemente? (No se puede deshacer)")) { try { const tt = tareasActuales.find(x => x.id === editingTaskId); await deleteDoc(doc(db, "tareas", editingTaskId)); registrar('Tarea/vencimiento borrado', tt ? tt.titulo : ''); closeTaskModal(); } catch(e) { alert("No se pudo borrar: " + e.message); } }
         }
+
+        // TAREAS RECURRENTES
+        let recurrentes = [];
+        let generandoRec = false;
+        function periodoActual() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
+
+        function renderRecurrentes() {
+            document.getElementById('recCount').innerText = recurrentes.length ? `(${recurrentes.length})` : '';
+            document.getElementById('recList').innerHTML = recurrentes.length ? recurrentes.map(r => {
+                const cli = clientesActivos.find(c => c.id === r.clienteId);
+                return `<div class="fila"><div class="grow"><b>${esc(r.titulo)}</b><small>Día ${r.dia} de cada mes · ${esc(r.responsable)}${cli ? ' · ' + esc(cli.nombre) : ''}</small></div>
+                    <button style="background:#fdedec; color:#c0392b;" onclick="borrarRecurrente('${r.id}')">Quitar</button></div>`;
+            }).join('') : '<div class="vacio-mini">Todavía no hay tareas que se repitan.</div>';
+        }
+
+        window.crearRecurrente = async function() {
+            const titulo = document.getElementById('recTitulo').value.trim();
+            const dia = Math.min(31, Math.max(1, parseInt(document.getElementById('recDia').value, 10) || 1));
+            if (!titulo) return alert("Escribí el título de la tarea.");
+            try {
+                await addDoc(collection(db, "recurrentes"), { titulo, dia, clienteId: document.getElementById('recCliente').value, responsable: document.getElementById('recResp').value, generados: [], creado: new Date().toISOString() });
+                registrar('Tarea recurrente creada', `${titulo} (día ${dia})`);
+                document.getElementById('recTitulo').value = '';
+            } catch (e) { alert("No se pudo guardar: " + e.message); }
+        }
+
+        window.borrarRecurrente = async function(id) {
+            const r = recurrentes.find(x => x.id === id);
+            if (!r || !confirm(`¿Dejar de crear "${r.titulo}" todos los meses? (Las tareas ya creadas no se borran)`)) return;
+            try { await deleteDoc(doc(db, "recurrentes", id)); registrar('Tarea recurrente eliminada', r.titulo); } catch (e) { alert(e.message); }
+        }
+
+        async function generarRecurrentes() {
+            if (generandoRec) return; generandoRec = true;
+            const per = periodoActual();
+            const [a, m] = per.split('-').map(Number);
+            try {
+                for (const r of recurrentes) {
+                    if ((r.generados || []).includes(per)) continue;
+                    const idTarea = `rec_${r.id}_${per}`;
+                    const ya = await getDoc(doc(db, "tareas", idTarea));
+                    if (!ya.exists()) {
+                        const dia = Math.min(r.dia || 1, new Date(a, m, 0).getDate());
+                        const cli = clientesActivos.find(c => c.id === r.clienteId);
+                        await setDoc(doc(db, "tareas", idTarea), {
+                            titulo: `${r.titulo} (${MESES_N[m - 1]} ${a})${cli ? ' - ' + cli.nombre : ''}`, tipo: 'tarea', tipoObligacion: 'presentacion',
+                            responsable: r.responsable || 'Un Paso Mas', vencimiento: `${per}-${String(dia).padStart(2, '0')}`, descripcion: 'Tarea mensual automática',
+                            monto: "", posicion: "", archivoUrl: "", clienteId: r.clienteId || "", estado: "pendientes", fechaCreacion: new Date().toISOString(), recurrenteId: r.id
+                        });
+                    }
+                    await updateDoc(doc(db, "recurrentes", r.id), { generados: arrayUnion(per) });
+                }
+            } catch (e) { console.error("Recurrentes:", e); }
+            generandoRec = false;
+        }
+
+        const cargasExtra = [];
+        window.cargasExtraAdmin = function() { cargasExtra.forEach(fn => fn()); };
+        cargasExtra.push(() => {
+            let clientesListos = false, recListos = false;
+            const intentar = () => { if (clientesListos && recListos) generarRecurrentes(); };
+            listeners.push(onSnapshot(collection(db, "recurrentes"), snap => {
+                recurrentes = []; snap.forEach(d => recurrentes.push({ id: d.id, ...d.data() }));
+                recurrentes.sort((x, y) => (x.dia || 0) - (y.dia || 0));
+                renderRecurrentes(); recListos = true; intentar();
+            }, e => console.warn("recurrentes:", e)));
+            const prev = window.alCambiarDatos;
+            window.alCambiarDatos = (que) => { if (prev) prev(que); if (que === 'clientes') { clientesListos = true; renderRecurrentes(); intentar(); } };
+        });
+
+        // ---------- Estado visual de un vencimiento/tarea ----------
+        function estadoTag(t) {
+            if (t.estado === 'listas') return '<span class="est est-ok">Finalizada</span>';
+            if (t.vencimiento && t.vencimiento < hoyStr()) return '<span class="est est-venc">Vencida</span>';
+            if (t.estado === 'proceso') return '<span class="est est-proc">En proceso</span>';
+            return '<span class="est est-pend">Pendiente</span>';
+        }
+
+        // ---------- FICHA DE CLIENTE ----------
+        let fichaId = null, fichaTab = 'venc';
+        window.abrirFicha = function(id) { fichaId = id; fichaTab = 'venc'; renderFicha(); document.getElementById('fichaModal').style.display = 'flex'; }
+        window.cerrarFicha = function() { fichaId = null; document.getElementById('fichaModal').style.display = 'none'; }
+        window.fichaVer = function(t) { fichaTab = t; renderFicha(); }
+        function renderFicha() {
+            const c = clientesActivos.find(x => x.id === fichaId); if (!c) return cerrarFicha();
+            document.getElementById('fichaTitulo').innerText = c.nombre || '';
+            const dato = (l, v) => `<div><b>${l}</b>${v ? esc(v) : '<span style="color:#bdc3c7;">—</span>'}</div>`;
+            document.getElementById('fichaDatos').innerHTML = `<div class="ficha-datos">
+                ${dato('CUIT', c.cuit)}${dato('Condición IVA', c.condIva)}${dato('Ganancias', c.condGanancias)}
+                ${dato('Actividad', c.actividad)}${dato('Categoría monotributo', c.categoriaMono)}${dato('Última recategorización', fmtFecha(c.fechaRecat))}
+                ${dato('Contacto', c.contacto)}${dato('Teléfono', c.telefono)}${dato('Email', c.emailContacto || c.emailPortal)}
+                ${dato('Dirección', c.direccion)}${dato('Cliente desde', fmtFecha(c.fechaAlta))}${dato('Abono mensual', c.abonoMensual ? pesos(c.abonoMensual) : '')}
+                </div>${c.observaciones ? `<p style="margin:8px 0 0 0; color:#555;"><b>Obs.:</b> ${esc(c.observaciones)}</p>` : ''}
+                <div style="display:flex; gap:8px; margin-top:10px;">
+                    <button class="btn-sec" style="width:auto; margin:0; padding:8px 12px;" onclick="cerrarFicha(); loadEditClient('${c.id}')">✏️ Editar datos</button>
+                    ${c.telefono ? `<a class="btn-wpp" style="padding:8px 12px;" target="_blank" href="https://wa.me/${String(c.telefono).replace(/\D/g, '')}">💬 WhatsApp</a>` : ''}
+                </div>`;
+
+            const venc = tareasActuales.filter(t => t.clienteId === c.id && t.tipo === 'vencimiento').sort((a, b) => (b.vencimiento || '').localeCompare(a.vencimiento || ''));
+            const tareas = tareasActuales.filter(t => t.clienteId === c.id && t.tipo !== 'vencimiento').sort((a, b) => (b.vencimiento || '').localeCompare(a.vencimiento || ''));
+            const hons = honorariosTodos.filter(h => h.clienteId === c.id).sort((a, b) => (b.periodo || '').localeCompare(a.periodo || ''));
+            const archivos = [...venc, ...tareas].filter(t => t.archivoUrl);
+            const deuda = hons.filter(h => !h.pagado).reduce((s, h) => s + (Number(h.monto) || 0), 0);
+            const tabs = [['venc', `Vencimientos (${venc.length})`], ['tareas', `Tareas (${tareas.length})`], ['hon', `Honorarios${deuda ? ' · debe ' + pesos(deuda) : ''}`], ['arch', `Archivos (${archivos.length})`]];
+            document.getElementById('fichaTabs').innerHTML = tabs.map(([k, l]) => `<button class="pc-tab ${fichaTab === k ? 'active' : ''}" onclick="fichaVer('${k}')">${l}</button>`).join('');
+
+            const filaT = t => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${fmtFecha(t.vencimiento)}</span><div class="grow"><b>${esc(t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo)}</b><small>${t.monto ? pesos(t.monto) + ' · ' : ''}${t.auditoriaPago ? '💳 Pago informado por el cliente' : ''}</small></div>${estadoTag(t)}${t.archivoUrl ? `<a class="mini" style="background:#ebf5fb; color:#2980b9;" href="${esc(t.archivoUrl)}" target="_blank">📎</a>` : ''}<button class="btn-sec" onclick="openTaskModal('${t.id}')">Abrir</button></div>`;
+            let html = '';
+            if (fichaTab === 'venc') html = venc.map(filaT).join('') || '<div class="vacio-mini">Sin vencimientos.</div>';
+            if (fichaTab === 'tareas') html = tareas.map(filaT).join('') || '<div class="vacio-mini">Sin tareas internas.</div>';
+            if (fichaTab === 'arch') html = archivos.map(t => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${fmtFecha(t.vencimiento)}</span><div class="grow"><b>${esc(t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo)}</b></div><a class="mini" style="background:#3498db; color:white;" href="${esc(t.archivoUrl)}" target="_blank">📥 Abrir</a></div>`).join('') || '<div class="vacio-mini">Sin archivos.</div>';
+            if (fichaTab === 'hon') html = hons.map(h => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${periodoTexto(h.periodo)}</span><div class="grow"><b>${esc(h.concepto)}</b><small>${pesos(h.monto)}${h.pagado && h.fechaPago ? ' · pagado el ' + fmtFecha(h.fechaPago) : ''}</small></div>${h.pagado ? '<span class="est est-ok">Pagado</span>' : '<span class="est est-venc">Debe</span>'}</div>`).join('') || '<div class="vacio-mini">Sin honorarios registrados.</div>';
+            document.getElementById('fichaContenido').innerHTML = `<div class="panel" style="box-shadow:none; border:1px solid #ecf0f1; padding:6px 12px; max-height:45vh; overflow-y:auto;">${html}</div>`;
+        }
+
+        // ---------- HONORARIOS ----------
+        let honorariosTodos = [];
+        function periodoTexto(p) { if (!p) return ''; const [a, m] = p.split('-'); return `${MESES_N[parseInt(m, 10) - 1].substring(0, 3)} ${a}`; }
+        window.renderHonorarios = function() {
+            const inpMes = document.getElementById('honMes');
+            if (!inpMes.value) inpMes.value = periodoActual();
+            const per = inpMes.value;
+            const term = (document.getElementById('honBuscar').value || '').toLowerCase();
+            const delMes = honorariosTodos.filter(h => h.periodo === per).sort((a, b) => (a.clienteNombre || '').localeCompare(b.clienteNombre || ''));
+            const total = delMes.reduce((s, h) => s + (Number(h.monto) || 0), 0);
+            const cobrado = delMes.filter(h => h.pagado).reduce((s, h) => s + (Number(h.monto) || 0), 0);
+            const sinGenerar = clientesActivos.filter(c => c.activo && Number(c.abonoMensual) > 0 && !delMes.some(h => h.clienteId === c.id && h.tipo === 'abono')).length;
+            const kpi = (l, v, color) => `<div class="kpi" style="border-top-color:${color}"><div class="lbl">${l}</div><div class="val" style="font-size:22px;">${v}</div></div>`;
+            document.getElementById('honKpis').innerHTML = kpi('Total del mes', pesos(total), '#3498db') + kpi('Cobrado', pesos(cobrado), '#27ae60') + kpi('Pendiente', pesos(total - cobrado), '#e74c3c') + kpi('Clientes al día', `${delMes.filter(h => h.pagado).length} / ${delMes.length}`, '#8e44ad');
+            document.getElementById('honTituloMes').innerHTML = `Honorarios de ${periodoTexto(per)}${sinGenerar ? ` <small style="color:#e67e22; font-weight:normal;">· ${sinGenerar} clientes con abono sin generar</small>` : ''}`;
+            const lista = delMes.filter(h => (h.clienteNombre || '').toLowerCase().includes(term));
+            document.getElementById('honLista').innerHTML = lista.map(h => {
+                const cli = clientesActivos.find(c => c.id === h.clienteId);
+                const msg = `Hola ${h.clienteNombre}, te recordamos que están pendientes los honorarios de ${periodoTexto(h.periodo)} (${h.concepto}) por ${pesos(h.monto)}. ¡Gracias! Equipo de Un Paso Más`;
+                const wpp = !h.pagado && cli && cli.telefono ? `<a class="mini" style="background:#25D366; color:white;" target="_blank" href="https://wa.me/${String(cli.telefono).replace(/\D/g, '')}?text=${encodeURIComponent(msg)}" title="Recordar por WhatsApp">💬</a>` : '';
+                return `<div class="fila"><div class="grow"><b>${esc(h.clienteNombre)}</b><small>${esc(h.concepto)}${h.pagado && h.fechaPago ? ' · pagado el ' + fmtFecha(h.fechaPago) : ''}</small></div>
+                    <b style="white-space:nowrap;">${pesos(h.monto)}</b>
+                    ${h.pagado ? `<span class="est est-ok">Pagado</span><button style="background:#ecf0f1;" onclick="marcarHonorario('${h.id}', false)" title="Deshacer">↩</button>`
+                               : `<button style="background:#27ae60; color:white;" onclick="marcarHonorario('${h.id}', true)">✔ Cobrado</button>`}
+                    ${wpp}<button style="background:#fdedec; color:#c0392b;" onclick="borrarHonorario('${h.id}')" title="Borrar">🗑</button></div>`;
+            }).join('') || '<div class="vacio-mini">No hay honorarios cargados este mes. Tocá "⚡ Generar honorarios del mes".</div>';
+
+            // Deudores
+            const deud = {};
+            honorariosTodos.filter(h => !h.pagado).forEach(h => { const d = deud[h.clienteId] = deud[h.clienteId] || { nombre: h.clienteNombre, total: 0, meses: [] }; d.total += Number(h.monto) || 0; d.meses.push(periodoTexto(h.periodo)); });
+            const ds = Object.entries(deud).sort((a, b) => b[1].total - a[1].total);
+            document.getElementById('honDeudores').innerHTML = ds.map(([id, d]) => `<div class="fila"><div class="grow"><b>${esc(d.nombre)}</b><small>${esc([...new Set(d.meses)].join(', '))}</small></div><b style="color:#c0392b; white-space:nowrap;">${pesos(d.total)}</b><button class="btn-sec" onclick="abrirFicha('${id}'); fichaVer('hon');">Ver</button></div>`).join('') || '<div class="vacio-mini">🎉 Nadie debe honorarios.</div>';
+        }
+
+        window.generarHonorarios = async function() {
+            const per = document.getElementById('honMes').value || periodoActual();
+            const candidatos = clientesActivos.filter(c => c.activo && Number(c.abonoMensual) > 0 && !honorariosTodos.some(h => h.clienteId === c.id && h.periodo === per && h.tipo === 'abono'));
+            if (!candidatos.length) return alert("No hay honorarios para generar: o ya están generados, o ningún cliente activo tiene cargado el \"Abono mensual\" en su ficha.");
+            if (!confirm(`Se van a generar los honorarios de ${periodoTexto(per)} para ${candidatos.length} clientes. ¿Continuar?`)) return;
+            try {
+                const batch = writeBatch(db);
+                candidatos.forEach(c => batch.set(doc(db, "honorarios", `${c.id}_${per}`), { clienteId: c.id, clienteNombre: c.nombre, periodo: per, concepto: 'Abono mensual', tipo: 'abono', monto: Number(c.abonoMensual), pagado: false, fechaPago: '', creado: new Date().toISOString() }));
+                await batch.commit();
+                registrar('Honorarios generados', `${periodoTexto(per)}: ${candidatos.length} clientes`);
+            } catch (e) { alert("Error: " + e.message); }
+        }
+        window.abrirCargoExtra = function() {
+            const b = document.getElementById('cargoExtraBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none';
+            document.getElementById('extraCliente').innerHTML = clientesActivos.filter(c => c.activo).map(c => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('');
+        }
+        window.guardarCargoExtra = async function() {
+            const per = document.getElementById('honMes').value || periodoActual();
+            const c = clientesActivos.find(x => x.id === document.getElementById('extraCliente').value);
+            const concepto = document.getElementById('extraConcepto').value.trim(), monto = Number(document.getElementById('extraMonto').value);
+            if (!c || !concepto || !monto) return alert("Completá cliente, concepto y monto.");
+            try {
+                await addDoc(collection(db, "honorarios"), { clienteId: c.id, clienteNombre: c.nombre, periodo: per, concepto, tipo: 'extra', monto, pagado: false, fechaPago: '', creado: new Date().toISOString() });
+                registrar('Cargo de honorarios', `${c.nombre}: ${concepto} ${pesos(monto)}`);
+                document.getElementById('extraConcepto').value = ''; document.getElementById('extraMonto').value = '';
+            } catch (e) { alert(e.message); }
+        }
+        window.marcarHonorario = async function(id, pagado) {
+            const h = honorariosTodos.find(x => x.id === id); if (!h) return;
+            try { await updateDoc(doc(db, "honorarios", id), { pagado, fechaPago: pagado ? hoyStr() : '' }); registrar(pagado ? 'Honorario cobrado' : 'Honorario vuelto a pendiente', `${h.clienteNombre}: ${h.concepto} ${periodoTexto(h.periodo)} ${pesos(h.monto)}`); }
+            catch (e) { alert(e.message); }
+        }
+        window.borrarHonorario = async function(id) {
+            const h = honorariosTodos.find(x => x.id === id); if (!h || !confirm(`¿Borrar "${h.concepto}" de ${h.clienteNombre}?`)) return;
+            try { await deleteDoc(doc(db, "honorarios", id)); registrar('Honorario borrado', `${h.clienteNombre}: ${h.concepto} ${periodoTexto(h.periodo)}`); } catch (e) { alert(e.message); }
+        }
+
+        // ---------- EXPORTAR A EXCEL (CSV compatible con Excel en español) ----------
+        function descargarCSV(nombre, filas) {
+            const celda = v => { const s = String(v ?? ''); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+            const txt = '\uFEFF' + filas.map(f => f.map(celda).join(';')).join('\r\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv;charset=utf-8' }));
+            a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
+        }
+        const num = v => (v === '' || v == null) ? '' : String(v).replace('.', ',');
+        window.exportarClientes = function() {
+            const filas = [['Cliente', 'CUIT', 'Estado', 'Condición IVA', 'Ganancias', 'Actividad', 'Cat. Monotributo', 'Teléfono', 'Email portal', 'Contacto', 'Dirección', 'Cliente desde', 'Abono mensual', 'Obligaciones']];
+            clientesActivos.forEach(c => filas.push([c.nombre, c.cuit, c.activo ? 'Activo' : 'Inactivo', c.condIva, c.condGanancias, c.actividad, c.categoriaMono, c.telefono, c.emailPortal, c.contacto, c.direccion, fmtFecha(c.fechaAlta), num(c.abonoMensual), (c.obligaciones || []).join(', ')]));
+            descargarCSV(`clientes_${hoyStr()}.csv`, filas);
+        }
+        window.exportarVencimientosMes = function() {
+            const y = currentCalDate.getFullYear(), m = String(currentCalDate.getMonth() + 1).padStart(2, '0');
+            const filas = [['Vencimiento', 'Obligación', 'Cliente', 'Tipo', 'Estado', 'Monto', 'Pago informado por cliente', 'Archivo']];
+            tareasActuales.filter(t => t.tipo === 'vencimiento' && (t.vencimiento || '').startsWith(`${y}-${m}`)).sort((a, b) => (a.vencimiento + a.titulo).localeCompare(b.vencimiento + b.titulo))
+                .forEach(t => filas.push([fmtFecha(t.vencimiento), grupoDe(t), nombreDe(t), t.tipoObligacion === 'pago' ? 'Pago' : 'Presentación', { pendientes: 'Pendiente', proceso: 'En proceso', listas: 'Finalizada' }[t.estado] || t.estado, num(t.monto), t.auditoriaPago || '', t.archivoUrl ? 'Sí' : '']));
+            descargarCSV(`vencimientos_${y}-${m}.csv`, filas);
+        }
+        window.exportarHonorarios = function() {
+            const per = document.getElementById('honMes').value || periodoActual();
+            const filas = [['Período', 'Cliente', 'Concepto', 'Monto', 'Estado', 'Fecha de pago']];
+            honorariosTodos.filter(h => h.periodo === per).forEach(h => filas.push([periodoTexto(h.periodo), h.clienteNombre, h.concepto, num(h.monto), h.pagado ? 'Pagado' : 'Pendiente', fmtFecha(h.fechaPago)]));
+            descargarCSV(`honorarios_${per}.csv`, filas);
+        }
+
+        // ---------- REGISTRO DE CAMBIOS ----------
+        let historialItems = [];
+        window.registrar = function(accion, detalle) {
+            addDoc(collection(db, "historial"), { fecha: new Date().toISOString(), usuario: currentUserEmail, nombre: miNombre || currentUserEmail, accion, detalle: detalle || '' }).catch(e => console.warn("historial:", e));
+        };
+        window.renderHistorial = function() {
+            const term = (document.getElementById('histBuscar').value || '').toLowerCase();
+            const lst = historialItems.filter(h => `${h.nombre} ${h.accion} ${h.detalle}`.toLowerCase().includes(term));
+            document.getElementById('histLista').innerHTML = lst.map(h => `<div class="fila"><span class="fila-fecha" style="color:#7f8c8d; min-width:90px;">${new Date(h.fecha).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span><div class="grow"><b>${esc(h.accion)}</b><small>${esc(h.detalle)}</small></div><span style="font-size:12px; color:#7f8c8d; white-space:nowrap;">${esc(h.nombre)}</span></div>`).join('') || '<div class="vacio-mini">Sin movimientos registrados todavía.</div>';
+        }
+
+        cargasExtra.push(() => {
+            listeners.push(onSnapshot(collection(db, "honorarios"), snap => {
+                honorariosTodos = []; snap.forEach(d => honorariosTodos.push({ id: d.id, ...d.data() }));
+                if (document.getElementById('honorarios').classList.contains('active')) renderHonorarios();
+                if (fichaId) renderFicha();
+            }, e => console.warn("honorarios:", e)));
+            listeners.push(onSnapshot(query(collection(db, "historial"), orderBy("fecha", "desc"), limit(300)), snap => {
+                historialItems = []; snap.forEach(d => historialItems.push(d.data()));
+                if (document.getElementById('historial').classList.contains('active')) renderHistorial();
+            }, e => console.warn("historial:", e)));
+            const prev = window.alCambiarDatos;
+            window.alCambiarDatos = (que) => { if (prev) prev(que); if (fichaId) renderFicha(); };
+        });
+        window.alMostrarSeccion = function(id) {
+            if (id === 'honorarios') renderHonorarios();
+            if (id === 'historial') renderHistorial();
+        };
 
         // CARGA PRINCIPAL ADMIN
         function iniciarCargaDatosAdmin() {
             const unsubClientes = onSnapshot(query(collection(db, "clientes")), (snapshot) => {
-                clientesActivos = []; snapshot.forEach(doc => { const c = doc.data(); c.id = doc.id; clientesActivos.push(c); });
+                clientesActivos = []; snapshot.forEach(d => { const c = d.data(); c.id = d.id; clientesActivos.push(c); });
                 clientesActivos.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '')); renderClientes();
-            });
+                if (typeof window.alCambiarDatos === 'function') window.alCambiarDatos('clientes');
+            }, e => console.error(e));
 
             const unsubTareas = onSnapshot(query(collection(db, "tareas")), (snapshot) => {
                 tareasActuales = []; snapshot.forEach((documento) => { const t = documento.data(); t.id = documento.id; tareasActuales.push(t); });
-                renderTareas(); if(document.getElementById('calendario').classList.contains('active')) renderCalendar();
-            });
-            listeners.push(unsubClientes, unsubTareas);
+                renderTareas(); renderInicio();
+                if(document.getElementById('calendario').classList.contains('active')) renderCalendar();
+                if (typeof window.alCambiarDatos === 'function') window.alCambiarDatos('tareas');
+            }, e => console.error(e));
+
+            const unsubCal = onSnapshot(collection(db, "calendarioVenc"), (snapshot) => {
+                calVencDB = {}; snapshot.forEach(d => { calVencDB[d.id] = d.data(); });
+            }, e => console.warn("calendarioVenc:", e));
+
+            listeners.push(unsubClientes, unsubTareas, unsubCal);
+            if (typeof window.cargasExtraAdmin === 'function') window.cargasExtraAdmin();
         }
 
         window.renderClientes = function() {
@@ -1150,12 +1833,13 @@
 
                 tbodyHtml += `
                     <tr style="background: ${c.activo ? 'transparent' : '#f9ebea'}; border-bottom:1px solid #ecf0f1;">
-                        <td><strong>${esc(c.nombre)}</strong><br><small style="color:#7f8c8d;">CUIT: ${esc(c.cuit)}</small><div style="margin-top:5px;">${condTags}</div></td>
-                        <td>${portalTag}${telTag}</td>
-                        <td>${clavesHtml}</td>
-                        <td>${c.activo ? '<span style="color:#27ae60; font-weight:bold;">Activo</span>' : '<span style="color:#e74c3c; font-weight:bold;">Inactivo</span>'}</td>
-                        <td>
+                        <td data-label="Cliente"><strong>${esc(c.nombre)}</strong><br><small style="color:#7f8c8d;">CUIT: ${esc(c.cuit)}</small><div style="margin-top:5px;">${condTags}</div></td>
+                        <td data-label="Contacto y acceso">${portalTag}${telTag}</td>
+                        <td data-label="Claves fiscales">${clavesHtml || '<span style="color:#bdc3c7; font-size:12px;">—</span>'}</td>
+                        <td data-label="Estado">${c.activo ? '<span style="color:#27ae60; font-weight:bold;">Activo</span>' : '<span style="color:#e74c3c; font-weight:bold;">Inactivo</span>'}</td>
+                        <td data-label="Acciones">
                             <button class="action-btn" style="background:#f39c12; color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px; font-weight:bold;" onclick="loadEditClient('${c.id}')">✏️ Editar</button>
+                            <button class="action-btn" style="background:#34495e; color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px; font-weight:bold;" onclick="abrirFicha('${c.id}')">📂 Ficha</button>
                             <button class="action-btn" style="background:${c.activo ? '#e74c3c' : '#27ae60'}; color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px; font-weight:bold;" onclick="toggleStatus('${c.id}', ${c.activo})">${c.activo ? '⛔ Baja' : '✅ Alta'}</button>
                             ${c.emailPortal ? `<button class="action-btn" style="background:#2980b9; color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px; font-weight:bold;" onclick="enviarAcceso('${c.id}')" title="Enviar mail para crear o cambiar la contraseña del portal">📧 Enviar acceso</button>` : ''}
                         </td>
@@ -1166,6 +1850,7 @@
             document.querySelector('#clientsTable tbody').innerHTML = tbodyHtml;
             document.getElementById('taskClient').innerHTML = selectHtml;
             document.getElementById('vencClient').innerHTML = selectHtml;
+            const rc = document.getElementById('recCliente'); if (rc) { const v = rc.value; rc.innerHTML = selectHtml; rc.value = v; }
             document.getElementById('countActivos').innerText = `Activos: ${countAct}`;
             document.getElementById('countInactivos').innerText = `Inactivos: ${countInact}`;
         }
@@ -1180,7 +1865,9 @@
             const resp = document.getElementById('filterResponsible').value;
             let htmlP = ''; let htmlPr = ''; let htmlL = '';
 
-            tareasActuales.filter(t => (t.titulo || '').toLowerCase().includes(term) && (resp === "" || t.responsable === resp) && t.tipo !== 'vencimiento').forEach(t => {
+            const respFiltro = resp === '__mias' ? miNombre : resp;
+            tareasActuales.filter(t => (t.titulo || '').toLowerCase().includes(term) && (respFiltro === "" || t.responsable === respFiltro) && t.tipo !== 'vencimiento')
+            .sort((a, b) => (a.vencimiento || '9999').localeCompare(b.vencimiento || '9999')).forEach(t => {
                 let badgeTipo = t.tipoObligacion === 'pago' ? '<span class="task-badge badge-pago">💰 Pago</span>' : '<span class="task-badge badge-pres">📁 Tarea Interna</span>';
                 const descPreview = t.descripcion ? (t.descripcion.length > 40 ? t.descripcion.substring(0, 40) + '...' : t.descripcion) : '';
                 const descHtml = descPreview ? `<div style="font-size:12px; color:#7f8c8d; margin-bottom:5px; padding-left:5px; border-left: 2px solid #bdc3c7;"><i>${esc(descPreview)}</i></div>` : '';
@@ -1197,6 +1884,11 @@
                     <div style="display:flex; gap:5px; margin-top:auto;">
                         <button style="background:#3498db; color:white; border:none; cursor:pointer; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:bold; width:100%;" onclick="openTaskModal('${t.id}')">👁️ Abrir Tarea</button>
                     </div>
+                    <select class="card-move" onchange="moverTarea('${t.id}', this.value)" title="Cambiar estado">
+                        <option value="pendientes" ${t.estado === 'pendientes' ? 'selected' : ''}>Estado: Pendiente</option>
+                        <option value="proceso" ${t.estado === 'proceso' ? 'selected' : ''}>Estado: En proceso</option>
+                        <option value="listas" ${t.estado === 'listas' ? 'selected' : ''}>Estado: Finalizada</option>
+                    </select>
                 </div>`;
                 
                 if (t.estado === 'pendientes') htmlP += card; else if (t.estado === 'proceso') htmlPr += card; else htmlL += card;
@@ -1218,6 +1910,7 @@
                 titulo: t + nombreParaTitulo, tipo: 'tarea', tipoObligacion: document.getElementById('taskTipoOb').value, responsable: document.getElementById('taskResponsible').value, vencimiento: document.getElementById('taskDueDate').value, descripcion: document.getElementById('taskDesc').value, monto: "", posicion: "", archivoUrl: archivoUrl, clienteId: clientId, estado: "pendientes", fechaCreacion: new Date().toISOString() 
             }); 
             
+            registrar('Tarea creada', t + nombreParaTitulo);
             document.getElementById('taskTitle').value = ''; document.getElementById('taskDueDate').value = ''; document.getElementById('taskDesc').value = ''; document.getElementById('taskFile').value = '';
             } catch(e) { alert("No se pudo crear la tarea: " + e.message); }
             btn.innerText = "+ Agregar Tarea al Tablero"; btn.disabled = false;
@@ -1237,6 +1930,7 @@
                 titulo: t + nombreParaTitulo, tipo: 'vencimiento', tipoObligacion: document.getElementById('vencTipoOb').value, monto: document.getElementById('vencMonto').value, responsable: document.getElementById('vencResp').value, vencimiento: document.getElementById('vencDate').value, descripcion: document.getElementById('vencDesc').value, posicion: "", archivoUrl: archivoUrl, clienteId: clientId, estado: "pendientes", fechaCreacion: new Date().toISOString() 
             }); 
             
+            registrar('Vencimiento manual creado', t + nombreParaTitulo);
             document.getElementById('vencTitle').value=''; document.getElementById('vencDate').value=''; document.getElementById('vencDesc').value=''; document.getElementById('vencFile').value=''; document.getElementById('vencMonto').value='';
             closeVencModal();
             } catch(e) { alert("No se pudo crear el vencimiento: " + e.message); }
@@ -1268,11 +1962,14 @@
                         nuevos.slice(i, i + 400).forEach(n => batch.set(doc(collection(db, "clientes")), n));
                         await batch.commit();
                     }
+                    registrar('Clientes importados desde CSV', `${nuevos.length} clientes`);
                     alert(`Se cargaron ${nuevos.length} clientes nuevos.`);
                 } catch(err) { alert("Error al importar: " + err.message); } document.getElementById('btnImportar').innerText = "Importar"; document.getElementById('csvFile').value = '';
             };
             reader.readAsText(file);
         }
+
+        const CAMPOS_EXTRA = [['direccion', 'clientDireccion'], ['contacto', 'clientContacto'], ['emailContacto', 'clientEmailContacto'], ['actividad', 'clientActividad'], ['fechaAlta', 'clientFechaAlta'], ['categoriaMono', 'clientCatMono'], ['fechaRecat', 'clientFechaRecat'], ['abonoMensual', 'clientAbono']];
 
         window.saveClient = async function() {
             const name = document.getElementById('clientName').value.trim(); const cuit = document.getElementById('clientCuit').value.replace(/\D/g, ''); const emailPortal = document.getElementById('clientEmailLogin').value.trim().toLowerCase();
@@ -1286,9 +1983,11 @@
                 nombre: name, cuit: cuit, telefono: document.getElementById('clientTel').value, emailPortal: emailPortal, condIva: document.getElementById('clientCondIva').value, condGanancias: document.getElementById('clientCondGanancias').value, clave_arca: document.getElementById('clientARCA').value, clave_agip: document.getElementById('clientAGIP').value, clave_arba: document.getElementById('clientARBA').value, observaciones: document.getElementById('clientObs').value, 
                 obligaciones: Array.from(document.querySelectorAll('.checkbox-grid input:checked')).map(cb => cb.value) 
             };
+            CAMPOS_EXTRA.forEach(([campo, id]) => data[campo] = document.getElementById(id).value);
             try {
                 if(editingClientId) await updateDoc(doc(db, "clientes", editingClientId), data); else { data.activo = true; await addDoc(collection(db, "clientes"), data); }
             } catch(e) { return alert("No se pudo guardar el cliente: " + e.message); }
+            registrar(editingClientId ? 'Cliente modificado' : 'Cliente nuevo', `${name} (${cuit})`);
             if (enviarMail && await enviarAccesoPortal(emailPortal)) alert(`Cliente guardado. Se envió a ${emailPortal} un mail para que cree su contraseña del portal.`);
             cancelEdit();
         }
@@ -1297,15 +1996,24 @@
             const c = clientesActivos.find(x => x.id === id); if(!c) return; editingClientId = id;
             document.getElementById('clientName').value = c.nombre||''; document.getElementById('clientCuit').value = c.cuit||''; document.getElementById('clientTel').value = c.telefono||''; document.getElementById('clientEmailLogin').value = c.emailPortal||''; document.getElementById('clientCondIva').value = c.condIva||''; document.getElementById('clientCondGanancias').value = c.condGanancias||''; document.getElementById('clientARCA').value = c.clave_arca||''; document.getElementById('clientAGIP').value = c.clave_agip||''; document.getElementById('clientARBA').value = c.clave_arba||''; document.getElementById('clientObs').value = c.observaciones||'';
             document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = c.obligaciones && c.obligaciones.includes(cb.value));
+            CAMPOS_EXTRA.forEach(([campo, id]) => document.getElementById(id).value = c[campo] || '');
+            showSection('clientes');
             document.getElementById('btnSaveClient').innerText = "Actualizar Ficha"; document.getElementById('btnCancelEdit').style.display = "inline-block"; document.getElementById('form-cliente-container').scrollIntoView({ behavior: 'smooth' });
         }
 
         window.cancelEdit = function() {
             editingClientId = null; document.getElementById('clientName').value = ''; document.getElementById('clientCuit').value = ''; document.getElementById('clientTel').value = ''; document.getElementById('clientEmailLogin').value = ''; document.getElementById('clientCondIva').value = ''; document.getElementById('clientCondGanancias').value = ''; document.getElementById('clientARCA').value = ''; document.getElementById('clientAGIP').value = ''; document.getElementById('clientARBA').value = ''; document.getElementById('clientObs').value = '';
+            CAMPOS_EXTRA.forEach(([campo, id]) => document.getElementById(id).value = '');
             document.querySelectorAll('.checkbox-grid input').forEach(cb => cb.checked = false); document.getElementById('btnSaveClient').innerText = "Guardar Ficha de Cliente"; document.getElementById('btnCancelEdit').style.display = "none";
         }
 
-        window.toggleStatus = async function(id, st) { if(confirm(`¿Deseas ${!st ? "dar de ALTA" : "dar de BAJA"} este cliente?`)) await updateDoc(doc(db, "clientes", id), { activo: !st }); }
+        window.toggleStatus = async function(id, st) {
+            const c = clientesActivos.find(x => x.id === id);
+            if(confirm(`¿Deseas ${!st ? "dar de ALTA" : "dar de BAJA"} este cliente?`)) {
+                try { await updateDoc(doc(db, "clientes", id), { activo: !st }); registrar(st ? 'Cliente dado de baja' : 'Cliente dado de alta', c ? c.nombre : id); }
+                catch (e) { alert(e.message); }
+            }
+        }
         
         // Meses disponibles en el generador: 2 meses atrás y 12 hacia adelante
         ;(function cargarMesesGenerador() {
@@ -1320,12 +2028,49 @@
         })();
 
         // BASE DE DATOS AUTOMÁTICA DE VENCIMIENTOS (EXTRACCION PDF OFICIAL)
+        function mostrarFuenteFechas(texto, tipo) {
+            const el = document.getElementById('avisoFechas');
+            el.style.display = 'block';
+            el.innerText = texto;
+            el.style.background = tipo === 'aviso' ? '#fef5e7' : '#eafaf1';
+            el.style.borderColor = tipo === 'aviso' ? '#f5cba7' : '#abebc6';
+            el.style.color = tipo === 'aviso' ? '#935116' : '#1e8449';
+        }
+
+        function leerFechasForm() { return [0,1,2,3,4,5,6,7,8,9].map(i => document.getElementById('fecha_' + i).value); }
+
+        window.guardarFechas = async function(silencioso) {
+            const ob = document.getElementById('masivoObligacion').value, mes = document.getElementById('masivoMes').value;
+            if (!ob) return alert("Elegí primero la obligación.");
+            const fechas = leerFechasForm();
+            if (fechas.some(x => !x)) { if (!silencioso) alert("Completá las 10 fechas antes de guardar."); return; }
+            try {
+                await setDoc(doc(db, "calendarioVenc", mes), { [ob]: fechas }, { merge: true });
+                calVencDB[mes] = { ...(calVencDB[mes] || {}), [ob]: fechas };
+                if (!silencioso) { mostrarFuenteFechas('📌 Fechas guardadas en el CRM.', 'ok'); registrar('Fechas de vencimiento guardadas', `${ob} · ${mes}`); }
+            } catch (e) { if (!silencioso) alert("No se pudieron guardar: " + e.message); }
+        }
+
+        window.copiarFechaATodas = function() {
+            const f0 = document.getElementById('fecha_0').value;
+            if (!f0) return alert("Completá primero la fecha de Term. 0.");
+            for (let i = 1; i <= 9; i++) document.getElementById('fecha_' + i).value = f0;
+        }
+
         window.autoCompletarFechas = function() {
             const ob = document.getElementById('masivoObligacion').value;
             const mes = document.getElementById('masivoMes').value;
             const ids = ['fecha_0', 'fecha_1', 'fecha_2', 'fecha_3', 'fecha_4', 'fecha_5', 'fecha_6', 'fecha_7', 'fecha_8', 'fecha_9'];
             document.getElementById('avisoFechas').style.display = 'none';
             if (!ob) { ids.forEach(id => document.getElementById(id).value = ''); return; }
+
+            // 1) Fechas guardadas en el CRM (cargadas por ustedes)
+            const guardadas = calVencDB[mes] && calVencDB[mes][ob];
+            if (guardadas && guardadas.length === 10) {
+                ids.forEach((id, i) => document.getElementById(id).value = guardadas[i] || '');
+                mostrarFuenteFechas('📌 Fechas guardadas en el CRM.', 'ok');
+                return;
+            }
             
             if (ob === 'sueldos_emp' || ob === 'sueldos_casas') {
                 const [m, a] = mes.split('-'); 
@@ -1336,6 +2081,7 @@
                 
                 const s = `${ld.getFullYear()}-${String(ld.getMonth() + 1).padStart(2, '0')}-${String(ld.getDate()).padStart(2, '0')}`; 
                 ids.forEach(id => document.getElementById(id).value = s);
+                mostrarFuenteFechas('Fecha calculada: último día hábil del mes. Corregila si hay feriados.', 'ok');
                 return;
             }
 
@@ -1378,9 +2124,10 @@
             if (bd[mes] && bd[mes][ob] && bd[mes][ob].length === 10) {
                 const fechas = bd[mes][ob];
                 ids.forEach((id, index) => document.getElementById(id).value = fechas[index]);
+                mostrarFuenteFechas('Fechas del calendario incorporado. Revisalas y tocá "Guardar fechas" si las corregís.', 'ok');
             } else {
                 ids.forEach(id => document.getElementById(id).value = '');
-                document.getElementById('avisoFechas').style.display = 'block';
+                mostrarFuenteFechas('No hay fechas cargadas para esta obligación en este mes. Completalas según el calendario de ARCA/AGIP/ARBA y tocá "💾 Guardar fechas": quedan guardadas para la próxima vez.', 'aviso');
             }
         }
 
@@ -1447,6 +2194,7 @@
                     }); 
                 }
             }
+            guardarFechas(true);
             if (nuevas.length > 0 && !confirm(`Se van a crear ${nuevas.length} vencimientos de "${tituloGrupo}". ¿Continuar?`)) return;
             try {
                 for (let i = 0; i < nuevas.length; i += 400) {
@@ -1455,6 +2203,7 @@
                     await batch.commit();
                 }
             } catch(e) { return alert("Error al generar los vencimientos: " + e.message); }
+            if (nuevas.length) registrar('Vencimientos masivos generados', `${tituloGrupo}: ${nuevas.length} clientes`);
             let msg = nuevas.length > 0 ? `¡Listo! Se generaron ${nuevas.length} vencimientos de: ${tituloGrupo}.` : "No se generó ningún vencimiento nuevo.";
             if (yaExistian) msg += `\n${yaExistian} ya estaban generados (no se duplicaron).`;
             if (sinFecha) msg += `\n${sinFecha} clientes no tienen fecha para su terminación de CUIT.`;
