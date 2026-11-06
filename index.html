@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Un Paso Mas - Estudio Contable</title>
+    <title>Un Paso Más - Portal de Clientes</title>
+    <meta name="apple-mobile-web-app-title" content="Un Paso Más">
+    <meta name="theme-color" content="#2c3e50">
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
@@ -361,10 +363,14 @@
     <div id="createVencModal" class="modal-overlay">
         <div class="modal-content">
             <h3>Crear Vencimiento Manual</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <div><label style="font-size:12px; font-weight:bold;">Título / Obligación</label><input type="text" id="vencTitle" placeholder="Ej: Plan de Pagos 08/25" style="margin:0;"></div>
-                <div><label style="font-size:12px; font-weight:bold;">Cliente (Opcional)</label><select id="vencClient" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
+            <p style="font-size:12px; color:#7f8c8d; margin:-5px 0 12px 0;">Para cargar un vencimiento de la rutina a un solo cliente (sin generar todos de nuevo), elegí la obligación, el mes y el cliente: el título, el tipo y la fecha se completan solos.</p>
+            <div style="display: grid; grid-template-columns: 1.4fr 1fr 1.4fr; gap: 10px; margin-bottom: 10px; background:#f4f8fb; padding:10px; border-radius:6px;">
+                <div><label style="font-size:12px; font-weight:bold;">Obligación</label><select id="vencOblig" onchange="autocompletarManual()" style="margin:0;"></select></div>
+                <div><label style="font-size:12px; font-weight:bold;">Mes en que vence</label><select id="vencMesBase" onchange="autocompletarManual()" style="margin:0;"></select></div>
+                <div><label style="font-size:12px; font-weight:bold;">Cliente</label><select id="vencClient" onchange="autocompletarManual()" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
             </div>
+            <div id="vencHint" style="display:none; font-size:12px; padding:8px; border-radius:4px; margin-bottom:10px;"></div>
+            <div style="margin-bottom: 10px;"><label style="font-size:12px; font-weight:bold;">Título</label><input type="text" id="vencTitle" placeholder="Ej: Plan de Pagos 08/25" style="margin:0;"></div>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div><label style="font-size:12px; font-weight:bold;">Tipo</label>
                     <select id="vencTipoOb" style="margin:0;">
@@ -430,6 +436,10 @@
                     <p>Acá podés ver tus vencimientos, descargar tus comprobantes y avisarnos cuando realizás un pago.</p>
                     <div class="pc-datos" id="pcDatos"></div>
                 </div>
+                <div id="pcBienvenida" style="display:none; background:#eaf2f8; border:1px solid #aed6f1; color:#1b4f72; padding:14px 16px; border-radius:10px; margin-bottom:18px; font-size:14px;">
+                    <b>👋 ¡Bienvenido/a a tu portal!</b> Acá vas a encontrar tus vencimientos, las boletas para pagar y los comprobantes de lo que presentamos. Mirá la guía <b>"¿Cómo uso el portal?"</b> para conocer cada parte.
+                    <div style="margin-top:8px;"><button onclick="cerrarBienvenida()" style="width:auto; margin:0; padding:6px 14px; border:none; border-radius:16px; background:#2e86c1; color:white; font-weight:600; cursor:pointer;">Entendido</button></div>
+                </div>
                 <div id="pcAlerta"></div>
                 <div class="pc-stats" id="pcStats"></div>
                 <div class="pc-layout">
@@ -442,6 +452,18 @@
                         <div id="clientDashboardGrid"></div>
                     </div>
                     <div class="pc-side">
+                        <details class="pc-card" id="pcGuia">
+                            <summary style="cursor:pointer; font-weight:700; font-size:14px;">📘 ¿Cómo uso el portal?</summary>
+                            <ol style="margin:10px 0 0 0; padding-left:18px; color:#555; line-height:1.5;">
+                                <li><b>Revisá tus vencimientos.</b> Arriba ves cuántos tenés pendientes y cuál es el próximo. Los colores te indican la urgencia.</li>
+                                <li><b>Presentaciones:</b> las hacemos nosotros. No tenés que hacer nada; cuando estén listas pasan a "Finalizados" con su comprobante.</li>
+                                <li><b>Pagos:</b> cuando cargamos la boleta o VEP, aparece el botón <b>"📥 Descargar boleta"</b>. Pagala antes de la fecha indicada.</li>
+                                <li><b>Avisanos que pagaste</b> con el botón <b>"✔ Ya lo pagué"</b>. Así lo controlamos y queda registrado.</li>
+                                <li>En <b>"Finalizados"</b> encontrás el historial y los comprobantes para descargar cuando quieras.</li>
+                                <li>¿Dudas? Escribinos por WhatsApp o email desde el recuadro de abajo.</li>
+                            </ol>
+                            <p style="margin:10px 0 0 0; font-size:12px; color:#7f8c8d;">Consejo: en el celular podés agregar el portal a la pantalla de inicio (en Safari: Compartir → "Agregar a inicio").</p>
+                        </details>
                         <div class="pc-card" id="pcContacto"></div>
                         <div class="pc-card">
                             <h4>Obligaciones que gestionamos</h4>
@@ -790,6 +812,7 @@
                             <option value="inactivos">Mostrar Inactivos</option>
                             <option value="todos">Mostrar Todos</option>
                         </select>
+                        <button class="btn-sec" onclick="enviarAccesosMasivo()" style="width:auto; margin:0; padding:8px 14px; background:#2980b9;">📧 Enviar accesos pendientes</button>
                         <button class="btn-sec" onclick="exportarClientes()" style="width:auto; margin:0; padding:8px 14px;">📥 Excel</button>
                         <input type="text" id="searchClient" placeholder="🔍 Buscar por nombre o CUIT..." oninput="renderClientes()" style="width: 300px; margin: 0; padding: 8px 15px; border:1px solid #bdc3c7; border-radius:4px;">
                     </div>
@@ -928,8 +951,24 @@
             } catch(e) {
                 if (e.code !== 'auth/email-already-in-use') { alert("No se pudo crear el acceso al portal: " + e.message); return false; }
             }
-            try { await enviarMailClave(email); return true; }
+            try {
+                await enviarMailClave(email);
+                const c = clientesActivos.find(x => (x.emailPortal || '') === email);
+                if (c && isUserAdmin) updateDoc(doc(db, "clientes", c.id), { accesoEnviado: hoyStr() }).catch(() => {});
+                return true;
+            }
             catch(e) { alert("No se pudo enviar el mail de acceso: " + e.message); return false; }
+        }
+
+        window.enviarAccesosMasivo = async function() {
+            const pend = clientesActivos.filter(c => c.activo && c.emailPortal && !c.accesoEnviado);
+            const sinMail = clientesActivos.filter(c => c.activo && !c.emailPortal).length;
+            if (!pend.length) return alert(`No hay accesos pendientes de enviar.${sinMail ? `\n\n${sinMail} clientes activos no tienen "Email (Acceso al Portal)" cargado.` : ''}`);
+            if (!confirm(`Se va a enviar el mail de acceso al portal a ${pend.length} clientes que todavía no lo recibieron.${sinMail ? `\n(${sinMail} clientes activos no tienen email cargado y no se incluyen.)` : ''}\n\n¿Continuar?`)) return;
+            let ok = 0, err = [];
+            for (const c of pend) { if (await enviarAccesoPortal(c.emailPortal)) ok++; else err.push(c.nombre); await new Promise(r => setTimeout(r, 400)); }
+            registrar('Accesos al portal enviados', `${ok} clientes`);
+            alert(`Listo: se enviaron ${ok} accesos.${err.length ? '\nNo se pudo enviar a: ' + err.join(', ') : ''}`);
         }
 
         window.enviarAcceso = async function(id) {
@@ -1158,7 +1197,49 @@
         }
 
         // MODALES
-        window.openVencModal = function() { document.getElementById('createVencModal').style.display = 'flex'; }
+        window.openVencModal = function() {
+            const so = document.getElementById('vencOblig');
+            if (!so.options.length) {
+                so.innerHTML = '<option value="">✏️ Otra (escribir el título)</option>' + Array.from(document.getElementById('masivoObligacion').options).filter(o => o.value).map(o => `<option value="${o.value}">${esc(o.textContent)}</option>`).join('');
+                document.getElementById('vencMesBase').innerHTML = document.getElementById('masivoMes').innerHTML;
+            }
+            // Por defecto, el mes que se está viendo en el calendario
+            const mc = `${String(currentCalDate.getMonth() + 1).padStart(2, '0')}-${currentCalDate.getFullYear()}`;
+            if (Array.from(document.getElementById('vencMesBase').options).some(o => o.value === mc)) document.getElementById('vencMesBase').value = mc;
+            autocompletarManual();
+            document.getElementById('createVencModal').style.display = 'flex';
+        }
+
+        function tituloManual() {
+            const ob = document.getElementById('vencOblig').value;
+            const cid = document.getElementById('vencClient').value;
+            const c = clientesActivos.find(x => x.id === cid);
+            const t = document.getElementById('vencTitle').value.trim();
+            return { ob, c, cid, titulo: t + (c ? ` - ${c.nombre}` : '') };
+        }
+
+        window.autocompletarManual = function() {
+            const ob = document.getElementById('vencOblig').value;
+            const hint = document.getElementById('vencHint');
+            hint.style.display = 'none';
+            document.getElementById('vencTitle').readOnly = !!ob;
+            if (!ob) return;
+            const mes = document.getElementById('vencMesBase').value;
+            const [m, a] = mes.split('-').map(Number);
+            const nombre = document.getElementById('vencOblig').selectedOptions[0].textContent;
+            document.getElementById('vencTitle').value = `${nombre} (${calcPeriodo(ob, m, a)})`;
+            document.getElementById('vencTipoOb').value = SOLO_PAGOS.includes(ob) ? 'pago' : 'presentacion';
+            const { c, titulo } = tituloManual();
+            const r = fechasPara(mes, ob);
+            let msgs = [];
+            if (c && r) { const fv = r.fechas[parseInt(String(c.cuit || '').slice(-1), 10)] || ''; if (fv) document.getElementById('vencDate').value = fv; }
+            else if (!r) msgs.push('No hay fechas cargadas para esta obligación en ese mes: completá la fecha a mano.');
+            if (!c) msgs.push('Elegí el cliente para completar la fecha según su CUIT.');
+            const ya = c && tareasActuales.find(t => t.tipo === 'vencimiento' && t.clienteId === c.id && t.titulo === titulo);
+            if (ya) { hint.style.background = '#fdedec'; hint.style.color = '#922b21'; hint.innerHTML = `⚠️ Este cliente ya tiene cargado "${esc(tituloCorto(titulo))}" (vence ${fmtFecha(ya.vencimiento)}).`; hint.style.display = 'block'; return; }
+            if (msgs.length) { hint.style.background = '#fef5e7'; hint.style.color = '#935116'; hint.innerText = msgs.join(' '); hint.style.display = 'block'; }
+            else if (c) { hint.style.background = '#eafaf1'; hint.style.color = '#1e8449'; hint.innerText = `✓ Se va a agrupar en el calendario junto con "${tituloCorto(titulo)}" del resto de los clientes.`; hint.style.display = 'block'; }
+        }
         window.closeVencModal = function() { document.getElementById('createVencModal').style.display = 'none'; }
 
         let grupoAbierto = null;
@@ -1309,6 +1390,7 @@
                 }
                 pcCliente = { id: snapCliente.docs[0].id, ...snapCliente.docs[0].data() };
                 renderEncabezadoCliente();
+                mostrarBienvenida();
                 const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", pcCliente.id), where("tipo", "==", "vencimiento")), (snapTareas) => {
                     pcTareas = [];
                     snapTareas.forEach(docu => { const t = docu.data(); t.id = docu.id; pcTareas.push(t); });
@@ -1341,6 +1423,17 @@
             if (ESTUDIO_WHATSAPP) contacto += `<a class="pc-btn pc-btn-verde" style="margin-bottom:6px;" target="_blank" href="https://wa.me/${ESTUDIO_WHATSAPP}?text=${encodeURIComponent('Hola, soy ' + (c.nombre || '') + '. Tengo una consulta:')}">💬 Escribir por WhatsApp</a>`;
             if (ESTUDIO_EMAIL) contacto += `<a class="pc-btn pc-btn-azul" href="mailto:${ESTUDIO_EMAIL}?subject=${encodeURIComponent('Consulta - ' + (c.nombre || ''))}">✉️ Enviar un email</a>`;
             document.getElementById('pcContacto').innerHTML = contacto;
+        }
+
+        function mostrarBienvenida() {
+            let visto = false;
+            try { visto = localStorage.getItem('upm_bienvenida_' + currentUserEmail) === '1'; } catch (e) {}
+            document.getElementById('pcBienvenida').style.display = visto ? 'none' : 'block';
+            if (!visto) document.getElementById('pcGuia').open = true;
+        }
+        window.cerrarBienvenida = function() {
+            try { localStorage.setItem('upm_bienvenida_' + currentUserEmail, '1'); } catch (e) {}
+            document.getElementById('pcBienvenida').style.display = 'none';
         }
 
         window.pcFiltro = function(f) {
@@ -1828,7 +1921,7 @@
                 let condTags = '';
                 if(c.condIva) condTags += `<span style="font-size:10px; background:#f39c12; color:white; padding:2px 5px; border-radius:3px; margin-right:3px; font-weight:bold;">${esc(c.condIva)}</span>`;
                 if(c.condGanancias) condTags += `<span style="font-size:10px; background:#8e44ad; color:white; padding:2px 5px; border-radius:3px; font-weight:bold;">Gcias: ${esc(c.condGanancias)}</span>`;
-                const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${esc(c.emailPortal)}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso Portal</span>';
+                const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${esc(c.emailPortal)}</span><span style="display:block; font-size:11px; margin-top:3px; color:${c.accesoEnviado ? '#27ae60' : '#e67e22'};">${c.accesoEnviado ? '✉️ Acceso enviado el ' + fmtFecha(c.accesoEnviado) : '⏳ Acceso sin enviar'}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso Portal</span>';
                 const telTag = c.telefono ? `<span style="font-size:11px; color:#27ae60; font-weight:bold; display:block; margin-top:3px;">📱 ${esc(c.telefono)}</span>` : '';
 
                 tbodyHtml += `
@@ -1920,6 +2013,8 @@
             const t = document.getElementById('vencTitle').value; const clientId = document.getElementById('vencClient').value;
             if(!t) return alert("La obligación es obligatoria.");
             if(!document.getElementById('vencDate').value) return alert("Indicá la fecha de vencimiento.");
+            { const { c, titulo } = tituloManual();
+              if (c && tareasActuales.some(x => x.tipo === 'vencimiento' && x.clienteId === c.id && x.titulo === titulo) && !confirm("Este cliente ya tiene un vencimiento con el mismo título. ¿Crearlo igual?")) return; }
             const btn = document.getElementById('btnCreateVenc'); btn.innerText = "Subiendo..."; btn.disabled = true;
             try {
             const fileInput = document.getElementById('vencFile'); let archivoUrl = "";
@@ -1931,7 +2026,7 @@
             }); 
             
             registrar('Vencimiento manual creado', t + nombreParaTitulo);
-            document.getElementById('vencTitle').value=''; document.getElementById('vencDate').value=''; document.getElementById('vencDesc').value=''; document.getElementById('vencFile').value=''; document.getElementById('vencMonto').value='';
+            document.getElementById('vencTitle').value=''; document.getElementById('vencDate').value=''; document.getElementById('vencDesc').value=''; document.getElementById('vencFile').value=''; document.getElementById('vencMonto').value=''; document.getElementById('vencOblig').value=''; document.getElementById('vencTitle').readOnly = false;
             closeVencModal();
             } catch(e) { alert("No se pudo crear el vencimiento: " + e.message); }
             btn.innerText = "Guardar Vencimiento"; btn.disabled = false;
@@ -2057,35 +2152,7 @@
             for (let i = 1; i <= 9; i++) document.getElementById('fecha_' + i).value = f0;
         }
 
-        window.autoCompletarFechas = function() {
-            const ob = document.getElementById('masivoObligacion').value;
-            const mes = document.getElementById('masivoMes').value;
-            const ids = ['fecha_0', 'fecha_1', 'fecha_2', 'fecha_3', 'fecha_4', 'fecha_5', 'fecha_6', 'fecha_7', 'fecha_8', 'fecha_9'];
-            document.getElementById('avisoFechas').style.display = 'none';
-            if (!ob) { ids.forEach(id => document.getElementById(id).value = ''); return; }
-
-            // 1) Fechas guardadas en el CRM (cargadas por ustedes)
-            const guardadas = calVencDB[mes] && calVencDB[mes][ob];
-            if (guardadas && guardadas.length === 10) {
-                ids.forEach((id, i) => document.getElementById(id).value = guardadas[i] || '');
-                mostrarFuenteFechas('📌 Fechas guardadas en el CRM.', 'ok');
-                return;
-            }
-            
-            if (ob === 'sueldos_emp' || ob === 'sueldos_casas') {
-                const [m, a] = mes.split('-'); 
-                let ld = new Date(a, m, 0); 
-                if (ld.getDay() === 6) ld.setDate(ld.getDate() - 1); 
-                if (ld.getDay() === 0) ld.setDate(ld.getDate() - 2); 
-                if (mes === '12-2026') ld = new Date(2026, 11, 30);
-                
-                const s = `${ld.getFullYear()}-${String(ld.getMonth() + 1).padStart(2, '0')}-${String(ld.getDate()).padStart(2, '0')}`; 
-                ids.forEach(id => document.getElementById(id).value = s);
-                mostrarFuenteFechas('Fecha calculada: último día hábil del mes. Corregila si hay feriados.', 'ok');
-                return;
-            }
-
-            const bd = {
+        const BD_VENC = {
                 "11-2026": {
                     "931": ["2026-11-12", "2026-11-12", "2026-11-13", "2026-11-13", "2026-11-16", "2026-11-16", "2026-11-17", "2026-11-17", "2026-11-18", "2026-11-18"],
                     "iva": ["2026-11-18", "2026-11-18", "2026-11-19", "2026-11-19", "2026-11-20", "2026-11-20", "2026-11-23", "2026-11-23", "2026-11-24", "2026-11-24"],
@@ -2121,14 +2188,48 @@
                 }
             };
 
-            if (bd[mes] && bd[mes][ob] && bd[mes][ob].length === 10) {
-                const fechas = bd[mes][ob];
-                ids.forEach((id, index) => document.getElementById(id).value = fechas[index]);
-                mostrarFuenteFechas('Fechas del calendario incorporado. Revisalas y tocá "Guardar fechas" si las corregís.', 'ok');
-            } else {
-                ids.forEach(id => document.getElementById(id).value = '');
-                mostrarFuenteFechas('No hay fechas cargadas para esta obligación en este mes. Completalas según el calendario de ARCA/AGIP/ARBA y tocá "💾 Guardar fechas": quedan guardadas para la próxima vez.', 'aviso');
+        // Devuelve las 10 fechas (por terminación de CUIT) para un mes y obligación, y de dónde salen
+        function fechasPara(mes, ob) {
+            const guardadas = calVencDB[mes] && calVencDB[mes][ob];
+            if (guardadas && guardadas.length === 10) return { fechas: guardadas, fuente: 'crm' };
+            if (ob === 'sueldos_emp' || ob === 'sueldos_casas') {
+                const [m, a] = mes.split('-');
+                let ld = new Date(a, m, 0);
+                if (ld.getDay() === 6) ld.setDate(ld.getDate() - 1);
+                if (ld.getDay() === 0) ld.setDate(ld.getDate() - 2);
+                if (mes === '12-2026') ld = new Date(2026, 11, 30);
+                const s = `${ld.getFullYear()}-${String(ld.getMonth() + 1).padStart(2, '0')}-${String(ld.getDate()).padStart(2, '0')}`;
+                return { fechas: Array(10).fill(s), fuente: 'calculada' };
             }
+            if (BD_VENC[mes] && BD_VENC[mes][ob] && BD_VENC[mes][ob].length === 10) return { fechas: BD_VENC[mes][ob], fuente: 'incorporada' };
+            return null;
+        }
+
+        // Período que corresponde a cada obligación según el mes en que vence
+        function calcPeriodo(ob, mesNum, anioNum) {
+            const impuestosMesActual = ['monotributo', 'recat_monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
+            const impuestosAnuales = ['dj_ganancias_pf', 'dj_ganancias_soc', 'dj_bienes_pf', 'dj_bienes_soc'];
+            if (impuestosAnuales.includes(ob)) return `Período ${anioNum - 1}`;
+            if (impuestosMesActual.includes(ob)) return `${MESES_N[mesNum - 1]} ${anioNum}`;
+            const d = new Date(anioNum, mesNum - 1, 1);
+            d.setMonth(d.getMonth() - (ob === 'iva_diferido' ? 3 : 1));
+            return `${MESES_N[d.getMonth()]} ${d.getFullYear()}`;
+        }
+        const SOLO_PAGOS = ['iva_diferido', 'monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
+
+        window.autoCompletarFechas = function() {
+            const ob = document.getElementById('masivoObligacion').value;
+            const mes = document.getElementById('masivoMes').value;
+            const ids = ['fecha_0', 'fecha_1', 'fecha_2', 'fecha_3', 'fecha_4', 'fecha_5', 'fecha_6', 'fecha_7', 'fecha_8', 'fecha_9'];
+            document.getElementById('avisoFechas').style.display = 'none';
+            if (!ob) { ids.forEach(id => document.getElementById(id).value = ''); return; }
+
+            const r = fechasPara(mes, ob);
+            ids.forEach((id, i) => document.getElementById(id).value = r ? (r.fechas[i] || '') : '');
+            if (!r) mostrarFuenteFechas('No hay fechas cargadas para esta obligación en este mes. Completalas según el calendario de ARCA/AGIP/ARBA y tocá "💾 Guardar fechas": quedan guardadas para la próxima vez.', 'aviso');
+            else if (r.fuente === 'crm') mostrarFuenteFechas('📌 Fechas guardadas en el CRM.', 'ok');
+            else if (r.fuente === 'calculada') mostrarFuenteFechas('Fecha calculada: último día hábil del mes. Corregila si hay feriados.', 'ok');
+            else mostrarFuenteFechas('Fechas del calendario incorporado. Revisalas y tocá "Guardar fechas" si las corregís.', 'ok');
         }
 
         window.generarMasivas = async function() {
@@ -2136,38 +2237,14 @@
             const ob = obSelect.value; 
             if(!ob) return alert("Selecciona la obligación fiscal a generar.");
             
-            const soloPagos = ['iva_diferido', 'monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
-            const tipoOb = soloPagos.includes(ob) ? 'pago' : 'presentacion';
-            
-            const mesValue = document.getElementById('masivoMes').value; 
+            const tipoOb = SOLO_PAGOS.includes(ob) ? 'pago' : 'presentacion';
+            const mesValue = document.getElementById('masivoMes').value;
             const [mesStr, anioStr] = mesValue.split('-');
-            let mesNum = parseInt(mesStr, 10);
-            let anioNum = parseInt(anioStr, 10);
-            
+            const mesNum = parseInt(mesStr, 10), anioNum = parseInt(anioStr, 10);
             if (ob === 'recat_monotributo' && mesNum !== 2 && mesNum !== 8) {
                 return alert("La recategorización de monotributo solo se genera en los meses de Febrero y Agosto.");
             }
-            
-            const impuestosMesActual = ['monotributo', 'recat_monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
-            const impuestosAnuales = ['dj_ganancias_pf', 'dj_ganancias_soc', 'dj_bienes_pf', 'dj_bienes_soc'];
-            const impuestosIvaDiferido = ['iva_diferido'];
-            
-            let periodoTexto = "";
-            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            
-            if (impuestosAnuales.includes(ob)) {
-                periodoTexto = `Período ${anioNum - 1}`;
-            } else if (impuestosMesActual.includes(ob)) {
-                periodoTexto = `${monthNames[mesNum - 1]} ${anioNum}`;
-            } else if (impuestosIvaDiferido.includes(ob)) {
-                let d = new Date(anioNum, mesNum - 1, 1);
-                d.setMonth(d.getMonth() - 3);
-                periodoTexto = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-            } else {
-                let d = new Date(anioNum, mesNum - 1, 1);
-                d.setMonth(d.getMonth() - 1);
-                periodoTexto = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-            }
+            const periodoTexto = calcPeriodo(ob, mesNum, anioNum);
             
             const nombreImpuesto = obSelect.options[obSelect.selectedIndex].text;
             const tituloGrupo = `${nombreImpuesto} (${periodoTexto})`;
