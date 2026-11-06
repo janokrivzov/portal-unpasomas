@@ -143,6 +143,21 @@
             .modal-content button { min-height:42px; }
         }
 
+        /* ===== Documentos / Mis datos ===== */
+        .pc-nav { display:flex; gap:6px; margin-bottom:16px; background:white; padding:6px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+        .pc-nav button { flex:1; margin:0; padding:10px 8px; border:none; border-radius:8px; background:transparent; color:#2c3e50; font-weight:600; cursor:pointer; font-size:14px; }
+        .pc-nav button.active { background:#2c3e50; color:white; }
+        .pc-box { background:white; border-radius:12px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:16px; }
+        .pc-box h4 { margin:0 0 12px 0; font-size:15px; }
+        .pc-box label { font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:4px; }
+        .doc-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #f0f3f4; font-size:13px; }
+        .doc-item:last-child { border-bottom:none; }
+        .doc-ico { font-size:22px; }
+        .doc-item .grow { flex:1; min-width:0; }
+        .doc-item .grow b { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .doc-item small { color:#7f8c8d; }
+        .buscador-res { background:white; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.12); margin-top:-6px; margin-bottom:16px; }
+
         /* ===== Portal Cliente ===== */
         #portalCliente { max-width: 1100px; margin: 0 auto; color: #2c3e50; }
         .pc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; gap:10px; }
@@ -363,10 +378,10 @@
     <div id="createVencModal" class="modal-overlay">
         <div class="modal-content">
             <h3>Crear Vencimiento Manual</h3>
-            <p style="font-size:12px; color:#7f8c8d; margin:-5px 0 12px 0;">Para cargar un vencimiento de la rutina a un solo cliente (sin generar todos de nuevo), elegí la obligación, el mes y el cliente: el título, el tipo y la fecha se completan solos.</p>
+            <p style="font-size:12px; color:#7f8c8d; margin:-5px 0 12px 0;">Para cargar un vencimiento de la rutina a un solo cliente (sin generar todos de nuevo), elegí la obligación, el período y el cliente: el título, el tipo y la fecha se completan solos.</p>
             <div style="display: grid; grid-template-columns: 1.4fr 1fr 1.4fr; gap: 10px; margin-bottom: 10px; background:#f4f8fb; padding:10px; border-radius:6px;">
                 <div><label style="font-size:12px; font-weight:bold;">Obligación</label><select id="vencOblig" onchange="autocompletarManual()" style="margin:0;"></select></div>
-                <div><label style="font-size:12px; font-weight:bold;">Mes en que vence</label><select id="vencMesBase" onchange="autocompletarManual()" style="margin:0;"></select></div>
+                <div><label style="font-size:12px; font-weight:bold;">Período</label><select id="vencPeriodo" onchange="autocompletarManual()" style="margin:0;"></select></div>
                 <div><label style="font-size:12px; font-weight:bold;">Cliente</label><select id="vencClient" onchange="autocompletarManual()" style="margin:0;"><option value="">-- Interna / Sin Cliente --</option></select></div>
             </div>
             <div id="vencHint" style="display:none; font-size:12px; padding:8px; border-radius:4px; margin-bottom:10px;"></div>
@@ -444,12 +459,62 @@
                 <div class="pc-stats" id="pcStats"></div>
                 <div class="pc-layout">
                     <div>
+                        <div class="pc-nav">
+                            <button class="active" data-v="venc" onclick="pcVista('venc')">📅 Vencimientos</button>
+                            <button data-v="docs" onclick="pcVista('docs')">📎 Documentos <span id="pcDocsCount"></span></button>
+                            <button data-v="datos" onclick="pcVista('datos')">👤 Mis datos</button>
+                        </div>
+                        <div id="pcVistaVenc">
                         <div class="pc-tabs">
                             <button class="pc-tab active" data-f="pendientes" onclick="pcFiltro('pendientes')">Pendientes</button>
                             <button class="pc-tab" data-f="finalizados" onclick="pcFiltro('finalizados')">Finalizados</button>
                             <button class="pc-tab" data-f="todos" onclick="pcFiltro('todos')">Todos</button>
                         </div>
                         <div id="clientDashboardGrid"></div>
+                        </div>
+
+                        <!-- Vista: Documentos -->
+                        <div id="pcVistaDocs" style="display:none;">
+                            <div class="pc-box">
+                                <h4>📤 Enviar documentación al estudio</h4>
+                                <p style="margin:-6px 0 12px 0; font-size:13px; color:#7f8c8d;">Subí facturas, extractos, recibos o lo que te pidamos. Podés elegir varios archivos a la vez (fotos o PDF).</p>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                    <div><label>¿Qué es?</label>
+                                        <select id="docCategoria" style="margin:0;">
+                                            <option>Facturas de venta</option><option>Facturas de compra</option><option>Extractos bancarios</option>
+                                            <option>Recibos de sueldo / novedades</option><option>Comprobante de pago</option><option>Otro</option>
+                                        </select></div>
+                                    <div><label>Período (mes)</label><input type="month" id="docPeriodo" style="margin:0;"></div>
+                                </div>
+                                <div style="margin-top:10px;"><label>Comentario (opcional)</label><input type="text" id="docNota" placeholder="Ej: faltan las de la sucursal 2" style="margin:0;"></div>
+                                <div style="margin-top:10px;"><label>Archivos</label><input type="file" id="docArchivos" multiple accept="image/*,application/pdf,.xls,.xlsx,.csv,.doc,.docx,.zip" style="margin:0;"></div>
+                                <button id="btnSubirDocs" class="pc-btn pc-btn-verde" style="margin-top:12px; width:100%;" onclick="subirDocsCliente()">📤 Enviar al estudio</button>
+                            </div>
+                            <div class="pc-box"><h4>📁 Documentos del estudio para vos</h4><div id="pcDocsEstudio"></div></div>
+                            <div class="pc-box"><h4>🗂️ Lo que nos enviaste</h4><div id="pcDocsCliente"></div></div>
+                        </div>
+
+                        <!-- Vista: Mis datos -->
+                        <div id="pcVistaDatos" style="display:none;">
+                            <div class="pc-box">
+                                <h4>👤 Mis datos de contacto</h4>
+                                <p style="margin:-6px 0 12px 0; font-size:13px; color:#7f8c8d;">Mantené tus datos actualizados para que podamos avisarte de tus vencimientos.</p>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                    <div><label>WhatsApp / Teléfono</label><input type="tel" id="mdTel" placeholder="Ej: 5491112345678" style="margin:0;"></div>
+                                    <div><label>Email de contacto</label><input type="email" id="mdEmail" style="margin:0;"></div>
+                                    <div><label>Persona de contacto</label><input type="text" id="mdContacto" style="margin:0;"></div>
+                                    <div><label>Dirección</label><input type="text" id="mdDireccion" style="margin:0;"></div>
+                                </div>
+                                <button class="pc-btn pc-btn-azul" style="margin-top:12px; width:100%;" onclick="guardarMisDatos()">💾 Guardar cambios</button>
+                                <p id="mdOk" style="display:none; color:#1e8449; font-size:13px; margin:10px 0 0 0;">✓ ¡Datos actualizados! Gracias.</p>
+                            </div>
+                            <div class="pc-box">
+                                <h4>📋 Datos fiscales</h4>
+                                <div id="mdFiscales" style="font-size:13px; color:#555; line-height:1.7;"></div>
+                                <p style="font-size:12px; color:#7f8c8d; margin:8px 0 0 0;">Si algún dato fiscal cambió, avisanos y lo actualizamos.</p>
+                                <p style="font-size:12px; color:#7f8c8d; margin:4px 0 0 0;">Para cambiar tu contraseña del portal: cerrá sesión y tocá "¿Olvidaste tu contraseña?".</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="pc-side">
                         <details class="pc-card" id="pcGuia">
@@ -485,12 +550,16 @@
             <div id="inicio" class="section active">
                 <h2 id="inicioSaludo" style="margin-bottom:2px;">Inicio</h2>
                 <p id="inicioFecha" style="margin-top:0; font-size:13px; color:#7f8c8d;"></p>
+                <input type="text" id="buscadorRapido" placeholder="🔍 Buscar cliente por nombre o CUIT..." oninput="buscarRapido()" autocomplete="off" style="margin-bottom:10px;">
+                <div id="buscadorRes"></div>
                 <div class="kpi-grid" id="inicioKpis"></div>
                 <div class="inicio-grid">
                     <div class="panel"><h3>💳 Pagos informados por clientes <small style="color:#95a5a6; font-weight:normal;">(para controlar)</small></h3><div id="inicioPagos"></div></div>
                     <div class="panel"><h3>⚠️ Vencidos sin finalizar</h3><div id="inicioVencidos"></div></div>
                     <div class="panel"><h3>📅 Próximos 7 días</h3><div id="inicioSemana"></div></div>
                     <div class="panel"><h3>👤 Mis tareas pendientes</h3><div id="inicioMias"></div></div>
+                    <div class="panel"><h3>📎 Documentación nueva de clientes</h3><div id="inicioDocs"></div></div>
+                    <div class="panel"><h3>👥 Datos actualizados por clientes <small style="color:#95a5a6; font-weight:normal;">(últimos 30 días)</small></h3><div id="inicioDatos"></div></div>
                 </div>
             </div>
 
@@ -702,6 +771,10 @@
             <div id="historial" class="section">
                 <h2>Registro de cambios</h2>
                 <p style="margin-top:0; font-size:13px; color:#7f8c8d;">Últimos 300 movimientos: quién hizo qué y cuándo (ustedes y los clientes).</p>
+                <div class="panel" style="margin-bottom:16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:220px; font-size:13px; color:#555;"><b>Copia de seguridad.</b> Descarga toda la información del CRM en un archivo. Recomendado: una vez por mes, guardada en un lugar seguro.</div>
+                    <button id="btnBackup" class="btn-sec" onclick="descargarBackup()" style="width:auto; margin:0; padding:10px 16px;">💾 Descargar copia de seguridad</button>
+                </div>
                 <input type="text" id="histBuscar" placeholder="🔍 Buscar (cliente, acción, persona)..." oninput="renderHistorial()">
                 <div class="panel" id="histLista"></div>
             </div>
@@ -830,7 +903,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, deleteDoc, doc, where, writeBatch, setDoc, getDoc, arrayUnion, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, deleteDoc, doc, where, writeBatch, setDoc, getDoc, getDocs, arrayUnion, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
         // CONFIGURACIÓN DE FIREBASE
@@ -914,6 +987,7 @@
                 document.getElementById('app-container').style.display = 'none';
                 listeners.forEach(unsub => unsub());
                 listeners = [];
+                pcCliente = null; window._pcDocsSub = false;
             }
         });
 
@@ -1079,8 +1153,24 @@
                     <button class="btn-sec" onclick="openTaskModal('${t.id}')">Abrir</button>
                 </div>`).join('') : '<div class="vacio-mini">No tenés tareas pendientes. 👌</div>');
 
+            // Documentación nueva enviada por clientes
+            const docsNuevos = documentosTodos.filter(d => d.subidoPor === 'cliente' && !d.revisado).sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+            const porCli = {};
+            docsNuevos.forEach(d => { (porCli[d.clienteId] = porCli[d.clienteId] || []).push(d); });
+            document.getElementById('inicioDocs').innerHTML = Object.keys(porCli).length ? Object.entries(porCli).map(([cid, ds]) => `
+                <div class="fila"><div class="grow"><b>${esc(ds[0].clienteNombre)}</b><small>${ds.length} archivo(s) · ${esc([...new Set(ds.map(d => d.categoria))].join(', '))}</small></div>
+                <button class="btn-sec" onclick="abrirFicha('${cid}'); fichaVer('docs');">Ver</button>
+                <button style="background:#27ae60; color:white;" onclick="marcarDocsRevisados('${cid}')" title="Marcar como recibidos">✔</button></div>`).join('')
+                : '<div class="vacio-mini">No hay documentación nueva.</div>';
+
+            const hace30 = hoyStr(-30);
+            const actualizados = clientesActivos.filter(c => c.datosActualizados && c.datosActualizados >= hace30).sort((a, b) => b.datosActualizados.localeCompare(a.datosActualizados));
+            document.getElementById('inicioDatos').innerHTML = actualizados.length ? actualizados.map(c => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${fmtFecha(c.datosActualizados).substring(0, 5)}</span><div class="grow"><b>${esc(c.nombre)}</b><small>Tel: ${esc(c.telefono || '—')} · ${esc(c.emailContacto || '')}</small></div><button class="btn-sec" onclick="abrirFicha('${c.id}')">Ver</button></div>`).join('')
+                : '<div class="vacio-mini">Ningún cliente actualizó sus datos.</div>';
+
             const b = document.getElementById('badgePagos');
-            b.style.display = pagos.length ? '' : 'none'; b.innerText = pagos.length;
+            const avisos = pagos.length + Object.keys(porCli).length;
+            b.style.display = avisos ? '' : 'none'; b.innerText = avisos;
         }
 
         window.irAMisTareas = function() { document.getElementById('filterResponsible').value = '__mias'; showSection('tareas'); renderTareas(); }
@@ -1201,11 +1291,15 @@
             const so = document.getElementById('vencOblig');
             if (!so.options.length) {
                 so.innerHTML = '<option value="">✏️ Otra (escribir el título)</option>' + Array.from(document.getElementById('masivoObligacion').options).filter(o => o.value).map(o => `<option value="${o.value}">${esc(o.textContent)}</option>`).join('');
-                document.getElementById('vencMesBase').innerHTML = document.getElementById('masivoMes').innerHTML;
+                // Períodos: 12 meses atrás y 12 hacia adelante
+                const hoy = new Date(); let opts = '';
+                for (let i = -12; i <= 12; i++) { const d = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1); opts += `<option value="${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}">${MESES_N[d.getMonth()]} ${d.getFullYear()}</option>`; }
+                document.getElementById('vencPeriodo').innerHTML = opts;
             }
-            // Por defecto, el mes que se está viendo en el calendario
-            const mc = `${String(currentCalDate.getMonth() + 1).padStart(2, '0')}-${currentCalDate.getFullYear()}`;
-            if (Array.from(document.getElementById('vencMesBase').options).some(o => o.value === mc)) document.getElementById('vencMesBase').value = mc;
+            // Por defecto: el mes anterior al que se está viendo en el calendario
+            const dp = new Date(currentCalDate.getFullYear(), currentCalDate.getMonth() - 1, 1);
+            const pv = `${String(dp.getMonth() + 1).padStart(2, '0')}-${dp.getFullYear()}`;
+            if (Array.from(document.getElementById('vencPeriodo').options).some(o => o.value === pv)) document.getElementById('vencPeriodo').value = pv;
             autocompletarManual();
             document.getElementById('createVencModal').style.display = 'flex';
         }
@@ -1224,21 +1318,26 @@
             hint.style.display = 'none';
             document.getElementById('vencTitle').readOnly = !!ob;
             if (!ob) return;
-            const mes = document.getElementById('vencMesBase').value;
-            const [m, a] = mes.split('-').map(Number);
+            const [pm, pa] = document.getElementById('vencPeriodo').value.split('-').map(Number);
             const nombre = document.getElementById('vencOblig').selectedOptions[0].textContent;
-            document.getElementById('vencTitle').value = `${nombre} (${calcPeriodo(ob, m, a)})`;
+            // Mes en que vence según el período (igual que el generador masivo)
+            const base = mesVencimientoDe(ob, pm, pa);
+            const mes = base ? `${String(base.getMonth() + 1).padStart(2, '0')}-${base.getFullYear()}` : null;
+            document.getElementById('vencTitle').value = `${nombre} (${base ? calcPeriodo(ob, base.getMonth() + 1, base.getFullYear()) : 'Período ' + pa})`;
             document.getElementById('vencTipoOb').value = SOLO_PAGOS.includes(ob) ? 'pago' : 'presentacion';
             const { c, titulo } = tituloManual();
-            const r = fechasPara(mes, ob);
+            const r = mes ? fechasPara(mes, ob) : null;
             let msgs = [];
+            if (base) msgs.push(`Vence en ${MESES_N[base.getMonth()]} ${base.getFullYear()}.`);
             if (c && r) { const fv = r.fechas[parseInt(String(c.cuit || '').slice(-1), 10)] || ''; if (fv) document.getElementById('vencDate').value = fv; }
-            else if (!r) msgs.push('No hay fechas cargadas para esta obligación en ese mes: completá la fecha a mano.');
+            else if (!r) msgs.push(base ? 'No hay fechas cargadas para ese mes: completá la fecha a mano.' : 'Completá la fecha a mano.');
             if (!c) msgs.push('Elegí el cliente para completar la fecha según su CUIT.');
-            const ya = c && tareasActuales.find(t => t.tipo === 'vencimiento' && t.clienteId === c.id && t.titulo === titulo);
-            if (ya) { hint.style.background = '#fdedec'; hint.style.color = '#922b21'; hint.innerHTML = `⚠️ Este cliente ya tiene cargado "${esc(tituloCorto(titulo))}" (vence ${fmtFecha(ya.vencimiento)}).`; hint.style.display = 'block'; return; }
+            const fvSel = document.getElementById('vencDate').value;
+            const ya = c && tareasActuales.find(t => t.tipo === 'vencimiento' && t.clienteId === c.id && (t.titulo === titulo || (fvSel && t.vencimiento === fvSel && grupoDe(t).startsWith(nombre + ' ('))));
+            if (ya) { hint.style.background = '#fdedec'; hint.style.color = '#922b21'; hint.innerHTML = `⚠️ Este cliente ya tiene cargado "${esc(tituloCorto(ya.titulo))}" (vence ${fmtFecha(ya.vencimiento)}).`; hint.style.display = 'block'; return; }
+            if (c && r) msgs = [];
             if (msgs.length) { hint.style.background = '#fef5e7'; hint.style.color = '#935116'; hint.innerText = msgs.join(' '); hint.style.display = 'block'; }
-            else if (c) { hint.style.background = '#eafaf1'; hint.style.color = '#1e8449'; hint.innerText = `✓ Se va a agrupar en el calendario junto con "${tituloCorto(titulo)}" del resto de los clientes.`; hint.style.display = 'block'; }
+            else if (c) { hint.style.background = '#eafaf1'; hint.style.color = '#1e8449'; hint.innerText = `✓ Vence el ${fmtFecha(document.getElementById('vencDate').value)} y se agrupa en el calendario junto con "${tituloCorto(titulo)}" del resto de los clientes.`; hint.style.display = 'block'; }
         }
         window.closeVencModal = function() { document.getElementById('createVencModal').style.display = 'none'; }
 
@@ -1388,8 +1487,10 @@
                 if(snapCliente.empty) {
                     document.getElementById('clientDashboardGrid').innerHTML = '<div class="pc-vacio">No encontramos una ficha de cliente asociada a este correo. Comunicate con el estudio.</div>'; return;
                 }
+                const primeraVez = !pcCliente;
                 pcCliente = { id: snapCliente.docs[0].id, ...snapCliente.docs[0].data() };
                 renderEncabezadoCliente();
+                if (!primeraVez) return;   // ya estamos escuchando sus vencimientos y documentos
                 mostrarBienvenida();
                 const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", pcCliente.id), where("tipo", "==", "vencimiento")), (snapTareas) => {
                     pcTareas = [];
@@ -1397,6 +1498,14 @@
                     renderPortalCliente();
                 }, errorPortal);
                 listeners.push(unsubTareas);
+                if (!window._pcDocsSub) {
+                    window._pcDocsSub = true;
+                    listeners.push(onSnapshot(query(collection(db, "documentos"), where("clienteId", "==", pcCliente.id)), snap => {
+                        pcDocs = []; snap.forEach(d => pcDocs.push({ id: d.id, ...d.data() })); renderDocsCliente();
+                    }, e => console.warn("documentos:", e)));
+                    const dp = new Date(); dp.setMonth(dp.getMonth() - 1);
+                    document.getElementById('docPeriodo').value = `${dp.getFullYear()}-${String(dp.getMonth() + 1).padStart(2, '0')}`;
+                }
             }, errorPortal);
             listeners.push(unsubCliente);
         }
@@ -1434,6 +1543,80 @@
         window.cerrarBienvenida = function() {
             try { localStorage.setItem('upm_bienvenida_' + currentUserEmail, '1'); } catch (e) {}
             document.getElementById('pcBienvenida').style.display = 'none';
+        }
+
+        // Vistas del portal (Vencimientos / Documentos / Mis datos)
+        window.pcVista = function(v) {
+            document.querySelectorAll('.pc-nav button').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+            document.getElementById('pcVistaVenc').style.display = v === 'venc' ? '' : 'none';
+            document.getElementById('pcVistaDocs').style.display = v === 'docs' ? '' : 'none';
+            document.getElementById('pcVistaDatos').style.display = v === 'datos' ? '' : 'none';
+            if (v === 'datos') cargarMisDatos();
+        }
+
+        let pcDocs = [];
+        const ICONO_DOC = n => /\.pdf$/i.test(n) ? '📕' : (/\.(jpe?g|png|heic|webp)$/i.test(n) ? '🖼️' : (/\.(xlsx?|csv)$/i.test(n) ? '📗' : '📄'));
+        function renderDocsCliente() {
+            const est = pcDocs.filter(d => d.subidoPor === 'estudio').sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+            const mios = pcDocs.filter(d => d.subidoPor === 'cliente').sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+            const item = d => `<div class="doc-item"><span class="doc-ico">${ICONO_DOC(d.nombre)}</span><div class="grow"><b title="${esc(d.nombre)}">${esc(d.titulo || d.nombre)}</b><small>${esc(d.categoria || '')}${d.periodo ? ' · ' + periodoTexto(d.periodo) : ''} · ${new Date(d.fecha).toLocaleDateString('es-AR')}${d.subidoPor === 'cliente' ? (d.revisado ? ' · <span style="color:#27ae60;">✓ Recibido por el estudio</span>' : ' · Enviado') : ''}</small>${d.nota ? `<small style="display:block;"><i>${esc(d.nota)}</i></small>` : ''}</div><a class="pc-btn pc-btn-azul" style="padding:6px 10px;" href="${esc(d.url)}" target="_blank">📥</a></div>`;
+            document.getElementById('pcDocsEstudio').innerHTML = est.map(item).join('') || '<div class="pc-nota" style="text-align:left;">Todavía no compartimos documentos con vos (constancias, declaraciones juradas, etc.).</div>';
+            document.getElementById('pcDocsCliente').innerHTML = mios.map(item).join('') || '<div class="pc-nota" style="text-align:left;">Todavía no enviaste documentos.</div>';
+            document.getElementById('pcDocsCount').innerText = est.length ? `(${est.length})` : '';
+        }
+
+        async function subirArchivoA(carpeta, file) {
+            const nombreSeguro = file.name.replace(/[^\w.\-]+/g, '_');
+            const r = ref(storage, `${carpeta}/${Date.now()}_${nombreSeguro}`);
+            await uploadBytes(r, file);
+            return await getDownloadURL(r);
+        }
+
+        window.subirDocsCliente = async function() {
+            const files = Array.from(document.getElementById('docArchivos').files);
+            if (!files.length) return alert("Elegí al menos un archivo.");
+            if (files.some(fl => fl.size > 20 * 1024 * 1024)) return alert("Cada archivo puede pesar hasta 20 MB.");
+            const btn = document.getElementById('btnSubirDocs'); btn.disabled = true;
+            const categoria = document.getElementById('docCategoria').value, periodo = document.getElementById('docPeriodo').value, nota = document.getElementById('docNota').value.trim();
+            let ok = 0;
+            try {
+                for (const fl of files) {
+                    btn.innerText = `Subiendo ${ok + 1} de ${files.length}...`;
+                    const url = await subirArchivoA(`clientes/${pcCliente.id}`, fl);
+                    await addDoc(collection(db, "documentos"), { clienteId: pcCliente.id, clienteNombre: pcCliente.nombre || '', nombre: fl.name, url, categoria, periodo, nota, fecha: new Date().toISOString(), subidoPor: 'cliente', email: currentUserEmail, revisado: false });
+                    ok++;
+                }
+                addDoc(collection(db, "historial"), { fecha: new Date().toISOString(), usuario: currentUserEmail, nombre: pcCliente.nombre || currentUserEmail, accion: 'Cliente envió documentación', detalle: `${ok} archivo(s) · ${categoria}${periodo ? ' · ' + periodo : ''}` }).catch(() => {});
+                alert(`¡Gracias! Recibimos ${ok} archivo(s).`);
+                document.getElementById('docArchivos').value = ''; document.getElementById('docNota').value = '';
+            } catch (e) { alert(`Se enviaron ${ok} archivo(s). Hubo un error con el resto: ` + e.message); }
+            btn.disabled = false; btn.innerText = '📤 Enviar al estudio';
+        }
+
+        function cargarMisDatos() {
+            const c = pcCliente; if (!c) return;
+            document.getElementById('mdTel').value = c.telefono || '';
+            document.getElementById('mdEmail').value = c.emailContacto || c.emailPortal || '';
+            document.getElementById('mdContacto').value = c.contacto || '';
+            document.getElementById('mdDireccion').value = c.direccion || '';
+            document.getElementById('mdOk').style.display = 'none';
+            const fila = (l, v) => v ? `<div><b>${l}:</b> ${esc(v)}</div>` : '';
+            document.getElementById('mdFiscales').innerHTML = fila('Razón social', c.nombre) + fila('CUIT', c.cuit) + fila('Condición frente al IVA', c.condIva) + fila('Ganancias', c.condGanancias) + fila('Categoría de monotributo', c.categoriaMono) + fila('Actividad', c.actividad) + fila('Email de acceso al portal', c.emailPortal);
+        }
+
+        window.guardarMisDatos = async function() {
+            const data = {
+                telefono: document.getElementById('mdTel').value.trim(),
+                emailContacto: document.getElementById('mdEmail').value.trim().toLowerCase(),
+                contacto: document.getElementById('mdContacto').value.trim(),
+                direccion: document.getElementById('mdDireccion').value.trim(),
+                datosActualizados: hoyStr()
+            };
+            try {
+                await updateDoc(doc(db, "clientes", pcCliente.id), data);
+                document.getElementById('mdOk').style.display = 'block';
+                addDoc(collection(db, "historial"), { fecha: new Date().toISOString(), usuario: currentUserEmail, nombre: pcCliente.nombre || currentUserEmail, accion: 'Cliente actualizó sus datos', detalle: `Tel: ${data.telefono || '—'} · Email: ${data.emailContacto || '—'}` }).catch(() => {});
+            } catch (e) { alert("No se pudieron guardar los datos: " + e.message); }
         }
 
         window.pcFiltro = function(f) {
@@ -1739,7 +1922,9 @@
             const hons = honorariosTodos.filter(h => h.clienteId === c.id).sort((a, b) => (b.periodo || '').localeCompare(a.periodo || ''));
             const archivos = [...venc, ...tareas].filter(t => t.archivoUrl);
             const deuda = hons.filter(h => !h.pagado).reduce((s, h) => s + (Number(h.monto) || 0), 0);
-            const tabs = [['venc', `Vencimientos (${venc.length})`], ['tareas', `Tareas (${tareas.length})`], ['hon', `Honorarios${deuda ? ' · debe ' + pesos(deuda) : ''}`], ['arch', `Archivos (${archivos.length})`]];
+            const docsC = documentosTodos.filter(d => d.clienteId === c.id).sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+            const docsNuevosC = docsC.filter(d => d.subidoPor === 'cliente' && !d.revisado).length;
+            const tabs = [['venc', `Vencimientos (${venc.length})`], ['tareas', `Tareas (${tareas.length})`], ['docs', `Documentos (${docsC.length})${docsNuevosC ? ' 🔴' : ''}`], ['hon', `Honorarios${deuda ? ' · debe ' + pesos(deuda) : ''}`], ['arch', `Adjuntos (${archivos.length})`]];
             document.getElementById('fichaTabs').innerHTML = tabs.map(([k, l]) => `<button class="pc-tab ${fichaTab === k ? 'active' : ''}" onclick="fichaVer('${k}')">${l}</button>`).join('');
 
             const filaT = t => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${fmtFecha(t.vencimiento)}</span><div class="grow"><b>${esc(t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo)}</b><small>${t.monto ? pesos(t.monto) + ' · ' : ''}${t.auditoriaPago ? '💳 Pago informado por el cliente' : ''}</small></div>${estadoTag(t)}${t.archivoUrl ? `<a class="mini" style="background:#ebf5fb; color:#2980b9;" href="${esc(t.archivoUrl)}" target="_blank">📎</a>` : ''}<button class="btn-sec" onclick="openTaskModal('${t.id}')">Abrir</button></div>`;
@@ -1747,8 +1932,83 @@
             if (fichaTab === 'venc') html = venc.map(filaT).join('') || '<div class="vacio-mini">Sin vencimientos.</div>';
             if (fichaTab === 'tareas') html = tareas.map(filaT).join('') || '<div class="vacio-mini">Sin tareas internas.</div>';
             if (fichaTab === 'arch') html = archivos.map(t => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${fmtFecha(t.vencimiento)}</span><div class="grow"><b>${esc(t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo)}</b></div><a class="mini" style="background:#3498db; color:white;" href="${esc(t.archivoUrl)}" target="_blank">📥 Abrir</a></div>`).join('') || '<div class="vacio-mini">Sin archivos.</div>';
+            if (fichaTab === 'docs') {
+                html = `<div style="background:#f4f8fb; border-radius:6px; padding:10px; margin:6px 0 10px 0;">
+                    <b style="font-size:13px;">📤 Compartir un documento con el cliente</b> <small style="color:#7f8c8d;">(lo ve en su portal: constancias, DDJJ, estatutos...)</small>
+                    <div style="display:grid; grid-template-columns: 1.5fr 1fr auto; gap:8px; margin-top:8px; align-items:center;">
+                        <input type="text" id="docEstTitulo" placeholder="Nombre (ej: Constancia de inscripción)" style="margin:0;">
+                        <input type="file" id="docEstArchivo" style="margin:0;">
+                        <button class="btn-green" id="btnDocEst" onclick="compartirDocEstudio('${c.id}')" style="margin:0; width:auto; padding:9px 14px;">Compartir</button>
+                    </div></div>`;
+                html += docsC.map(d => `<div class="fila"><span style="font-size:20px;">${ICONO_DOC(d.nombre)}</span><div class="grow"><b>${esc(d.titulo || d.nombre)}</b><small>${d.subidoPor === 'cliente' ? '⬆️ Enviado por el cliente' : '⬇️ Compartido por el estudio'} · ${esc(d.categoria || '')}${d.periodo ? ' · ' + periodoTexto(d.periodo) : ''} · ${new Date(d.fecha).toLocaleDateString('es-AR')}</small>${d.nota ? `<small><i>${esc(d.nota)}</i></small>` : ''}</div>
+                    ${d.subidoPor === 'cliente' && !d.revisado ? '<span class="est est-proc">Nuevo</span>' : ''}
+                    <a class="mini" style="background:#3498db; color:white;" href="${esc(d.url)}" target="_blank">📥</a>
+                    <button style="background:#fdedec; color:#c0392b;" onclick="borrarDocumento('${d.id}')" title="Borrar">🗑</button></div>`).join('') || '<div class="vacio-mini">Sin documentos.</div>';
+                if (docsNuevosC) html += `<button class="btn-green" style="margin-top:10px;" onclick="marcarDocsRevisados('${c.id}')">✔ Marcar todo como recibido</button>`;
+            }
             if (fichaTab === 'hon') html = hons.map(h => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${periodoTexto(h.periodo)}</span><div class="grow"><b>${esc(h.concepto)}</b><small>${pesos(h.monto)}${h.pagado && h.fechaPago ? ' · pagado el ' + fmtFecha(h.fechaPago) : ''}</small></div>${h.pagado ? '<span class="est est-ok">Pagado</span>' : '<span class="est est-venc">Debe</span>'}</div>`).join('') || '<div class="vacio-mini">Sin honorarios registrados.</div>';
             document.getElementById('fichaContenido').innerHTML = `<div class="panel" style="box-shadow:none; border:1px solid #ecf0f1; padding:6px 12px; max-height:45vh; overflow-y:auto;">${html}</div>`;
+        }
+
+        // ---------- DOCUMENTOS ----------
+        let documentosTodos = [];
+        window.compartirDocEstudio = async function(cid) {
+            const c = clientesActivos.find(x => x.id === cid);
+            const fl = document.getElementById('docEstArchivo').files[0];
+            const titulo = document.getElementById('docEstTitulo').value.trim();
+            if (!fl) return alert("Elegí el archivo.");
+            const btn = document.getElementById('btnDocEst'); btn.disabled = true; btn.innerText = 'Subiendo...';
+            try {
+                const url = await subirArchivoA(`clientes/${cid}`, fl);
+                await addDoc(collection(db, "documentos"), { clienteId: cid, clienteNombre: c ? c.nombre : '', nombre: fl.name, titulo: titulo || fl.name, url, categoria: 'Documento del estudio', periodo: '', nota: '', fecha: new Date().toISOString(), subidoPor: 'estudio', email: currentUserEmail, revisado: true });
+                registrar('Documento compartido con cliente', `${c ? c.nombre : cid}: ${titulo || fl.name}`);
+            } catch (e) { alert("No se pudo subir: " + e.message); }
+            btn.disabled = false; btn.innerText = 'Compartir';
+        }
+        window.marcarDocsRevisados = async function(cid) {
+            const ds = documentosTodos.filter(d => d.clienteId === cid && d.subidoPor === 'cliente' && !d.revisado);
+            try {
+                const batch = writeBatch(db); ds.forEach(d => batch.update(doc(db, "documentos", d.id), { revisado: true })); await batch.commit();
+                registrar('Documentación recibida', `${ds[0] ? ds[0].clienteNombre : ''}: ${ds.length} archivo(s)`);
+            } catch (e) { alert(e.message); }
+        }
+        window.borrarDocumento = async function(id) {
+            const d = documentosTodos.find(x => x.id === id); if (!d || !confirm(`¿Borrar "${d.titulo || d.nombre}"? El cliente ya no lo va a ver.`)) return;
+            try { await deleteDoc(doc(db, "documentos", id)); registrar('Documento borrado', `${d.clienteNombre}: ${d.titulo || d.nombre}`); } catch (e) { alert(e.message); }
+        }
+        cargasExtra.push(() => {
+            listeners.push(onSnapshot(collection(db, "documentos"), snap => {
+                documentosTodos = []; snap.forEach(d => documentosTodos.push({ id: d.id, ...d.data() }));
+                renderInicio(); if (fichaId) renderFicha();
+            }, e => console.warn("documentos:", e)));
+        });
+
+        // ---------- COPIA DE SEGURIDAD ----------
+        window.descargarBackup = async function() {
+            if (!confirm("Se va a descargar una copia completa de la base (clientes con sus claves fiscales, vencimientos, honorarios, etc.).\n\nGuardala en un lugar seguro y no la compartas. ¿Continuar?")) return;
+            const btn = document.getElementById('btnBackup'); btn.disabled = true; btn.innerText = 'Preparando...';
+            try {
+                const cols = ['clientes', 'tareas', 'honorarios', 'recurrentes', 'calendarioVenc', 'comentarios', 'documentos', 'historial'];
+                const data = { generado: new Date().toISOString(), por: currentUserEmail };
+                for (const c of cols) { const snap = await getDocs(collection(db, c)); data[c] = {}; snap.forEach(d => data[c][d.id] = d.data()); }
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+                a.download = `backup_unpasomas_${hoyStr()}.json`; document.body.appendChild(a); a.click(); a.remove();
+                registrar('Copia de seguridad descargada', cols.map(c => `${c}: ${Object.keys(data[c]).length}`).join(' · '));
+            } catch (e) { alert("No se pudo generar la copia: " + e.message); }
+            btn.disabled = false; btn.innerText = '💾 Descargar copia de seguridad';
+        }
+
+        // ---------- BUSCADOR RÁPIDO DE CLIENTES ----------
+        window.buscarRapido = function() {
+            const term = document.getElementById('buscadorRapido').value.trim().toLowerCase();
+            const box = document.getElementById('buscadorRes');
+            if (term.length < 2) { box.innerHTML = ''; return; }
+            const digits = term.replace(/\D/g, '');
+            const res = clientesActivos.filter(c => (c.nombre || '').toLowerCase().includes(term) || (digits.length >= 3 && (c.cuit || '').includes(digits))).slice(0, 8);
+            box.innerHTML = res.length ? '<div class="buscador-res">' + res.map(c => `<div class="fila" style="padding:9px 12px;"><div class="grow"><b>${esc(c.nombre)}</b><small>CUIT ${esc(c.cuit)}${c.activo ? '' : ' · Inactivo'}</small></div>
+                <button class="btn-sec" onclick="abrirFicha('${c.id}')">📂 Ficha</button>${c.telefono ? `<a class="mini" style="background:#25D366; color:white;" target="_blank" href="https://wa.me/${String(c.telefono).replace(/\D/g, '')}">💬</a>` : ''}</div>`).join('') + '</div>'
+                : '<div class="buscador-res"><div class="vacio-mini" style="padding:10px 12px;">Sin resultados.</div></div>';
         }
 
         // ---------- HONORARIOS ----------
@@ -2207,13 +2467,20 @@
 
         // Período que corresponde a cada obligación según el mes en que vence
         function calcPeriodo(ob, mesNum, anioNum) {
-            const impuestosMesActual = ['monotributo', 'recat_monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
+            const impuestosMesActual = ['monotributo', 'recat_monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc', 'sueldos_emp', 'sueldos_casas'];
             const impuestosAnuales = ['dj_ganancias_pf', 'dj_ganancias_soc', 'dj_bienes_pf', 'dj_bienes_soc'];
             if (impuestosAnuales.includes(ob)) return `Período ${anioNum - 1}`;
             if (impuestosMesActual.includes(ob)) return `${MESES_N[mesNum - 1]} ${anioNum}`;
             const d = new Date(anioNum, mesNum - 1, 1);
             d.setMonth(d.getMonth() - (ob === 'iva_diferido' ? 3 : 1));
             return `${MESES_N[d.getMonth()]} ${d.getFullYear()}`;
+        }
+        // Inverso de calcPeriodo: a partir del período, en qué mes vence (null para las anuales)
+        function mesVencimientoDe(ob, pm, pa) {
+            if (['dj_ganancias_pf', 'dj_ganancias_soc', 'dj_bienes_pf', 'dj_bienes_soc'].includes(ob)) return null;
+            const mismoMes = ['monotributo', 'recat_monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc', 'sueldos_emp', 'sueldos_casas'];
+            const off = mismoMes.includes(ob) ? 0 : (ob === 'iva_diferido' ? 3 : 1);
+            return new Date(pa, pm - 1 + off, 1);
         }
         const SOLO_PAGOS = ['iva_diferido', 'monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
 
@@ -2262,8 +2529,8 @@
                 if (c.activo && c.obligaciones && c.obligaciones.includes(ob)) { 
                     const titulo = `${tituloGrupo} - ${c.nombre}`;
                     // Si ya se generó antes para este cliente, no se duplica
-                    if (tareasActuales.some(t => t.tipo === 'vencimiento' && t.clienteId === c.id && t.titulo === titulo)) { yaExistian++; continue; }
                     const fv = f[(c.cuit || '').replace(/\D/g, '').slice(-1)]; 
+                    if (tareasActuales.some(t => t.tipo === 'vencimiento' && t.clienteId === c.id && (t.titulo === titulo || (fv && t.vencimiento === fv && grupoDe(t).startsWith(nombreImpuesto + ' ('))))) { yaExistian++; continue; }
                     if (!fv) { sinFecha++; continue; }
                     nuevas.push({ 
                         titulo, tipo: 'vencimiento', tipoObligacion: tipoOb, monto: "", posicion: "", descripcion: "", archivoUrl: "",
