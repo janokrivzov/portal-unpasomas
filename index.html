@@ -800,7 +800,7 @@
                     </div>
 
                     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
-                        <div><label style="font-size:12px; font-weight:bold;">Email (Acceso al Portal)</label><input type="email" id="clientEmailLogin" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Email (Acceso al Portal) <span style="font-weight:normal; color:#95a5a6;">· el acceso se envía solo con "📧 Enviar acceso"</span></label><input type="email" id="clientEmailLogin" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Clave ARCA</label><input type="text" id="clientARCA" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Clave AGIP</label><input type="text" id="clientAGIP" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Clave ARBA</label><input type="text" id="clientARBA" style="margin:0;"></div>
@@ -1274,12 +1274,16 @@
             }
 
             const fechaStr = fecha ? fmtFecha(fecha) : 'próximamente';
-            const queVence = tipoObligacion === 'pago' ? 'el pago' : 'la presentación';
+            const esPago = tipoObligacion === 'pago';
+            const queVence = esPago ? 'el pago' : (monto ? 'la presentación y el pago' : 'la presentación');
 
             let mensaje = `${nombreCliente}\nTe recordamos que el día *${fechaStr}* vence ${queVence} de *${obligacion}*`;
             if (periodo) mensaje += ` correspondiente al período *${periodo}*`;
-            if (monto) mensaje += ` por un monto de *$${monto}*`;
-            mensaje += `.\n\nTe recomendamos abonarlo en tiempo y forma. Cualquier consulta estamos a disposición.\n\nSaludos, el equipo de Un Paso Mas`;
+            if (monto) mensaje += ` por un monto de *${pesos(monto)}*`;
+            mensaje += (esPago || monto)
+                ? `.\n\nTe recomendamos abonarlo en tiempo y forma. Cualquier consulta estamos a disposición.`
+                : `.\n\nDe la presentación nos encargamos nosotros. Cualquier consulta estamos a disposición.`;
+            mensaje += `\n\nSaludos, el equipo de Un Paso Más`;
             
             const url = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
             if (soloUrl) return url;
@@ -1764,7 +1768,8 @@
             const wppContainer = document.getElementById('editWppContainer');
             if(t.tipo === 'vencimiento' && t.clienteId) {
                 const cli = clientesActivos.find(c => c.id === t.clienteId);
-                if(cli) wppContainer.innerHTML = generarLinkWpp(cli.telefono, t.titulo, t.monto, t.vencimiento, t.tipoObligacion);
+                const refrescarWpp = () => { wppContainer.innerHTML = generarLinkWpp(cli.telefono, t.titulo, document.getElementById('editTaskMonto') ? document.getElementById('editTaskMonto').value : t.monto, t.vencimiento, document.getElementById('editTaskTipoOb').value); };
+                if(cli) { refrescarWpp(); document.getElementById('editTaskTipoOb').onchange = refrescarWpp; if (document.getElementById('editTaskMonto')) document.getElementById('editTaskMonto').oninput = refrescarWpp; }
                 else wppContainer.innerHTML = '';
             } else { wppContainer.innerHTML = ''; }
             
@@ -2139,6 +2144,18 @@
             if (id === 'historial') renderHistorial();
         };
 
+        // Corrige vencimientos de obligaciones "solo pago" que quedaron cargados como presentación (ej: Autónomos)
+        let tiposCorregidos = false;
+        async function corregirTiposPago() {
+            if (tiposCorregidos) return; tiposCorregidos = true;
+            const malos = tareasActuales.filter(t => t.tipo === 'vencimiento' && t.tipoObligacion !== 'pago' && grupoDe(t).startsWith('Autónomos ('));
+            if (!malos.length) return;
+            try {
+                const batch = writeBatch(db); malos.forEach(t => batch.update(doc(db, "tareas", t.id), { tipoObligacion: 'pago' })); await batch.commit();
+                registrar('Corrección automática', `${malos.length} vencimientos de Autónomos pasados a "Solo pago"`);
+            } catch (e) { console.warn(e); }
+        }
+
         // CARGA PRINCIPAL ADMIN
         function iniciarCargaDatosAdmin() {
             const unsubClientes = onSnapshot(query(collection(db, "clientes")), (snapshot) => {
@@ -2150,6 +2167,7 @@
             const unsubTareas = onSnapshot(query(collection(db, "tareas")), (snapshot) => {
                 tareasActuales = []; snapshot.forEach((documento) => { const t = documento.data(); t.id = documento.id; tareasActuales.push(t); });
                 renderTareas(); renderInicio();
+                corregirTiposPago();
                 if(document.getElementById('calendario').classList.contains('active')) renderCalendar();
                 if (typeof window.alCambiarDatos === 'function') window.alCambiarDatos('tareas');
             }, e => console.error(e));
@@ -2331,8 +2349,6 @@
             if(!name || !cuit) return alert("Completá nombre y CUIT");
             if(cuit.length !== 11) return alert("El CUIT debe tener 11 números.");
             if(clientesActivos.find(c => c.cuit === cuit && c.id !== editingClientId)) return alert("CUIT ya registrado.");
-            const emailAnterior = editingClientId ? (clientesActivos.find(c => c.id === editingClientId) || {}).emailPortal : "";
-            const enviarMail = emailPortal && emailPortal !== emailAnterior;
 
             const data = { 
                 nombre: name, cuit: cuit, telefono: document.getElementById('clientTel').value, emailPortal: emailPortal, condIva: document.getElementById('clientCondIva').value, condGanancias: document.getElementById('clientCondGanancias').value, clave_arca: document.getElementById('clientARCA').value, clave_agip: document.getElementById('clientAGIP').value, clave_arba: document.getElementById('clientARBA').value, observaciones: document.getElementById('clientObs').value, 
@@ -2343,7 +2359,6 @@
                 if(editingClientId) await updateDoc(doc(db, "clientes", editingClientId), data); else { data.activo = true; await addDoc(collection(db, "clientes"), data); }
             } catch(e) { return alert("No se pudo guardar el cliente: " + e.message); }
             registrar(editingClientId ? 'Cliente modificado' : 'Cliente nuevo', `${name} (${cuit})`);
-            if (enviarMail && await enviarAccesoPortal(emailPortal)) alert(`Cliente guardado. Se envió a ${emailPortal} un mail para que cree su contraseña del portal.`);
             cancelEdit();
         }
 
@@ -2482,7 +2497,7 @@
             const off = mismoMes.includes(ob) ? 0 : (ob === 'iva_diferido' ? 3 : 1);
             return new Date(pa, pm - 1 + off, 1);
         }
-        const SOLO_PAGOS = ['iva_diferido', 'monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
+        const SOLO_PAGOS = ['autonomos', 'iva_diferido', 'monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
 
         window.autoCompletarFechas = function() {
             const ob = document.getElementById('masivoObligacion').value;
