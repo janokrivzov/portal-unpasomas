@@ -86,6 +86,13 @@
         .canal { font-size:11px; font-weight:bold; padding:3px 8px; border-radius:10px; }
         .canal-mail { background:#d6eaf8; color:#1f618d; } .canal-wpp { background:#d5f5e3; color:#1e8449; }
         .aviso-tag { font-size:10px; color:#7f8c8d; white-space:nowrap; }
+        .drv-row { display:flex; align-items:center; gap:10px; padding:8px 2px; border-bottom:1px solid #f0f3f4; font-size:13px; }
+        .drv-row:last-child { border-bottom:none; }
+        .drv-row.carpeta { cursor:pointer; } .drv-row.carpeta:hover { background:#eef5fb; }
+        .drv-row.sugerido { background:#fef9e7; }
+        .drv-row input { width:auto; margin:0; }
+        .drv-row .grow { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .drv-ruta a { color:#2980b9; cursor:pointer; text-decoration:none; } .drv-ruta a:hover { text-decoration:underline; }
         .coment { background:#f4f6f7; border-radius:6px; padding:8px 10px; margin-bottom:6px; font-size:13px; }
         .coment small { color:#7f8c8d; display:block; font-size:11px; margin-bottom:2px; }
         .fila { display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid #f0f3f4; font-size:13px; }
@@ -333,7 +340,10 @@
             <textarea id="editTaskDesc" style="min-height: 60px; margin-bottom: 10px;"></textarea>
             <label style="font-size:12px; font-weight:bold; display:block;">Archivos <span style="font-weight:normal; color:#95a5a6;">(los ve el cliente en su portal y se pueden adjuntar al mail)</span></label>
             <div id="editTaskFileLink" style="font-size:12px; margin:4px 0 6px 0;"></div>
-            <input type="file" id="editTaskFile" multiple style="margin-bottom: 10px;">
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
+                <input type="file" id="editTaskFile" multiple style="margin:0; flex:1; min-width:200px;">
+                <button id="btnDriveTarea" onclick="driveDesdeTarea()" style="width:auto; margin:0; padding:9px 12px; background:#f1c40f; color:#4d3c00; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">📂 Agregar desde Drive</button>
+            </div>
             <div id="editAvisosBox" style="display:none; background:#f4f8fb; border-radius:6px; padding:10px; margin-bottom:10px;">
                 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                     <b style="font-size:12px;">Avisar al cliente:</b>
@@ -403,6 +413,23 @@
                 <button id="btnEnviarMail" onclick="confirmarEnvioMail()" style="background:#2980b9; color:white; border:none; padding:11px; border-radius:4px; cursor:pointer; flex:1; font-weight:bold;">✉️ Enviar</button>
                 <button onclick="cerrarMail()" style="background:#95a5a6; color:white; border:none; padding:11px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">Cancelar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL ARCHIVOS DE DRIVE -->
+    <div id="driveModal" class="modal-overlay" style="z-index:2150;" onclick="if(event.target === this) cerrarDrive()">
+        <div class="modal-content" style="width:720px;">
+            <h3 style="margin-bottom:4px;">📂 Agregar archivos desde Drive</h3>
+            <p id="driveContexto" style="font-size:12px; color:#7f8c8d; margin:0 0 8px 0;"></p>
+            <div id="driveRuta" style="font-size:13px; margin-bottom:8px;"></div>
+            <div id="driveAviso" style="display:none; background:#fef5e7; border:1px solid #f5cba7; color:#935116; padding:8px 10px; border-radius:6px; font-size:12px; margin-bottom:8px;"></div>
+            <div id="driveLista" style="border:1px solid #ecf0f1; border-radius:6px; max-height:50vh; overflow-y:auto; padding:4px 10px; background:#fbfcfc;"></div>
+            <div id="driveRecordar" style="display:none; margin-top:8px;"></div>
+            <div style="display:flex; gap:10px; margin-top:12px;">
+                <button id="btnDriveAgregar" onclick="agregarDesdeDrive()" style="background:#2980b9; color:white; border:none; padding:11px; border-radius:4px; cursor:pointer; flex:1; font-weight:bold;">Agregar seleccionados</button>
+                <button onclick="cerrarDrive()" style="background:#95a5a6; color:white; border:none; padding:11px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">Cancelar</button>
+            </div>
+            <p style="font-size:11px; color:#95a5a6; margin:8px 0 0 0;">El CRM no copia ni modifica nada en el Drive: guarda la referencia y, al enviar el mail, adjunta el archivo directo desde ahí.</p>
         </div>
     </div>
 
@@ -842,6 +869,11 @@
                         <button class="btn-green" onclick="probarMail()" style="width:auto; margin:0; padding:10px 14px;">🧪 Enviarme un mail de prueba</button>
                     </div>
                     <p id="cfgMailEstado" style="font-size:13px; margin:10px 0 0 0;"></p>
+                    <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:end; margin-top:14px;">
+                        <div><label style="font-size:12px; font-weight:bold;">📂 Carpeta principal de clientes en Google Drive <span style="font-weight:normal; color:#95a5a6;">(link de la carpeta "trabajo")</span></label><input type="text" id="cfgDriveRaiz" placeholder="https://drive.google.com/drive/folders/..." style="margin:0;"></div>
+                        <button class="btn-sec" onclick="guardarCfgDrive()" style="width:auto; margin:0; padding:10px 14px;">💾 Guardar</button>
+                    </div>
+                    <p style="font-size:12px; color:#7f8c8d; margin:6px 0 0 0;">Estructura esperada: <b>carpeta principal / Cliente / Año / AñoMes</b> (ej: trabajo / Epelbaum Vanina / 2026 / 202610). El CRM solo lee: no crea, mueve ni borra nada.</p>
                     <label style="display:flex; gap:8px; align-items:center; margin-top:10px; font-size:13px; font-weight:normal;">
                         <input type="checkbox" id="cfgFirmaGmail" checked onchange="cambiarFirmaGmail(this.checked)" style="width:auto; margin:0;">
                         Agregar al final de cada mail la <b>firma de Gmail</b> de la cuenta (si no, se usa la firma de texto de las plantillas)
@@ -933,6 +965,7 @@
                         <div><label style="font-size:12px; font-weight:bold;">Última recategorización</label><input type="date" id="clientFechaRecat" style="margin:0;"></div>
                         <div><label style="font-size:12px; font-weight:bold;">Abono mensual ($)</label><input type="number" id="clientAbono" placeholder="Honorarios" style="margin:0;"></div>
                     </div>
+                    <div style="margin-top: 10px;"><label style="font-size:12px; font-weight:bold;">📂 Carpeta de Drive del cliente <span style="font-weight:normal; color:#95a5a6;">(opcional: solo si el nombre de la carpeta no coincide con el del cliente)</span></label><input type="text" id="clientDrive" placeholder="https://drive.google.com/drive/folders/..." style="margin:0;"></div>
 
                     <textarea id="clientObs" placeholder="Observaciones..." style="margin-top: 15px; min-height:60px;"></textarea>
                     
@@ -1484,7 +1517,7 @@
                 html += `<div class="grp-row" data-id="${t.id}">
                     <div class="nom" title="${esc(nombreDe(t))}">${badge} ${esc(nombreDe(t))}${pagoInf}</div>
                     <input type="number" class="g-monto" placeholder="Monto $" value="${esc(t.monto || '')}">
-                    <div class="arch">${archivosDe(t).length ? listaArchivosHtml(archivosDe(t), true) + '<br>agregar:' : 'Archivos:'}<input type="file" class="g-file" multiple></div>
+                    <div class="arch"><span class="g-list">${archivosDe(t).length ? listaArchivosHtml(archivosDe(t), true) + '<br>' : ''}</span><div style="display:flex; gap:4px; align-items:center;"><button onclick="abrirDrive('${t.id}')" title="Agregar desde Drive" style="width:auto; margin:0; padding:4px 7px; background:#f1c40f; color:#4d3c00; border:none; border-radius:4px; cursor:pointer; font-size:12px;">📂 Drive</button><input type="file" class="g-file" multiple style="font-size:11px;"></div></div>
                     <select class="g-estado">
                         <option value="pendientes" ${t.estado === 'pendientes' ? 'selected' : ''}>🕒 Pendiente</option>
                         <option value="proceso" ${t.estado === 'proceso' ? 'selected' : ''}>⏳ En proceso</option>
@@ -1517,7 +1550,7 @@
                 let n = 0;
                 for (const c of cambios) {
                     btn.innerText = `Guardando ${++n} de ${cambios.length}...`;
-                    if (c.file) { c.upd.archivos = [...archivosDe(c.t), ...(await subirArchivos(c.file))]; c.upd.archivoUrl = c.upd.archivos[0].url; }
+                    if (c.file) { c.upd.archivos = [...archivosDe(c.t), ...(await subirArchivos(c.file))]; c.upd.archivoUrl = (c.upd.archivos.find(a => !a.driveId) || {}).url || ''; }
                     await updateDoc(doc(db, "tareas", c.t.id), c.upd);
                 }
                 registrar('Carga masiva en vencimiento', `${grupoAbierto.groupName} (${fmtFecha(grupoAbierto.dateString)}): ${cambios.length} clientes actualizados`);
@@ -1805,7 +1838,7 @@
                 <div class="pc-stat"><div class="lbl">Pendientes</div><div class="val">${pendientes.length}</div><div class="sub">vencimientos a gestionar</div></div>
                 <div class="pc-stat"><div class="lbl">Próximo vencimiento</div><div class="val" style="color:#e67e22;">${proxTxt}</div><div class="sub" title="${esc(proxSub)}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(proxSub)}</div></div>
                 <div class="pc-stat"><div class="lbl">Pagos pendientes</div><div class="val">${pagosPend.length}</div><div class="sub">${totalPagos ? 'Total informado: ' + pesos(totalPagos) : 'a cargo tuyo'}</div></div>
-                <div class="pc-stat"><div class="lbl">Finalizados</div><div class="val" style="color:#27ae60;">${finalizados.length}</div><div class="sub">con comprobante disponible: ${finalizados.filter(t => archivosDe(t).length).length}</div></div>`;
+                <div class="pc-stat"><div class="lbl">Finalizados</div><div class="val" style="color:#27ae60;">${finalizados.length}</div><div class="sub">con comprobante disponible: ${finalizados.filter(t => archivosPortal(t).length).length}</div></div>`;
 
             document.getElementById('pcAlerta').innerHTML = vencidos.length
                 ? `<div class="pc-alerta">⚠️ Tenés <b>${vencidos.length}</b> ${vencidos.length === 1 ? 'vencimiento vencido' : 'vencimientos vencidos'} sin finalizar. Si ya lo pagaste, avisanos con el botón "Ya lo pagué"; si no, comunicate con el estudio.</div>` : '';
@@ -1852,7 +1885,7 @@
             if (t.vencimiento) { const [a, m, dd] = t.vencimiento.split('-'); fecha = `<div class="pc-fecha"><div class="d">${dd}</div><div class="m">${MESES[parseInt(m, 10) - 1].substring(0, 3)}</div></div>`; }
 
             let acciones = '';
-            const arch = archivosDe(t);
+            const arch = archivosPortal(t);
             arch.forEach(a => { acciones += `<a class="pc-btn pc-btn-azul" href="${esc(a.url)}" target="_blank" title="${esc(a.nombre)}" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;">📥 ${arch.length === 1 ? (hecho ? 'Comprobante' : (esPago ? 'Descargar boleta' : 'Descargar')) : esc(a.nombre)}</a>`; });
             if (esPago && !hecho) acciones += `<button class="pc-btn pc-btn-verde" onclick="marcarPagadoCliente('${t.id}')">✔ Ya lo pagué</button>`;
             if (!acciones && !hecho) acciones = '<div class="pc-nota">El estudio está trabajando en esto</div>';
@@ -1905,7 +1938,9 @@
             for (const fl of files) out.push({ nombre: fl.name, url: await subirArchivo(fl), fecha: new Date().toISOString() });
             return out;
         }
-        const listaArchivosHtml = (arr, chico) => arr.map(a => `<a href="${esc(a.url)}" target="_blank" style="display:inline-block; margin:2px 6px 2px 0; ${chico ? 'font-size:11px;' : 'font-size:12px;'} color:#2980b9; text-decoration:none;">📎 ${esc(a.nombre)}</a>`).join('');
+        const listaArchivosHtml = (arr, chico) => arr.map(a => `<a href="${esc(a.url)}" target="_blank" title="${a.driveId ? 'Archivo de Google Drive' : 'Archivo del CRM'}" style="display:inline-block; margin:2px 6px 2px 0; ${chico ? 'font-size:11px;' : 'font-size:12px;'} color:#2980b9; text-decoration:none;">${a.driveId ? '📂' : '📎'} ${esc(a.nombre)}</a>`).join('');
+        // El portal del cliente solo puede mostrar los archivos guardados en el CRM (los de Drive son privados)
+        function archivosPortal(t) { return archivosDe(t).filter(a => !a.driveId); }
 
         async function subirArchivo(file) {
             const nombreSeguro = file.name.replace(/[^\w.\-]+/g, '_');
@@ -1935,6 +1970,7 @@
             document.getElementById('editTaskFile').value = '';
             document.getElementById('editWppContainer').innerHTML = '';
             document.getElementById('editAvisosBox').style.display = t.clienteId ? 'block' : 'none';
+            document.getElementById('btnDriveTarea').style.display = t.clienteId ? '' : 'none';
             document.getElementById('editAvisosEstado').innerHTML = estadoAvisos(t);
             
             // Comentarios de esta tarea
@@ -1963,7 +1999,7 @@
         let archivosEdit = [];
         function renderArchivosEdit() {
             document.getElementById('editTaskFileLink').innerHTML = archivosEdit.length
-                ? archivosEdit.map((a, i) => `<span style="display:inline-flex; align-items:center; gap:4px; background:#ebf5fb; border-radius:12px; padding:3px 4px 3px 10px; margin:2px 4px 2px 0;"><a href="${esc(a.url)}" target="_blank" style="color:#2980b9; text-decoration:none;">📎 ${esc(a.nombre)}</a><button onclick="quitarArchivoEdit(${i})" title="Quitar" style="width:auto; margin:0; padding:0 7px; border:none; background:none; color:#c0392b; cursor:pointer; font-weight:bold;">✕</button></span>`).join('')
+                ? archivosEdit.map((a, i) => `<span style="display:inline-flex; align-items:center; gap:4px; background:${a.driveId ? '#fef9e7' : '#ebf5fb'}; border-radius:12px; padding:3px 4px 3px 10px; margin:2px 4px 2px 0;"><a href="${esc(a.url)}" target="_blank" title="${a.driveId ? 'Archivo de Google Drive' : 'Archivo del CRM'}" style="color:#2980b9; text-decoration:none;">${a.driveId ? '📂' : '📎'} ${esc(a.nombre)}</a><button onclick="quitarArchivoEdit(${i})" title="Quitar" style="width:auto; margin:0; padding:0 7px; border:none; background:none; color:#c0392b; cursor:pointer; font-weight:bold;">✕</button></span>`).join('')
                 : '<span style="color:#95a5a6;">Sin archivos.</span>';
         }
         window.quitarArchivoEdit = function(i) {
@@ -1995,7 +2031,7 @@
                 const fileInput = document.getElementById('editTaskFile');
                 const nuevos = fileInput.files.length ? await subirArchivos(Array.from(fileInput.files)) : [];
                 updateData.archivos = [...archivosEdit, ...nuevos];
-                updateData.archivoUrl = updateData.archivos.length ? updateData.archivos[0].url : '';
+                updateData.archivoUrl = (updateData.archivos.find(a => !a.driveId) || {}).url || '';
                 await updateDoc(doc(db, "tareas", editingTaskId), updateData);
                 registrar('Tarea/vencimiento editado', updateData.titulo);
                 closeTaskModal();
@@ -2210,9 +2246,118 @@
             } catch (e) { alert(e.message); }
         }
 
+        // ---------- ARCHIVOS DESDE GOOGLE DRIVE ----------
+        let driveCtx = null;   // { tareaId, clienteId, sugerencias[], datos }
+        function periodoDeTarea(t) {
+            // "(Octubre 2026)" -> 2026 / 202610 · "(Período 2025)" -> 2025 · si no, el mes del vencimiento
+            const m = grupoDe(t).match(/\(([^)]*)\)\s*$/);
+            if (m) {
+                const txt = m[1].trim();
+                const mm = txt.match(/^([A-Za-zÁÉÍÓÚáéíóú]+)\s+(\d{4})$/);
+                if (mm) { const i = MESES_N.findIndex(x => x.toLowerCase() === mm[1].toLowerCase()); if (i > -1) return { anio: mm[2], periodo: mm[2] + String(i + 1).padStart(2, '0') }; }
+                const ma = txt.match(/(\d{4})/); if (ma) return { anio: ma[1], periodo: '' };
+            }
+            if (t.vencimiento) return { anio: t.vencimiento.slice(0, 4), periodo: t.vencimiento.slice(0, 4) + t.vencimiento.slice(5, 7) };
+            return { anio: '', periodo: '' };
+        }
+        function normTxt(s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+        function palabrasClave(t) {
+            // Palabras de la obligación para sugerir archivos: "IIBB AGIP Local" -> iibb, agip · "931 + Boletas" -> 931, boletas
+            const ob = grupoDe(t).replace(/\s*\([^)]*\)\s*$/, '');
+            return normTxt(ob).split(' ').filter(w => w.length >= 3 || /^\d+$/.test(w)).filter(w => !['las', 'los', 'del', 'por', 'con', 'para'].includes(w)).slice(0, 3);
+        }
+
+        window.abrirDrive = async function(tareaId, folderId) {
+            const t = tareasActuales.find(x => x.id === tareaId); if (!t) return;
+            const c = clientesActivos.find(x => x.id === t.clienteId);
+            if (!cfgCorreo.url) return alert('Primero hay que conectar el script de correo en "✉️ Plantillas y correo".');
+            if (!cfgCorreo.driveRaiz && !(c && c.driveCarpeta)) return alert('Falta configurar la carpeta principal de Drive en "✉️ Plantillas y correo".');
+            driveCtx = { tareaId, clienteId: c ? c.id : null };
+            const p = periodoDeTarea(t);
+            document.getElementById('driveContexto').innerText = `${c ? c.nombre : ''} · ${t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo}`;
+            document.getElementById('driveModal').style.display = 'flex';
+            await cargarDrive(folderId ? { folderId } : { cliente: c ? c.nombre : '', clienteCarpeta: c && c.driveCarpeta ? idDrive(c.driveCarpeta) || c.driveCarpeta : '', anio: p.anio, periodo: p.periodo });
+        }
+        async function cargarDrive(params) {
+            const lista = document.getElementById('driveLista');
+            lista.innerHTML = '<div class="vacio-mini">Buscando en Drive...</div>';
+            document.getElementById('driveAviso').style.display = 'none';
+            document.getElementById('driveRecordar').style.display = 'none';
+            try {
+                const d = await llamarScript({ accion: 'driveListar', raiz: cfgCorreo.driveRaiz || '', ...params });
+                driveCtx.datos = d;
+                renderDrive();
+            } catch (e) { lista.innerHTML = `<div class="vacio-mini" style="color:#c0392b;">❌ ${esc(e.message)}</div>`; }
+        }
+        window.irCarpetaDrive = function(id) { cargarDrive({ folderId: id }); }
+        function renderDrive() {
+            const d = driveCtx.datos, t = tareasActuales.find(x => x.id === driveCtx.tareaId), c = clientesActivos.find(x => x.id === driveCtx.clienteId);
+            document.getElementById('driveRuta').innerHTML = '<span class="drv-ruta">' + d.ruta.map((r, i) => i === d.ruta.length - 1 ? `<b>${esc(r.nombre)}</b>` : `<a onclick="irCarpetaDrive('${r.id}')">${esc(r.nombre)}</a>`).join(' › ') + '</span>';
+            const av = document.getElementById('driveAviso');
+            if (d.aviso) { av.innerText = d.aviso; av.style.display = 'block'; }
+            const yaIds = archivosDe(t).filter(a => a.driveId).map(a => a.driveId);
+            const claves = palabrasClave(t), per = periodoDeTarea(t).periodo;
+            const enCarpetaPeriodo = per && d.carpeta.nombre.replace(/\D/g, '') === per;
+            const sugeridos = enCarpetaPeriodo ? d.archivos.filter(a => { const n = normTxt(a.nombre); return claves.some(k => n.split(' ').includes(k)); }).map(a => a.id) : [];
+            const filasC = d.carpetas.map(cp => `<div class="drv-row carpeta" onclick="irCarpetaDrive('${cp.id}')"><span>📁</span><div class="grow">${esc(cp.nombre)}</div><span style="color:#95a5a6;">›</span></div>`).join('');
+            const archivosOrd = d.archivos.slice().sort((a, b) => (sugeridos.includes(b.id) - sugeridos.includes(a.id)));
+            const filasA = archivosOrd.map(a => {
+                const ya = yaIds.includes(a.id), sug = sugeridos.includes(a.id);
+                const kb = a.tamano ? (a.tamano > 1048576 ? (a.tamano / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(a.tamano / 1024)) + ' KB') : '';
+                return `<label class="drv-row ${sug && !ya ? 'sugerido' : ''}" style="font-weight:normal;"><input type="checkbox" class="drv-chk" value="${a.id}" data-nombre="${esc(a.nombre)}" data-url="${esc(a.url)}" ${ya ? 'disabled checked' : (sug ? 'checked' : '')}>
+                    <span>${/\.pdf$/i.test(a.nombre) ? '📕' : '📄'}</span><div class="grow" title="${esc(a.nombre)}">${esc(a.nombre)}</div>
+                    <small style="color:#95a5a6; white-space:nowrap;">${ya ? '✓ ya agregado' : (sug ? '⭐ sugerido · ' : '') + kb}</small></label>`;
+            }).join('');
+            document.getElementById('driveLista').innerHTML = (filasC + filasA) || '<div class="vacio-mini">Carpeta vacía.</div>';
+            // Si estamos parados en una carpeta de cliente (hija directa de la principal), ofrecer recordarla
+            const rec = document.getElementById('driveRecordar');
+            const esHijaDeRaiz = d.ruta.length >= 2 && d.ruta[d.ruta.length - 2].id === d.raizId;
+            const guardada = c && c.driveCarpeta && (idDrive(c.driveCarpeta) || c.driveCarpeta) === d.carpeta.id;
+            if (c && esHijaDeRaiz && !guardada && !d.clienteCarpetaId) {
+                rec.style.display = 'block';
+                rec.innerHTML = `<button onclick="recordarCarpetaCliente('${d.carpeta.id}')" style="width:auto; margin:0; padding:7px 12px; background:#ecf0f1; border:none; border-radius:4px; cursor:pointer; font-size:12px;">📌 Usar "${esc(d.carpeta.nombre)}" como carpeta de ${esc(c.nombre)}</button>`;
+            }
+        }
+        window.recordarCarpetaCliente = async function(folderId) {
+            const c = clientesActivos.find(x => x.id === driveCtx.clienteId); if (!c) return;
+            try {
+                await updateDoc(doc(db, "clientes", c.id), { driveCarpeta: folderId });
+                registrar('Carpeta de Drive asignada', c.nombre);
+                document.getElementById('driveRecordar').innerHTML = '<small style="color:#1e8449;">✓ Guardada. La próxima vez va directo a esta carpeta.</small>';
+                const t = tareasActuales.find(x => x.id === driveCtx.tareaId), p = periodoDeTarea(t);
+                cargarDrive({ clienteCarpeta: folderId, anio: p.anio, periodo: p.periodo });
+            } catch (e) { alert(e.message); }
+        }
+        window.driveDesdeTarea = function() { abrirDrive(editingTaskId); }
+        window.cerrarDrive = function() { document.getElementById('driveModal').style.display = 'none'; driveCtx = null; }
+        window.agregarDesdeDrive = async function() {
+            const sel = Array.from(document.querySelectorAll('.drv-chk:checked:not(:disabled)')).map(cb => ({ nombre: cb.dataset.nombre, driveId: cb.value, url: cb.dataset.url, origen: 'drive', fecha: new Date().toISOString() }));
+            if (!sel.length) return alert("Tildá al menos un archivo.");
+            const t = tareasActuales.find(x => x.id === driveCtx.tareaId);
+            const actuales = archivosDe(t);
+            const nuevos = sel.filter(a => !actuales.some(x => x.driveId === a.driveId));
+            const archivos = [...actuales, ...nuevos];
+            try {
+                await updateDoc(doc(db, "tareas", t.id), { archivos, archivoUrl: (archivos.find(a => !a.driveId) || {}).url || '' });
+                registrar('Archivos de Drive agregados', `${t.titulo}: ${nuevos.map(a => a.nombre).join(', ')}`);
+                // Reflejarlo en la ventana del vencimiento y en el grupo, si están abiertos
+                if (editingTaskId === t.id) { nuevos.forEach(a => { if (!archivosEdit.some(x => x.driveId === a.driveId)) archivosEdit.push(a); }); renderArchivosEdit(); }
+                const fila = document.querySelector(`#groupModalList .grp-row[data-id="${t.id}"] .g-list`);
+                if (fila) fila.innerHTML = listaArchivosHtml(archivos, true) + '<br>';
+                cerrarDrive();
+            } catch (e) { alert("No se pudieron agregar: " + e.message); }
+        }
+
         // ---------- CONFIGURACIÓN DEL CORREO ----------
         let cfgCorreo = {};
         function usaFirmaGmail() { return !!cfgCorreo.url && cfgCorreo.firmaGmail !== false; }
+        function idDrive(s) { s = String(s || '').trim(); const m = s.match(/\/folders\/([a-zA-Z0-9_-]+)/) || s.match(/[?&]id=([a-zA-Z0-9_-]+)/); return m ? m[1] : (/^[a-zA-Z0-9_-]{15,}$/.test(s) ? s : ''); }
+        window.guardarCfgDrive = async function() {
+            const v = document.getElementById('cfgDriveRaiz').value.trim();
+            const id = idDrive(v);
+            if (v && !id) return alert('Pegá el link de la carpeta (abrila en Drive y copiá la dirección del navegador).');
+            try { await setDoc(doc(db, "config", "correo"), { driveRaiz: id }, { merge: true }); registrar('Carpeta principal de Drive', id ? 'Configurada' : 'Quitada'); alert(id ? 'Carpeta guardada.' : 'Carpeta quitada.'); } catch (e) { alert(e.message); }
+        }
         window.cambiarFirmaGmail = async function(v) {
             try { await setDoc(doc(db, "config", "correo"), { firmaGmail: v }, { merge: true }); registrar('Firma de Gmail', v ? 'Activada' : 'Desactivada'); } catch (e) { alert(e.message); }
         }
@@ -2227,6 +2372,7 @@
                 est.innerHTML = `🟢 <b>Conectado.</b> Última prueba OK el ${new Date(up.fecha).toLocaleString('es-AR')} (envía desde ${esc(up.cuenta || '')} · ${fir}).`; est.style.color = '#1e8449';
             }
             const chk = document.getElementById('cfgFirmaGmail'); if (chk) chk.checked = cfgCorreo.firmaGmail !== false;
+            const dr = document.getElementById('cfgDriveRaiz'); if (dr && document.activeElement !== dr) dr.value = cfgCorreo.driveRaiz ? `https://drive.google.com/drive/folders/${cfgCorreo.driveRaiz}` : '';
             else { est.innerHTML = '🟡 Dirección guardada. Tocá "Enviarme un mail de prueba" para confirmar que funciona.'; est.style.color = '#935116'; }
         }
         window.guardarCfgMail = async function() {
@@ -2272,7 +2418,7 @@
             sel.value = plantillaId || (!t ? 'mail_libre' : ((t.tipoObligacion === 'pago' && t.estado !== 'listas') ? 'mail_pago' : 'mail_presentacion'));
             if (!sel.value) sel.selectedIndex = 0;
             const arch = t ? archivosDe(t) : [];
-            document.getElementById('mailAdjuntos').innerHTML = arch.length ? arch.map((a, i) => `<label style="display:flex; gap:6px; align-items:center; margin:3px 0; font-weight:normal;"><input type="checkbox" class="mail-adj" data-i="${i}" checked onchange="cambioAdjuntosMail()" style="width:auto; margin:0;"> 📎 ${esc(a.nombre)}</label>`).join('') : '<span style="color:#95a5a6;">Este vencimiento no tiene archivos cargados. Podés adjuntar desde acá abajo.</span>';
+            document.getElementById('mailAdjuntos').innerHTML = arch.length ? arch.map((a, i) => `<label style="display:flex; gap:6px; align-items:center; margin:3px 0; font-weight:normal;"><input type="checkbox" class="mail-adj" data-i="${i}" checked onchange="cambioAdjuntosMail()" style="width:auto; margin:0;"> ${a.driveId ? '📂' : '📎'} ${esc(a.nombre)}</label>`).join('') : '<span style="color:#95a5a6;">Este vencimiento no tiene archivos cargados. Podés adjuntar desde acá abajo.</span>';
             aplicarPlantillaMail();
             document.getElementById('mailModal').style.display = 'flex';
         }
@@ -2734,7 +2880,7 @@
             reader.readAsText(file);
         }
 
-        const CAMPOS_EXTRA = [['direccion', 'clientDireccion'], ['contacto', 'clientContacto'], ['emailContacto', 'clientEmailContacto'], ['actividad', 'clientActividad'], ['fechaAlta', 'clientFechaAlta'], ['categoriaMono', 'clientCatMono'], ['fechaRecat', 'clientFechaRecat'], ['abonoMensual', 'clientAbono']];
+        const CAMPOS_EXTRA = [['driveCarpeta', 'clientDrive'], ['direccion', 'clientDireccion'], ['contacto', 'clientContacto'], ['emailContacto', 'clientEmailContacto'], ['actividad', 'clientActividad'], ['fechaAlta', 'clientFechaAlta'], ['categoriaMono', 'clientCatMono'], ['fechaRecat', 'clientFechaRecat'], ['abonoMensual', 'clientAbono']];
 
         window.saveClient = async function() {
             const name = document.getElementById('clientName').value.trim(); const cuit = document.getElementById('clientCuit').value.replace(/\D/g, ''); const emailPortal = document.getElementById('clientEmailLogin').value.trim().toLowerCase();
