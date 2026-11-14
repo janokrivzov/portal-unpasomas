@@ -842,6 +842,10 @@
                         <button class="btn-green" onclick="probarMail()" style="width:auto; margin:0; padding:10px 14px;">🧪 Enviarme un mail de prueba</button>
                     </div>
                     <p id="cfgMailEstado" style="font-size:13px; margin:10px 0 0 0;"></p>
+                    <label style="display:flex; gap:8px; align-items:center; margin-top:10px; font-size:13px; font-weight:normal;">
+                        <input type="checkbox" id="cfgFirmaGmail" checked onchange="cambiarFirmaGmail(this.checked)" style="width:auto; margin:0;">
+                        Agregar al final de cada mail la <b>firma de Gmail</b> de la cuenta (si no, se usa la firma de texto de las plantillas)
+                    </label>
                 </div>
                 <div class="panel">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -851,7 +855,7 @@
                             <button class="btn-sec" onclick="nuevaPlantilla('wpp')" style="width:auto; margin:0; padding:8px 12px;">+ Plantilla de WhatsApp</button>
                         </div>
                     </div>
-                    <p style="font-size:12px; color:#7f8c8d;">Datos que se completan solos: <code>{cliente}</code> <code>{obligacion}</code> <code>{periodo}</code> <code>{fecha}</code> <code>{monto}</code> <code>{monto_txt}</code> <code>{que_vence}</code> <code>{detalle_pago}</code> <code>{archivos}</code>. En WhatsApp, el texto entre *asteriscos* sale en negrita.</p>
+                    <p style="font-size:12px; color:#7f8c8d;">Datos que se completan solos: <code>{firma}</code> <code>{cliente}</code> <code>{obligacion}</code> <code>{periodo}</code> <code>{fecha}</code> <code>{monto}</code> <code>{monto_txt}</code> <code>{que_vence}</code> <code>{detalle_pago}</code> <code>{archivos}</code>. En WhatsApp, el texto entre *asteriscos* sale en negrita.</p>
                     <div id="listaPlantillas"></div>
                 </div>
             </div>
@@ -1343,7 +1347,8 @@
 
         // GENERADOR DE LINK WHATSAPP
         // ---------- PLANTILLAS DE MENSAJES ----------
-        const FIRMA = `Saludos,\nEquipo de Un Paso Más\nWhatsApp: +54 9 11 5718-2388`;
+        const FIRMA = `Saludos,\n{firma}`;
+        const FIRMA_TEXTO = `Equipo de Un Paso Más\nWhatsApp: +54 9 11 5718-2388`;
         const PLANTILLAS_BASE = {
             mail_presentacion: { orden: 1, canal: 'mail', nombre: 'Presentación realizada', asunto: '{obligacion} {periodo} - Presentación realizada',
                 cuerpo: `Hola {cliente},\n\nTe informamos que realizamos la presentación de {obligacion} correspondiente al período {periodo}.\n\n{detalle_pago}Te adjuntamos la documentación:\n{archivos}\n\nCualquier consulta estamos a disposición.\n\n${FIRMA}` },
@@ -1367,7 +1372,7 @@
 
         // Datos para completar las variables de una plantilla
         function ctxMensaje(t, c) {
-            const ctx = { cliente: c ? c.nombre : (t ? nombreDe(t) : ''), obligacion: '', periodo: '', fecha: '', monto: '', monto_txt: '', que_vence: 'la presentación', detalle_pago: '', archivos: '' };
+            const ctx = { firma: usaFirmaGmail() ? '' : FIRMA_TEXTO, cliente: c ? c.nombre : (t ? nombreDe(t) : ''), obligacion: '', periodo: '', fecha: '', monto: '', monto_txt: '', que_vence: 'la presentación', detalle_pago: '', archivos: '' };
             if (t) {
                 let ob = t.tipo === 'vencimiento' ? grupoDe(t) : (t.titulo || '');
                 const m = ob.match(/(.*)\s\((.*)\)\s*$/);
@@ -2207,12 +2212,21 @@
 
         // ---------- CONFIGURACIÓN DEL CORREO ----------
         let cfgCorreo = {};
+        function usaFirmaGmail() { return !!cfgCorreo.url && cfgCorreo.firmaGmail !== false; }
+        window.cambiarFirmaGmail = async function(v) {
+            try { await setDoc(doc(db, "config", "correo"), { firmaGmail: v }, { merge: true }); registrar('Firma de Gmail', v ? 'Activada' : 'Desactivada'); } catch (e) { alert(e.message); }
+        }
         function pintarCfgMail() {
             const inp = document.getElementById('cfgMailUrl');
             if (document.activeElement !== inp) inp.value = cfgCorreo.url || '';
             const est = document.getElementById('cfgMailEstado');
             if (!cfgCorreo.url) { est.innerHTML = '⚪ <b>Sin conectar.</b> Seguí el instructivo para instalar el script y pegá acá su dirección.'; est.style.color = '#7f8c8d'; }
-            else if (cfgCorreo.ultimaPrueba && cfgCorreo.ultimaPrueba.ok) { est.innerHTML = `🟢 <b>Conectado.</b> Última prueba OK el ${new Date(cfgCorreo.ultimaPrueba.fecha).toLocaleString('es-AR')} (envía desde ${esc(cfgCorreo.ultimaPrueba.cuenta || '')}).`; est.style.color = '#1e8449'; }
+            else if (cfgCorreo.ultimaPrueba && cfgCorreo.ultimaPrueba.ok) {
+                const up = cfgCorreo.ultimaPrueba;
+                const fir = up.firma ? '✔ firma de Gmail encontrada' : (up.gmailApi ? '⚠️ la cuenta no tiene firma en Gmail' : '⚠️ firma de Gmail sin activar en el script');
+                est.innerHTML = `🟢 <b>Conectado.</b> Última prueba OK el ${new Date(up.fecha).toLocaleString('es-AR')} (envía desde ${esc(up.cuenta || '')} · ${fir}).`; est.style.color = '#1e8449';
+            }
+            const chk = document.getElementById('cfgFirmaGmail'); if (chk) chk.checked = cfgCorreo.firmaGmail !== false;
             else { est.innerHTML = '🟡 Dirección guardada. Tocá "Enviarme un mail de prueba" para confirmar que funciona.'; est.style.color = '#935116'; }
         }
         window.guardarCfgMail = async function() {
@@ -2234,8 +2248,10 @@
             est.innerText = 'Enviando mail de prueba...'; est.style.color = '#555';
             try {
                 const d = await llamarScript({ accion: 'probar', para: currentUserEmail });
-                await setDoc(doc(db, "config", "correo"), { ultimaPrueba: { ok: true, fecha: new Date().toISOString(), cuenta: d.cuenta || '' } }, { merge: true });
-                alert(`✅ ¡Funciona! Te enviamos un mail de prueba a ${currentUserEmail} desde ${d.cuenta}.\nPodés enviar ${d.cuotaRestante} mails más hoy.`);
+                await setDoc(doc(db, "config", "correo"), { ultimaPrueba: { ok: true, fecha: new Date().toISOString(), cuenta: d.cuenta || '', firma: !!d.firma, gmailApi: !!d.gmailApi } }, { merge: true });
+                const notaFirma = d.firma ? '\n✔ Se encontró la firma de Gmail y se va a agregar a los mails.'
+                    : (d.gmailApi === false || d.gmailApi === undefined ? '\n⚠️ Para usar la firma de Gmail falta un paso en el script (ver instrucciones).' : '\n⚠️ La cuenta no tiene firma configurada en Gmail.');
+                alert(`✅ ¡Funciona! Te enviamos un mail de prueba a ${currentUserEmail} desde ${d.cuenta}.\nPodés enviar ${d.cuotaRestante} mails más hoy.${notaFirma}`);
             } catch (e) { est.innerText = '🔴 ' + e.message; est.style.color = '#c0392b'; }
         }
 
@@ -2303,7 +2319,7 @@
             btn.disabled = false; btn.innerText = '✉️ Enviar';
         }
         async function enviarMailReal(msg, tareaId, clienteId, nombrePlantilla) {
-            await llamarScript({ accion: 'enviar', ...msg });
+            await llamarScript({ accion: 'enviar', ...msg, firmaGmail: usaFirmaGmail() });
             const c = clientesActivos.find(x => x.id === clienteId);
             if (tareaId) await updateDoc(doc(db, "tareas", tareaId), { avisoMail: { fecha: new Date().toISOString(), para: msg.para, plantilla: nombrePlantilla || '', por: currentUserEmail } });
             registrar('Mail enviado', `${c ? c.nombre : msg.para} · ${msg.asunto}${msg.adjuntos.length ? ` · ${msg.adjuntos.length} adjunto(s)` : ''}`);
