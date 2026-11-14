@@ -67,7 +67,7 @@
         .inicio-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
         .panel { background:white; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
         .panel h3 { margin:0 0 12px 0; font-size:15px; color:#2c3e50; }
-        .grp-row { display:grid; grid-template-columns: minmax(0,1.6fr) 110px minmax(0,1.3fr) 120px auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid #ecf0f1; font-size:13px; }
+        .grp-row { display:grid; grid-template-columns: minmax(0,1.5fr) 100px minmax(0,1.4fr) 115px auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid #ecf0f1; font-size:13px; }
         .grp-row:last-child { border-bottom:none; }
         .grp-row input, .grp-row select { margin:0; padding:6px; font-size:12px; }
         .grp-row .nom { font-weight:600; overflow:hidden; text-overflow:ellipsis; }
@@ -79,6 +79,13 @@
         @media (max-width: 800px) { .ficha-datos { grid-template-columns: 1fr 1fr; } }
         .est { font-size:11px; font-weight:bold; padding:2px 8px; border-radius:10px; white-space:nowrap; }
         .est-ok { background:#d5f5e3; color:#1e8449; } .est-pend { background:#d6eaf8; color:#1f618d; } .est-proc { background:#fdebd0; color:#a04000; } .est-venc { background:#fadbd8; color:#922b21; }
+        .plt { border:1px solid #ecf0f1; border-radius:8px; padding:12px; margin-top:12px; }
+        .plt-head { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+        .plt-head input { margin:0; flex:1; min-width:200px; font-weight:bold; }
+        .plt textarea { min-height:140px; font-family:inherit; line-height:1.45; margin:6px 0 0 0; }
+        .canal { font-size:11px; font-weight:bold; padding:3px 8px; border-radius:10px; }
+        .canal-mail { background:#d6eaf8; color:#1f618d; } .canal-wpp { background:#d5f5e3; color:#1e8449; }
+        .aviso-tag { font-size:10px; color:#7f8c8d; white-space:nowrap; }
         .coment { background:#f4f6f7; border-radius:6px; padding:8px 10px; margin-bottom:6px; font-size:13px; }
         .coment small { color:#7f8c8d; display:block; font-size:11px; margin-bottom:2px; }
         .fila { display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid #f0f3f4; font-size:13px; }
@@ -289,7 +296,7 @@
     </div>
 
     <!-- MODAL DE EDICIÓN GENÉRICO -->
-    <div id="taskModal" class="modal-overlay">
+    <div id="taskModal" class="modal-overlay" style="z-index:2050;">
         <div class="modal-content">
             <h3>Editar / Ver Detalles</h3>
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
@@ -324,9 +331,17 @@
             </div>
             <label style="font-size:12px; font-weight:bold;">Descripción</label>
             <textarea id="editTaskDesc" style="min-height: 60px; margin-bottom: 10px;"></textarea>
-            <label style="font-size:12px; font-weight:bold; display:block;">Archivo Adjunto (Visible para el Cliente)</label>
-            <div id="editTaskFileLink" style="font-size:12px; margin-bottom:10px; color:#2980b9;"></div>
-            <input type="file" id="editTaskFile" style="margin-bottom: 10px;">
+            <label style="font-size:12px; font-weight:bold; display:block;">Archivos <span style="font-weight:normal; color:#95a5a6;">(los ve el cliente en su portal y se pueden adjuntar al mail)</span></label>
+            <div id="editTaskFileLink" style="font-size:12px; margin:4px 0 6px 0;"></div>
+            <input type="file" id="editTaskFile" multiple style="margin-bottom: 10px;">
+            <div id="editAvisosBox" style="display:none; background:#f4f8fb; border-radius:6px; padding:10px; margin-bottom:10px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <b style="font-size:12px;">Avisar al cliente:</b>
+                    <button onclick="mailDesdeTarea()" style="width:auto; margin:0; padding:8px 12px; background:#2980b9; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">✉️ Enviar mail</button>
+                    <button onclick="wppDesdeTarea()" style="width:auto; margin:0; padding:8px 12px; background:#25D366; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">💬 WhatsApp</button>
+                    <span id="editAvisosEstado" style="font-size:11px; color:#7f8c8d;"></span>
+                </div>
+            </div>
             <p id="editAuditLog" style="font-size:11px; color:#7f8c8d; margin-top:0; font-style:italic;"></p>
             <div style="border-top:1px solid #ecf0f1; padding-top:10px;">
                 <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:6px;">💬 Comentarios internos <span style="font-weight:normal; color:#95a5a6;">(solo los ve el estudio)</span></label>
@@ -350,13 +365,60 @@
         <div class="modal-content" style="width:860px;">
             <h3 id="groupModalTitle" style="color:#2980b9;">Nombre del Grupo</h3>
             <p id="groupModalSub" style="font-size:12px; color:#7f8c8d; margin-top:-5px; margin-bottom:12px;">Cargá montos, subí boletas, cambiá estados y avisá a los clientes, todo junto.</p>
+            <div id="mailCola" style="display:none; background:#eaf2f8; border:1px solid #aed6f1; border-radius:6px; padding:12px; margin-bottom:12px;"></div>
             <div id="wppCola" style="display:none; background:#eafaf1; border:1px solid #abebc6; border-radius:6px; padding:12px; margin-bottom:12px;"></div>
             <div id="groupModalList" style="margin-bottom:12px; border:1px solid #ecf0f1; border-radius:6px; padding:6px 10px; background:#f9f9f9; max-height:50vh; overflow-y:auto;"></div>
             <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap:wrap;">
                 <button id="btnGuardarGrupo" onclick="guardarGrupo()" style="background:#2980b9; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; flex:1; min-width:150px; font-weight:bold;">💾 Guardar cambios</button>
+                <button onclick="prepararMailsMasivos()" style="background:#8e44ad; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; flex:1; min-width:150px; font-weight:bold;">✉️ Mails a todos</button>
                 <button onclick="iniciarWppMasivo()" style="background:#25D366; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; flex:1; min-width:150px; font-weight:bold;">📲 Avisar a todos</button>
                 <button id="btnMarkAllFinished" onclick="markAllAsFinished()" style="background:#27ae60; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; flex:1; min-width:150px; font-weight:bold;">✅ Todos finalizados</button>
                 <button onclick="closeGroupModal()" style="background:#95a5a6; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ENVIAR MAIL -->
+    <div id="mailModal" class="modal-overlay" style="z-index:2100;" onclick="if(event.target === this) cerrarMail()">
+        <div class="modal-content" style="width:720px;">
+            <h3 style="margin-bottom:6px;">✉️ Enviar mail</h3>
+            <p id="mailContexto" style="font-size:12px; color:#7f8c8d; margin:0 0 12px 0;"></p>
+            <div id="mailSinConexion" style="display:none; background:#fef5e7; border:1px solid #f5cba7; color:#935116; padding:10px; border-radius:6px; font-size:13px; margin-bottom:10px;">
+                Todavía no está conectado el envío de mails. Configuralo en <b>✉️ Plantillas y correo</b> (te lleva 10 minutos, una sola vez).
+            </div>
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
+                <div><label style="font-size:12px; font-weight:bold;">Para <span style="font-weight:normal; color:#95a5a6;">(varios separados por coma)</span></label><input type="text" id="mailPara" style="margin:0;"></div>
+                <div><label style="font-size:12px; font-weight:bold;">Plantilla</label><select id="mailPlantilla" onchange="aplicarPlantillaMail()" style="margin:0;"></select></div>
+            </div>
+            <div style="margin-top:8px;"><label style="font-size:12px; font-weight:bold;">CC <span style="font-weight:normal; color:#95a5a6;">(opcional)</span></label><input type="text" id="mailCc" style="margin:0;"></div>
+            <div style="margin-top:8px;"><label style="font-size:12px; font-weight:bold;">Asunto</label><input type="text" id="mailAsunto" style="margin:0;"></div>
+            <div style="margin-top:8px;"><label style="font-size:12px; font-weight:bold;">Mensaje</label><textarea id="mailCuerpo" oninput="mailEditado = true" style="min-height:200px; margin:0; font-family:inherit; line-height:1.45;"></textarea></div>
+            <div style="margin-top:8px;">
+                <label style="font-size:12px; font-weight:bold;">Adjuntos</label>
+                <div id="mailAdjuntos" style="font-size:13px;"></div>
+                <input type="file" id="mailExtra" multiple onchange="cambioAdjuntosMail()" style="margin:6px 0 0 0;">
+                <small style="color:#95a5a6;">Hasta 25 MB en total por mail.</small>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:14px;">
+                <button id="btnEnviarMail" onclick="confirmarEnvioMail()" style="background:#2980b9; color:white; border:none; padding:11px; border-radius:4px; cursor:pointer; flex:1; font-weight:bold;">✉️ Enviar</button>
+                <button onclick="cerrarMail()" style="background:#95a5a6; color:white; border:none; padding:11px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL WHATSAPP -->
+    <div id="wppModal" class="modal-overlay" style="z-index:2100;" onclick="if(event.target === this) cerrarWpp()">
+        <div class="modal-content" style="width:560px;">
+            <h3 style="margin-bottom:6px;">💬 Mensaje por WhatsApp</h3>
+            <p id="wppContexto" style="font-size:12px; color:#7f8c8d; margin:0 0 12px 0;"></p>
+            <div style="display:grid; grid-template-columns: 1fr 1.4fr; gap:10px;">
+                <div><label style="font-size:12px; font-weight:bold;">Teléfono</label><input type="tel" id="wppTel" style="margin:0;"></div>
+                <div><label style="font-size:12px; font-weight:bold;">Plantilla</label><select id="wppPlantilla" onchange="aplicarPlantillaWpp()" style="margin:0;"></select></div>
+            </div>
+            <div style="margin-top:8px;"><label style="font-size:12px; font-weight:bold;">Mensaje</label><textarea id="wppTexto" style="min-height:170px; margin:0; font-family:inherit; line-height:1.45;"></textarea></div>
+            <div style="display:flex; gap:10px; margin-top:14px;">
+                <button onclick="abrirWppModal()" style="background:#25D366; color:white; border:none; padding:11px; border-radius:4px; cursor:pointer; flex:1; font-weight:bold;">💬 Abrir WhatsApp</button>
+                <button onclick="cerrarWpp()" style="background:#95a5a6; color:white; border:none; padding:11px; border-radius:4px; cursor:pointer; width:auto; font-weight:bold;">Cancelar</button>
             </div>
         </div>
     </div>
@@ -404,7 +466,7 @@
                         <option value="Un Paso Mas">Un Paso Mas</option>
                     </select>
                 </div>
-                <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="vencFile" style="margin:0;"></div>
+                <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="vencFile" multiple style="margin:0;"></div>
             </div>
             <label style="font-size:12px; font-weight:bold;">Descripción / Notas</label>
             <textarea id="vencDesc" placeholder="Observaciones o detalles del vencimiento..." style="min-height: 70px; margin-bottom:0;"></textarea>
@@ -428,6 +490,7 @@
             <button class="menu-btn" data-sec="vencimientos" onclick="showSection('vencimientos')"><span>🚀</span> <span class="menu-text">Venc. Masivos</span></button>
             <button class="menu-btn" data-sec="clientes" onclick="showSection('clientes')"><span>👥</span> <span class="menu-text">Gestión Clientes</span></button>
             <button class="menu-btn" data-sec="honorarios" onclick="showSection('honorarios')"><span>💵</span> <span class="menu-text">Honorarios</span></button>
+            <button class="menu-btn" data-sec="plantillas" onclick="showSection('plantillas')"><span>✉️</span> <span class="menu-text">Plantillas y correo</span></button>
             <button class="menu-btn" data-sec="historial" onclick="showSection('historial')"><span>🕘</span> <span class="menu-text">Registro de cambios</span></button>
             <button class="menu-btn logout-btn" onclick="logout()"><span>🚪</span> <span class="menu-text">Cerrar Sesión</span></button>
         </div>
@@ -601,7 +664,7 @@
                             </select>
                         </div>
                         <div><label style="font-size:12px; font-weight:bold;">Vencimiento</label><input type="date" id="taskDueDate" style="margin:0;"></div>
-                        <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="taskFile" style="margin:0;"></div>
+                        <div><label style="font-size:12px; font-weight:bold;">Adjuntar Archivo</label><input type="file" id="taskFile" multiple style="margin:0;"></div>
                     </div>
                     <textarea id="taskDesc" placeholder="Observaciones, detalles o información adicional de la tarea..." style="margin-top:10px;"></textarea>
                     <button id="btnCreateTask" class="btn-green" onclick="addTask()" style="margin-top: 10px; width: 100%;">+ Agregar Tarea al Tablero</button>
@@ -764,6 +827,32 @@
                         <input type="text" id="honBuscar" placeholder="🔍 Buscar cliente..." oninput="renderHonorarios()" style="margin-bottom:8px;">
                         <div id="honLista"></div></div>
                     <div class="panel"><h3>🔴 Deudores (todos los meses)</h3><div id="honDeudores"></div></div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN PLANTILLAS Y CORREO -->
+            <div id="plantillas" class="section">
+                <h2>Plantillas y correo</h2>
+                <div class="panel" style="margin-bottom:16px;">
+                    <h3>🔌 Conexión para enviar mails</h3>
+                    <p style="font-size:13px; color:#555; margin-top:0;">Los mails salen desde la cuenta de Gmail del estudio, con los archivos adjuntos, y quedan en "Enviados". Se configura una sola vez siguiendo el instructivo.</p>
+                    <div style="display:grid; grid-template-columns: 1fr auto auto; gap:8px; align-items:end;">
+                        <div><label style="font-size:12px; font-weight:bold;">Dirección del script (termina en /exec)</label><input type="text" id="cfgMailUrl" placeholder="https://script.google.com/macros/s/.../exec" style="margin:0;"></div>
+                        <button class="btn-sec" onclick="guardarCfgMail()" style="width:auto; margin:0; padding:10px 14px;">💾 Guardar</button>
+                        <button class="btn-green" onclick="probarMail()" style="width:auto; margin:0; padding:10px 14px;">🧪 Enviarme un mail de prueba</button>
+                    </div>
+                    <p id="cfgMailEstado" style="font-size:13px; margin:10px 0 0 0;"></p>
+                </div>
+                <div class="panel">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <h3 style="margin:0;">📝 Plantillas de mensajes</h3>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-sec" onclick="nuevaPlantilla('mail')" style="width:auto; margin:0; padding:8px 12px;">+ Plantilla de mail</button>
+                            <button class="btn-sec" onclick="nuevaPlantilla('wpp')" style="width:auto; margin:0; padding:8px 12px;">+ Plantilla de WhatsApp</button>
+                        </div>
+                    </div>
+                    <p style="font-size:12px; color:#7f8c8d;">Datos que se completan solos: <code>{cliente}</code> <code>{obligacion}</code> <code>{periodo}</code> <code>{fecha}</code> <code>{monto}</code> <code>{monto_txt}</code> <code>{que_vence}</code> <code>{detalle_pago}</code> <code>{archivos}</code>. En WhatsApp, el texto entre *asteriscos* sale en negrita.</p>
+                    <div id="listaPlantillas"></div>
                 </div>
             </div>
 
@@ -1253,41 +1342,61 @@
         }
 
         // GENERADOR DE LINK WHATSAPP
-        function generarLinkWpp(telefono, tituloCompleto, monto, fecha, tipoObligacion, soloUrl) {
+        // ---------- PLANTILLAS DE MENSAJES ----------
+        const FIRMA = `Saludos,\nEquipo de Un Paso Más\nWhatsApp: +54 9 11 5718-2388`;
+        const PLANTILLAS_BASE = {
+            mail_presentacion: { orden: 1, canal: 'mail', nombre: 'Presentación realizada', asunto: '{obligacion} {periodo} - Presentación realizada',
+                cuerpo: `Hola {cliente},\n\nTe informamos que realizamos la presentación de {obligacion} correspondiente al período {periodo}.\n\n{detalle_pago}Te adjuntamos la documentación:\n{archivos}\n\nCualquier consulta estamos a disposición.\n\n${FIRMA}` },
+            mail_pago: { orden: 2, canal: 'mail', nombre: 'Aviso de pago (con boleta)', asunto: 'Vencimiento {obligacion} {periodo} - {fecha}',
+                cuerpo: `Hola {cliente},\n\nTe recordamos que el {fecha} vence {que_vence} de {obligacion} correspondiente al período {periodo}{monto_txt}.\n\nTe adjuntamos la boleta / VEP para realizar el pago:\n{archivos}\n\nUna vez abonado, por favor envianos el comprobante.\n\n${FIRMA}` },
+            mail_libre: { orden: 3, canal: 'mail', nombre: 'Mail en blanco', asunto: '', cuerpo: `Hola {cliente},\n\n\n\n${FIRMA}` },
+            wpp_pago: { orden: 10, canal: 'wpp', nombre: 'Aviso de pago (WhatsApp)', asunto: '',
+                cuerpo: `{cliente}\nTe recordamos que el día *{fecha}* vence {que_vence} de *{obligacion}* correspondiente al período *{periodo}*{monto_txt}.\n\nTe recomendamos abonarlo en tiempo y forma. Cualquier consulta estamos a disposición.\n\nSaludos, el equipo de Un Paso Más` },
+            wpp_presentacion: { orden: 11, canal: 'wpp', nombre: 'Aviso de presentación (WhatsApp)', asunto: '',
+                cuerpo: `{cliente}\nTe recordamos que el día *{fecha}* vence la presentación de *{obligacion}* correspondiente al período *{periodo}*.\n\nDe la presentación nos encargamos nosotros. Cualquier consulta estamos a disposición.\n\nSaludos, el equipo de Un Paso Más` },
+            wpp_libre: { orden: 12, canal: 'wpp', nombre: 'Mensaje libre (WhatsApp)', asunto: '', cuerpo: `Hola {cliente}! ` }
+        };
+        let plantillasDB = {};
+        function plantillas() {
+            const out = {};
+            Object.entries(PLANTILLAS_BASE).forEach(([id, p]) => out[id] = { ...p, id, base: true, editada: !!plantillasDB[id] });
+            Object.entries(plantillasDB).forEach(([id, p]) => out[id] = { ...(out[id] || {}), ...p, id, base: !!PLANTILLAS_BASE[id], editada: true });
+            return Object.values(out).sort((a, b) => (a.orden || 50) - (b.orden || 50) || (a.nombre || '').localeCompare(b.nombre || ''));
+        }
+        function plantilla(id) { return plantillas().find(p => p.id === id) || plantillas()[0]; }
+
+        // Datos para completar las variables de una plantilla
+        function ctxMensaje(t, c) {
+            const ctx = { cliente: c ? c.nombre : (t ? nombreDe(t) : ''), obligacion: '', periodo: '', fecha: '', monto: '', monto_txt: '', que_vence: 'la presentación', detalle_pago: '', archivos: '' };
+            if (t) {
+                let ob = t.tipo === 'vencimiento' ? grupoDe(t) : (t.titulo || '');
+                const m = ob.match(/(.*)\s\((.*)\)\s*$/);
+                if (m) { ctx.obligacion = m[1].trim(); ctx.periodo = m[2].trim(); } else ctx.obligacion = ob;
+                if (t.tipo !== 'vencimiento' && c) ctx.obligacion = ctx.obligacion.replace(' - ' + c.nombre, '');
+                ctx.fecha = t.vencimiento ? fmtFecha(t.vencimiento) : '';
+                const esPago = t.tipoObligacion === 'pago';
+                if (t.monto) { ctx.monto = pesos(t.monto); ctx.monto_txt = ` por un monto de ${pesos(t.monto)}`; }
+                ctx.que_vence = esPago ? 'el pago' : (t.monto ? 'la presentación y el pago' : 'la presentación');
+                if (t.monto) ctx.detalle_pago = `${esPago ? 'El importe a pagar' : 'El saldo a pagar'} es de ${pesos(t.monto)}${t.vencimiento ? `, con vencimiento el ${fmtFecha(t.vencimiento)}` : ''}.\n\n`;
+                const arch = archivosDe(t);
+                ctx.archivos = arch.length ? arch.map(a => '• ' + a.nombre).join('\n') : '(sin archivos)';
+            }
+            return ctx;
+        }
+        function aplicarPlantilla(texto, ctx) {
+            return String(texto || '').replace(/\{(\w+)\}/g, (m, k) => (k in ctx ? ctx[k] : m)).replace(/\n{3,}/g, '\n\n');
+        }
+
+        function generarLinkWpp(telefono, tituloCompleto, monto, fecha, tipoObligacion, soloUrl, tareaId) {
             if(!telefono || !tituloCompleto) return '';
-            const telLimpio = telefono.replace(/\D/g,'');
-            
-            let nombreCliente = "Cliente";
-            let obligacion = tituloCompleto;
-            let periodo = "";
-
-            const splitIndex = tituloCompleto.indexOf(' - ');
-            if (splitIndex !== -1) {
-                obligacion = tituloCompleto.substring(0, splitIndex);
-                nombreCliente = tituloCompleto.substring(splitIndex + 3);
-            }
-
-            const match = obligacion.match(/(.*)\s\((.*)\)/);
-            if (match) {
-                obligacion = match[1].trim();
-                periodo = match[2].trim();
-            }
-
-            const fechaStr = fecha ? fmtFecha(fecha) : 'próximamente';
-            const esPago = tipoObligacion === 'pago';
-            const queVence = esPago ? 'el pago' : (monto ? 'la presentación y el pago' : 'la presentación');
-
-            let mensaje = `${nombreCliente}\nTe recordamos que el día *${fechaStr}* vence ${queVence} de *${obligacion}*`;
-            if (periodo) mensaje += ` correspondiente al período *${periodo}*`;
-            if (monto) mensaje += ` por un monto de *${pesos(monto)}*`;
-            mensaje += (esPago || monto)
-                ? `.\n\nTe recomendamos abonarlo en tiempo y forma. Cualquier consulta estamos a disposición.`
-                : `.\n\nDe la presentación nos encargamos nosotros. Cualquier consulta estamos a disposición.`;
-            mensaje += `\n\nSaludos, el equipo de Un Paso Más`;
-            
+            const telLimpio = String(telefono).replace(/\D/g,'');
+            const t = { titulo: tituloCompleto, tipo: 'vencimiento', monto, vencimiento: fecha, tipoObligacion };
+            const c = { nombre: nombreDe(t) };
+            const p = plantilla((tipoObligacion === 'pago' || monto) ? 'wpp_pago' : 'wpp_presentacion');
+            const mensaje = aplicarPlantilla(p.cuerpo, ctxMensaje(t, c));
             const url = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
             if (soloUrl) return url;
-            return `<a href="${url}" target="_blank" class="btn-wpp" title="Enviar aviso">💬 Avisar</a>`;
+            return `<a href="${url}" target="_blank" class="btn-wpp" title="Enviar aviso" ${tareaId ? `onclick="marcarWpp('${tareaId}')"` : ''}>💬 Avisar</a>`;
         }
 
         // MODALES
@@ -1356,24 +1465,27 @@
             const listos = window.currentGroupTasks.filter(t => t.estado === 'listas').length;
             document.getElementById('groupModalSub').innerText = `Vence el ${fmtFecha(dateString)} · ${window.currentGroupTasks.length} clientes · ${listos} finalizados. Cargá montos y boletas, cambiá estados y tocá "Guardar cambios".`;
             document.getElementById('wppCola').style.display = 'none';
+            document.getElementById('mailCola').style.display = 'none';
 
             let html = '';
             window.currentGroupTasks.forEach(t => {
                 const cli = clientesActivos.find(c => c.id === t.clienteId);
                 const tel = cli && cli.telefono ? cli.telefono : '';
-                const wppBtn = generarLinkWpp(tel, t.titulo, t.monto, t.vencimiento, t.tipoObligacion) || '<span style="font-size:11px; color:#bdc3c7;">sin WhatsApp</span>';
+                const wppBtn = generarLinkWpp(tel, t.titulo, t.monto, t.vencimiento, t.tipoObligacion, false, t.id) || '<span style="font-size:11px; color:#bdc3c7;">sin WhatsApp</span>';
+                const mailBtn = `<button onclick="abrirMail('${t.id}')" title="Enviar mail" style="width:auto; margin:0; padding:5px 8px; border:none; border-radius:4px; background:#2980b9; color:white; cursor:pointer; font-size:12px; font-weight:bold;">✉️</button>`;
+                const avisos = [t.avisoMail ? `✉️ ${new Date(t.avisoMail.fecha).toLocaleDateString('es-AR').slice(0, 5)}` : '', t.avisoWpp ? `💬 ${new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR').slice(0, 5)}` : ''].filter(Boolean).join(' ');
                 const badge = t.tipoObligacion === 'pago' ? '<span style="background:#e74c3c; color:white; padding:1px 5px; border-radius:3px; font-size:9px;">PAGO</span>' : '<span style="background:#8e44ad; color:white; padding:1px 5px; border-radius:3px; font-size:9px;">PRES</span>';
                 const pagoInf = t.auditoriaPago ? ' <span title="' + esc(t.auditoriaPago) + '">💳</span>' : '';
                 html += `<div class="grp-row" data-id="${t.id}">
                     <div class="nom" title="${esc(nombreDe(t))}">${badge} ${esc(nombreDe(t))}${pagoInf}</div>
                     <input type="number" class="g-monto" placeholder="Monto $" value="${esc(t.monto || '')}">
-                    <div class="arch">${t.archivoUrl ? `<a href="${esc(t.archivoUrl)}" target="_blank">📎 Ver</a> · reemplazar:` : 'Boleta/VEP:'}<input type="file" class="g-file"></div>
+                    <div class="arch">${archivosDe(t).length ? listaArchivosHtml(archivosDe(t), true) + '<br>agregar:' : 'Archivos:'}<input type="file" class="g-file" multiple></div>
                     <select class="g-estado">
                         <option value="pendientes" ${t.estado === 'pendientes' ? 'selected' : ''}>🕒 Pendiente</option>
                         <option value="proceso" ${t.estado === 'proceso' ? 'selected' : ''}>⏳ En proceso</option>
                         <option value="listas" ${t.estado === 'listas' ? 'selected' : ''}>✅ Finalizada</option>
                     </select>
-                    <div>${wppBtn}</div>
+                    <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">${mailBtn}${wppBtn}${avisos ? `<span class="aviso-tag" style="width:100%;">${avisos}</span>` : ''}</div>
                 </div>`;
             });
             document.getElementById('groupModalList').innerHTML = html || '<div class="vacio-mini">No hay clientes en este vencimiento.</div>';
@@ -1389,7 +1501,7 @@
                 const upd = {};
                 const monto = fila.querySelector('.g-monto').value;
                 const estado = fila.querySelector('.g-estado').value;
-                const file = fila.querySelector('.g-file').files[0];
+                const file = fila.querySelector('.g-file').files.length ? Array.from(fila.querySelector('.g-file').files) : null;
                 if (String(monto) !== String(t.monto || '')) upd.monto = monto;
                 if (estado !== t.estado) upd.estado = estado;
                 if (file || Object.keys(upd).length) cambios.push({ t, upd, file });
@@ -1400,7 +1512,7 @@
                 let n = 0;
                 for (const c of cambios) {
                     btn.innerText = `Guardando ${++n} de ${cambios.length}...`;
-                    if (c.file) c.upd.archivoUrl = await subirArchivo(c.file);
+                    if (c.file) { c.upd.archivos = [...archivosDe(c.t), ...(await subirArchivos(c.file))]; c.upd.archivoUrl = c.upd.archivos[0].url; }
                     await updateDoc(doc(db, "tareas", c.t.id), c.upd);
                 }
                 registrar('Carga masiva en vencimiento', `${grupoAbierto.groupName} (${fmtFecha(grupoAbierto.dateString)}): ${cambios.length} clientes actualizados`);
@@ -1408,6 +1520,46 @@
                 setTimeout(() => openGroupModal(grupoAbierto.groupName, grupoAbierto.dateString), 300);
             } catch (e) { alert("Error al guardar: " + e.message); }
             btn.innerText = "💾 Guardar cambios"; btn.disabled = false;
+        }
+
+        // Mails masivos: envía a todos los clientes del grupo que tienen archivos y aún no recibieron el mail
+        window.prepararMailsMasivos = function() {
+            const box = document.getElementById('mailCola');
+            if (!cfgCorreo.url) { box.style.display = 'block'; box.innerHTML = 'Primero hay que conectar el envío de mails en <b>✉️ Plantillas y correo</b>.'; return; }
+            const ops = plantillas().filter(p => p.canal === 'mail').map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
+            box.style.display = 'block';
+            box.innerHTML = `<div style="display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:end;">
+                <div><label style="font-size:12px; font-weight:bold;">Plantilla para todos</label><select id="mmPlantilla" style="margin:0;">${ops}</select></div>
+                <button onclick="enviarMailsMasivos()" id="btnMM" style="width:auto; margin:0; padding:10px 14px; background:#8e44ad; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">Enviar</button></div>
+                <label style="display:flex; gap:6px; align-items:center; margin-top:8px; font-size:12px; font-weight:normal;"><input type="checkbox" id="mmSoloArch" checked style="width:auto; margin:0;"> Solo a los que tienen archivos cargados</label>
+                <label style="display:flex; gap:6px; align-items:center; margin-top:4px; font-size:12px; font-weight:normal;"><input type="checkbox" id="mmSoloNuevos" checked style="width:auto; margin:0;"> Saltear los que ya recibieron un mail</label>
+                <div id="mmProgreso" style="font-size:12px; margin-top:8px;"></div>`;
+            document.getElementById('mmPlantilla').value = window.currentGroupTasks.some(t => t.tipoObligacion === 'pago') ? 'mail_pago' : 'mail_presentacion';
+        }
+        window.enviarMailsMasivos = async function() {
+            const soloArch = document.getElementById('mmSoloArch').checked, soloNuevos = document.getElementById('mmSoloNuevos').checked;
+            const p = plantilla(document.getElementById('mmPlantilla').value);
+            const lista = [], sinMail = [];
+            window.currentGroupTasks.forEach(t0 => {
+                const t = tareasActuales.find(x => x.id === t0.id) || t0;
+                if (soloArch && !archivosDe(t).length) return;
+                if (soloNuevos && t.avisoMail) return;
+                const c = clientesActivos.find(x => x.id === t.clienteId);
+                if (!emailsDe(c)) { sinMail.push(nombreDe(t)); return; }
+                lista.push({ t, c });
+            });
+            if (!lista.length) return alert(`No hay mails para enviar con esos filtros.${sinMail.length ? '\nSin email cargado: ' + sinMail.join(', ') : ''}`);
+            if (!confirm(`Se van a enviar ${lista.length} mails con la plantilla "${p.nombre}", cada uno con sus archivos.${sinMail.length ? `\n\n${sinMail.length} clientes no tienen email y se saltean.` : ''}\n\n¿Enviar?`)) return;
+            const prog = document.getElementById('mmProgreso'), btn = document.getElementById('btnMM'); btn.disabled = true;
+            let ok = 0; const errores = [];
+            for (const { t, c } of lista) {
+                prog.innerText = `Enviando ${ok + errores.length + 1} de ${lista.length}: ${c.nombre}...`;
+                const ctx = ctxMensaje(t, c);
+                try { await enviarMailReal({ para: emailsDe(c), cc: '', asunto: aplicarPlantilla(p.asunto, ctx).replace(/\s+/g, ' ').trim(), cuerpo: aplicarPlantilla(p.cuerpo, ctx), adjuntos: archivosDe(t) }, t.id, c.id, p.nombre); ok++; }
+                catch (e) { errores.push(`${c.nombre}: ${e.message}`); }
+            }
+            prog.innerHTML = `✅ Enviados: <b>${ok}</b>${errores.length ? `<br>❌ Con error: ${errores.map(esc).join('<br>')}` : ''}${sinMail.length ? `<br>Sin email: ${esc(sinMail.join(', '))}` : ''}`;
+            btn.disabled = false;
         }
 
         // WhatsApp masivo: abre los avisos uno detrás del otro
@@ -1418,7 +1570,7 @@
             pend.forEach(t => {
                 const cli = clientesActivos.find(c => c.id === t.clienteId);
                 const url = cli && cli.telefono ? generarLinkWpp(cli.telefono, t.titulo, t.monto, t.vencimiento, t.tipoObligacion, true) : '';
-                if (url) colaWpp.push({ nombre: nombreDe(t), url }); else sinTel.push(nombreDe(t));
+                if (url) colaWpp.push({ nombre: nombreDe(t), url, id: t.id }); else sinTel.push(nombreDe(t));
             });
             posWpp = 0;
             const box = document.getElementById('wppCola');
@@ -1439,7 +1591,7 @@
                 <div style="display:flex; gap:8px;"><button onclick="abrirWppActual()" style="background:#25D366; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; flex:1; margin:0;">💬 Abrir WhatsApp de ${esc(c.nombre)}</button>
                 <button onclick="saltarWpp()" style="background:#ecf0f1; border:none; padding:10px; border-radius:4px; cursor:pointer; width:auto; margin:0;">Saltar</button></div>`;
         }
-        window.abrirWppActual = function() { window.open(colaWpp[posWpp].url, '_blank'); posWpp++; pasoWpp(); }
+        window.abrirWppActual = function() { window.open(colaWpp[posWpp].url, '_blank'); updateDoc(doc(db, "tareas", colaWpp[posWpp].id), { avisoWpp: { fecha: new Date().toISOString(), por: currentUserEmail } }).catch(() => {}); posWpp++; pasoWpp(); }
         window.saltarWpp = function() { posWpp++; pasoWpp(); }
 
         window.closeGroupModal = function() {
@@ -1648,7 +1800,7 @@
                 <div class="pc-stat"><div class="lbl">Pendientes</div><div class="val">${pendientes.length}</div><div class="sub">vencimientos a gestionar</div></div>
                 <div class="pc-stat"><div class="lbl">Próximo vencimiento</div><div class="val" style="color:#e67e22;">${proxTxt}</div><div class="sub" title="${esc(proxSub)}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(proxSub)}</div></div>
                 <div class="pc-stat"><div class="lbl">Pagos pendientes</div><div class="val">${pagosPend.length}</div><div class="sub">${totalPagos ? 'Total informado: ' + pesos(totalPagos) : 'a cargo tuyo'}</div></div>
-                <div class="pc-stat"><div class="lbl">Finalizados</div><div class="val" style="color:#27ae60;">${finalizados.length}</div><div class="sub">con comprobante disponible: ${finalizados.filter(t => t.archivoUrl).length}</div></div>`;
+                <div class="pc-stat"><div class="lbl">Finalizados</div><div class="val" style="color:#27ae60;">${finalizados.length}</div><div class="sub">con comprobante disponible: ${finalizados.filter(t => archivosDe(t).length).length}</div></div>`;
 
             document.getElementById('pcAlerta').innerHTML = vencidos.length
                 ? `<div class="pc-alerta">⚠️ Tenés <b>${vencidos.length}</b> ${vencidos.length === 1 ? 'vencimiento vencido' : 'vencimientos vencidos'} sin finalizar. Si ya lo pagaste, avisanos con el botón "Ya lo pagué"; si no, comunicate con el estudio.</div>` : '';
@@ -1695,7 +1847,8 @@
             if (t.vencimiento) { const [a, m, dd] = t.vencimiento.split('-'); fecha = `<div class="pc-fecha"><div class="d">${dd}</div><div class="m">${MESES[parseInt(m, 10) - 1].substring(0, 3)}</div></div>`; }
 
             let acciones = '';
-            if (t.archivoUrl) acciones += `<a class="pc-btn pc-btn-azul" href="${esc(t.archivoUrl)}" target="_blank">📥 ${hecho ? 'Comprobante' : 'Descargar boleta'}</a>`;
+            const arch = archivosDe(t);
+            arch.forEach(a => { acciones += `<a class="pc-btn pc-btn-azul" href="${esc(a.url)}" target="_blank" title="${esc(a.nombre)}" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;">📥 ${arch.length === 1 ? (hecho ? 'Comprobante' : (esPago ? 'Descargar boleta' : 'Descargar')) : esc(a.nombre)}</a>`; });
             if (esPago && !hecho) acciones += `<button class="pc-btn pc-btn-verde" onclick="marcarPagadoCliente('${t.id}')">✔ Ya lo pagué</button>`;
             if (!acciones && !hecho) acciones = '<div class="pc-nota">El estudio está trabajando en esto</div>';
 
@@ -1737,6 +1890,18 @@
             if(id) moverTarea(id, estadoDestino);
         }
 
+        // Archivos de un vencimiento/tarea: lista nueva "archivos" (compatible con el campo viejo "archivoUrl")
+        function archivosDe(t) {
+            if (Array.isArray(t.archivos) && t.archivos.length) return t.archivos;
+            return t.archivoUrl ? [{ nombre: 'Archivo adjunto', url: t.archivoUrl }] : [];
+        }
+        async function subirArchivos(files) {
+            const out = [];
+            for (const fl of files) out.push({ nombre: fl.name, url: await subirArchivo(fl), fecha: new Date().toISOString() });
+            return out;
+        }
+        const listaArchivosHtml = (arr, chico) => arr.map(a => `<a href="${esc(a.url)}" target="_blank" style="display:inline-block; margin:2px 6px 2px 0; ${chico ? 'font-size:11px;' : 'font-size:12px;'} color:#2980b9; text-decoration:none;">📎 ${esc(a.nombre)}</a>`).join('');
+
         async function subirArchivo(file) {
             const nombreSeguro = file.name.replace(/[^\w.\-]+/g, '_');
             const storageRef = ref(storage, `tareas/${Date.now()}_${nombreSeguro}`);
@@ -1760,18 +1925,12 @@
             const auditLog = document.getElementById('editAuditLog');
             if(t.auditoriaPago) { auditLog.innerText = `🔍 Auditoría: ${t.auditoriaPago}`; auditLog.style.display = 'block'; } else { auditLog.style.display = 'none'; }
             
-            const linkBox = document.getElementById('editTaskFileLink');
-            if(t.archivoUrl) linkBox.innerHTML = `<a href="${t.archivoUrl}" target="_blank">📎 Ver Archivo Actual</a> (Sube uno nuevo para reemplazar)`;
-            else linkBox.innerHTML = 'Sin archivo adjunto.';
+            archivosEdit = archivosDe(t).slice();
+            renderArchivosEdit();
             document.getElementById('editTaskFile').value = '';
-            
-            const wppContainer = document.getElementById('editWppContainer');
-            if(t.tipo === 'vencimiento' && t.clienteId) {
-                const cli = clientesActivos.find(c => c.id === t.clienteId);
-                const refrescarWpp = () => { wppContainer.innerHTML = generarLinkWpp(cli.telefono, t.titulo, document.getElementById('editTaskMonto') ? document.getElementById('editTaskMonto').value : t.monto, t.vencimiento, document.getElementById('editTaskTipoOb').value); };
-                if(cli) { refrescarWpp(); document.getElementById('editTaskTipoOb').onchange = refrescarWpp; if (document.getElementById('editTaskMonto')) document.getElementById('editTaskMonto').oninput = refrescarWpp; }
-                else wppContainer.innerHTML = '';
-            } else { wppContainer.innerHTML = ''; }
+            document.getElementById('editWppContainer').innerHTML = '';
+            document.getElementById('editAvisosBox').style.display = t.clienteId ? 'block' : 'none';
+            document.getElementById('editAvisosEstado').innerHTML = estadoAvisos(t);
             
             // Comentarios de esta tarea
             if (unsubComent) unsubComent();
@@ -1796,6 +1955,23 @@
             } catch (e) { alert("No se pudo guardar el comentario: " + e.message); }
         }
 
+        let archivosEdit = [];
+        function renderArchivosEdit() {
+            document.getElementById('editTaskFileLink').innerHTML = archivosEdit.length
+                ? archivosEdit.map((a, i) => `<span style="display:inline-flex; align-items:center; gap:4px; background:#ebf5fb; border-radius:12px; padding:3px 4px 3px 10px; margin:2px 4px 2px 0;"><a href="${esc(a.url)}" target="_blank" style="color:#2980b9; text-decoration:none;">📎 ${esc(a.nombre)}</a><button onclick="quitarArchivoEdit(${i})" title="Quitar" style="width:auto; margin:0; padding:0 7px; border:none; background:none; color:#c0392b; cursor:pointer; font-weight:bold;">✕</button></span>`).join('')
+                : '<span style="color:#95a5a6;">Sin archivos.</span>';
+        }
+        window.quitarArchivoEdit = function(i) {
+            if (!confirm(`¿Quitar "${archivosEdit[i].nombre}"? (Se aplica al tocar Guardar)`)) return;
+            archivosEdit.splice(i, 1); renderArchivosEdit();
+        }
+        function estadoAvisos(t) {
+            const p = [];
+            if (t.avisoMail) p.push(`✉️ Mail enviado el ${new Date(t.avisoMail.fecha).toLocaleDateString('es-AR')}`);
+            if (t.avisoWpp) p.push(`💬 WhatsApp el ${new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR')}`);
+            return p.join(' · ');
+        }
+
         window.closeTaskModal = function() { editingTaskId = null; if (unsubComent) { unsubComent(); unsubComent = null; } document.getElementById('taskModal').style.display = 'none'; }
 
         window.updateTaskDetails = async function() {
@@ -1812,7 +1988,9 @@
             btn.disabled = true;
             try {
                 const fileInput = document.getElementById('editTaskFile');
-                if (fileInput.files.length > 0) updateData.archivoUrl = await subirArchivo(fileInput.files[0]);
+                const nuevos = fileInput.files.length ? await subirArchivos(Array.from(fileInput.files)) : [];
+                updateData.archivos = [...archivosEdit, ...nuevos];
+                updateData.archivoUrl = updateData.archivos.length ? updateData.archivos[0].url : '';
                 await updateDoc(doc(db, "tareas", editingTaskId), updateData);
                 registrar('Tarea/vencimiento editado', updateData.titulo);
                 closeTaskModal();
@@ -1919,24 +2097,25 @@
                 </div>${c.observaciones ? `<p style="margin:8px 0 0 0; color:#555;"><b>Obs.:</b> ${esc(c.observaciones)}</p>` : ''}
                 <div style="display:flex; gap:8px; margin-top:10px;">
                     <button class="btn-sec" style="width:auto; margin:0; padding:8px 12px;" onclick="cerrarFicha(); loadEditClient('${c.id}')">✏️ Editar datos</button>
-                    ${c.telefono ? `<a class="btn-wpp" style="padding:8px 12px;" target="_blank" href="https://wa.me/${String(c.telefono).replace(/\D/g, '')}">💬 WhatsApp</a>` : ''}
+                    <button class="btn-sec" style="width:auto; margin:0; padding:8px 12px; background:#25D366;" onclick="abrirWpp(null, '${c.id}')">💬 Mensaje</button>
+                    <button class="btn-sec" style="width:auto; margin:0; padding:8px 12px; background:#2980b9;" onclick="abrirMail(null, '${c.id}')">✉️ Mail</button>
                 </div>`;
 
             const venc = tareasActuales.filter(t => t.clienteId === c.id && t.tipo === 'vencimiento').sort((a, b) => (b.vencimiento || '').localeCompare(a.vencimiento || ''));
             const tareas = tareasActuales.filter(t => t.clienteId === c.id && t.tipo !== 'vencimiento').sort((a, b) => (b.vencimiento || '').localeCompare(a.vencimiento || ''));
             const hons = honorariosTodos.filter(h => h.clienteId === c.id).sort((a, b) => (b.periodo || '').localeCompare(a.periodo || ''));
-            const archivos = [...venc, ...tareas].filter(t => t.archivoUrl);
+            const archivos = [...venc, ...tareas].filter(t => archivosDe(t).length);
             const deuda = hons.filter(h => !h.pagado).reduce((s, h) => s + (Number(h.monto) || 0), 0);
             const docsC = documentosTodos.filter(d => d.clienteId === c.id).sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
             const docsNuevosC = docsC.filter(d => d.subidoPor === 'cliente' && !d.revisado).length;
             const tabs = [['venc', `Vencimientos (${venc.length})`], ['tareas', `Tareas (${tareas.length})`], ['docs', `Documentos (${docsC.length})${docsNuevosC ? ' 🔴' : ''}`], ['hon', `Honorarios${deuda ? ' · debe ' + pesos(deuda) : ''}`], ['arch', `Adjuntos (${archivos.length})`]];
             document.getElementById('fichaTabs').innerHTML = tabs.map(([k, l]) => `<button class="pc-tab ${fichaTab === k ? 'active' : ''}" onclick="fichaVer('${k}')">${l}</button>`).join('');
 
-            const filaT = t => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${fmtFecha(t.vencimiento)}</span><div class="grow"><b>${esc(t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo)}</b><small>${t.monto ? pesos(t.monto) + ' · ' : ''}${t.auditoriaPago ? '💳 Pago informado por el cliente' : ''}</small></div>${estadoTag(t)}${t.archivoUrl ? `<a class="mini" style="background:#ebf5fb; color:#2980b9;" href="${esc(t.archivoUrl)}" target="_blank">📎</a>` : ''}<button class="btn-sec" onclick="openTaskModal('${t.id}')">Abrir</button></div>`;
+            const filaT = t => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${fmtFecha(t.vencimiento)}</span><div class="grow"><b>${esc(t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo)}</b><small>${t.monto ? pesos(t.monto) + ' · ' : ''}${t.auditoriaPago ? '💳 Pago informado por el cliente' : ''}</small></div>${estadoTag(t)}${archivosDe(t).length ? `<span class="mini" style="background:#ebf5fb; color:#2980b9;" title="Archivos">📎${archivosDe(t).length}</span>` : ''}${t.avisoMail ? '<span title="Mail enviado">✉️</span>' : ''}<button class="btn-sec" onclick="openTaskModal('${t.id}')">Abrir</button></div>`;
             let html = '';
             if (fichaTab === 'venc') html = venc.map(filaT).join('') || '<div class="vacio-mini">Sin vencimientos.</div>';
             if (fichaTab === 'tareas') html = tareas.map(filaT).join('') || '<div class="vacio-mini">Sin tareas internas.</div>';
-            if (fichaTab === 'arch') html = archivos.map(t => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${fmtFecha(t.vencimiento)}</span><div class="grow"><b>${esc(t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo)}</b></div><a class="mini" style="background:#3498db; color:white;" href="${esc(t.archivoUrl)}" target="_blank">📥 Abrir</a></div>`).join('') || '<div class="vacio-mini">Sin archivos.</div>';
+            if (fichaTab === 'arch') html = archivos.map(t => `<div class="fila"><span class="fila-fecha" style="color:#2c3e50;">${fmtFecha(t.vencimiento)}</span><div class="grow"><b>${esc(t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo)}</b><small>${listaArchivosHtml(archivosDe(t), true)}</small></div></div>`).join('') || '<div class="vacio-mini">Sin archivos.</div>';
             if (fichaTab === 'docs') {
                 html = `<div style="background:#f4f8fb; border-radius:6px; padding:10px; margin:6px 0 10px 0;">
                     <b style="font-size:13px;">📤 Compartir un documento con el cliente</b> <small style="color:#7f8c8d;">(lo ve en su portal: constancias, DDJJ, estatutos...)</small>
@@ -1988,6 +2167,199 @@
             }, e => console.warn("documentos:", e)));
         });
 
+        // ---------- PLANTILLAS (pantalla) ----------
+        function renderPlantillas() {
+            document.getElementById('listaPlantillas').innerHTML = plantillas().map(p => `
+                <div class="plt" data-id="${p.id}">
+                    <div class="plt-head">
+                        <span class="canal canal-${p.canal}">${p.canal === 'mail' ? '✉️ Mail' : '💬 WhatsApp'}</span>
+                        <input type="text" class="p-nombre" value="${esc(p.nombre)}">
+                        ${p.editada && p.base ? '<span style="font-size:11px; color:#e67e22;">editada</span>' : ''}
+                    </div>
+                    ${p.canal === 'mail' ? `<label style="font-size:12px; font-weight:bold;">Asunto</label><input type="text" class="p-asunto" value="${esc(p.asunto || '')}" style="margin:0;">` : ''}
+                    <textarea class="p-cuerpo">${esc(p.cuerpo || '')}</textarea>
+                    <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                        <button class="btn-green" style="width:auto; margin:0; padding:8px 14px;" onclick="guardarPlantilla('${p.id}')">💾 Guardar</button>
+                        ${p.base ? (p.editada ? `<button class="btn-sec" style="width:auto; margin:0; padding:8px 14px;" onclick="restaurarPlantilla('${p.id}')">↩ Volver al texto original</button>` : '')
+                                 : `<button style="width:auto; margin:0; padding:8px 14px; background:#fdedec; color:#c0392b; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="restaurarPlantilla('${p.id}')">🗑 Borrar</button>`}
+                    </div>
+                </div>`).join('');
+        }
+        window.guardarPlantilla = async function(id) {
+            const box = document.querySelector(`.plt[data-id="${id}"]`);
+            const p = plantilla(id);
+            const data = { nombre: box.querySelector('.p-nombre').value.trim() || p.nombre, canal: p.canal, orden: p.orden || 50,
+                asunto: box.querySelector('.p-asunto') ? box.querySelector('.p-asunto').value : '', cuerpo: box.querySelector('.p-cuerpo').value };
+            try { await setDoc(doc(db, "plantillas", id), data); registrar('Plantilla guardada', data.nombre); alert("Plantilla guardada."); } catch (e) { alert(e.message); }
+        }
+        window.restaurarPlantilla = async function(id) {
+            const p = plantilla(id);
+            if (!confirm(p.base ? `¿Volver "${p.nombre}" al texto original?` : `¿Borrar la plantilla "${p.nombre}"?`)) return;
+            try { await deleteDoc(doc(db, "plantillas", id)); registrar(p.base ? 'Plantilla restaurada' : 'Plantilla borrada', p.nombre); } catch (e) { alert(e.message); }
+        }
+        window.nuevaPlantilla = async function(canal) {
+            const nombre = prompt(canal === 'mail' ? 'Nombre de la nueva plantilla de mail:' : 'Nombre de la nueva plantilla de WhatsApp:');
+            if (!nombre) return;
+            try {
+                await addDoc(collection(db, "plantillas"), { nombre, canal, orden: canal === 'mail' ? 5 : 15, asunto: canal === 'mail' ? '{obligacion} {periodo}' : '', cuerpo: canal === 'mail' ? `Hola {cliente},\n\n\n\n${FIRMA}` : 'Hola {cliente}! ' });
+            } catch (e) { alert(e.message); }
+        }
+
+        // ---------- CONFIGURACIÓN DEL CORREO ----------
+        let cfgCorreo = {};
+        function pintarCfgMail() {
+            const inp = document.getElementById('cfgMailUrl');
+            if (document.activeElement !== inp) inp.value = cfgCorreo.url || '';
+            const est = document.getElementById('cfgMailEstado');
+            if (!cfgCorreo.url) { est.innerHTML = '⚪ <b>Sin conectar.</b> Seguí el instructivo para instalar el script y pegá acá su dirección.'; est.style.color = '#7f8c8d'; }
+            else if (cfgCorreo.ultimaPrueba && cfgCorreo.ultimaPrueba.ok) { est.innerHTML = `🟢 <b>Conectado.</b> Última prueba OK el ${new Date(cfgCorreo.ultimaPrueba.fecha).toLocaleString('es-AR')} (envía desde ${esc(cfgCorreo.ultimaPrueba.cuenta || '')}).`; est.style.color = '#1e8449'; }
+            else { est.innerHTML = '🟡 Dirección guardada. Tocá "Enviarme un mail de prueba" para confirmar que funciona.'; est.style.color = '#935116'; }
+        }
+        window.guardarCfgMail = async function() {
+            const url = document.getElementById('cfgMailUrl').value.trim();
+            if (url && !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)) return alert('La dirección debe empezar con "https://script.google.com/macros/s/" y terminar en "/exec".');
+            try { await setDoc(doc(db, "config", "correo"), { url, ultimaPrueba: null }, { merge: true }); registrar('Conexión de correo actualizada', url ? 'Dirección guardada' : 'Desconectado'); } catch (e) { alert(e.message); }
+        }
+        async function llamarScript(payload) {
+            if (!cfgCorreo.url) throw new Error('El envío de mails no está configurado (ver "Plantillas y correo").');
+            const idToken = await auth.currentUser.getIdToken();
+            const r = await fetch(cfgCorreo.url, { method: 'POST', body: JSON.stringify({ ...payload, idToken }) });
+            let data; try { data = await r.json(); } catch (e) { throw new Error('El script no respondió bien. Revisá que esté implementado con acceso "Cualquier persona".'); }
+            if (!data.ok) throw new Error(data.error || 'Error desconocido');
+            return data;
+        }
+        window.probarMail = async function() {
+            const est = document.getElementById('cfgMailEstado');
+            if (!cfgCorreo.url) { await guardarCfgMail(); if (!document.getElementById('cfgMailUrl').value.trim()) return; await new Promise(r => setTimeout(r, 400)); }
+            est.innerText = 'Enviando mail de prueba...'; est.style.color = '#555';
+            try {
+                const d = await llamarScript({ accion: 'probar', para: currentUserEmail });
+                await setDoc(doc(db, "config", "correo"), { ultimaPrueba: { ok: true, fecha: new Date().toISOString(), cuenta: d.cuenta || '' } }, { merge: true });
+                alert(`✅ ¡Funciona! Te enviamos un mail de prueba a ${currentUserEmail} desde ${d.cuenta}.\nPodés enviar ${d.cuotaRestante} mails más hoy.`);
+            } catch (e) { est.innerText = '🔴 ' + e.message; est.style.color = '#c0392b'; }
+        }
+
+        // ---------- ENVIAR MAIL ----------
+        let mailCtx = null;   // { tareaId, clienteId }
+        function emailsDe(c) { return [c && c.emailContacto, c && c.emailPortal].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(', '); }
+        window.abrirMail = function(tareaId, clienteId, plantillaId) {
+            const t = tareaId ? tareasActuales.find(x => x.id === tareaId) : null;
+            const c = clientesActivos.find(x => x.id === (clienteId || (t && t.clienteId)));
+            mailCtx = { tareaId: t ? t.id : null, clienteId: c ? c.id : null };
+            document.getElementById('mailSinConexion').style.display = cfgCorreo.url ? 'none' : 'block';
+            document.getElementById('mailContexto').innerText = [c ? c.nombre : '', t ? (t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo) : ''].filter(Boolean).join(' · ');
+            document.getElementById('mailPara').value = emailsDe(c);
+            document.getElementById('mailCc').value = '';
+            document.getElementById('mailExtra').value = '';
+            const sel = document.getElementById('mailPlantilla');
+            sel.innerHTML = plantillas().filter(p => p.canal === 'mail').map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
+            sel.value = plantillaId || (!t ? 'mail_libre' : ((t.tipoObligacion === 'pago' && t.estado !== 'listas') ? 'mail_pago' : 'mail_presentacion'));
+            if (!sel.value) sel.selectedIndex = 0;
+            const arch = t ? archivosDe(t) : [];
+            document.getElementById('mailAdjuntos').innerHTML = arch.length ? arch.map((a, i) => `<label style="display:flex; gap:6px; align-items:center; margin:3px 0; font-weight:normal;"><input type="checkbox" class="mail-adj" data-i="${i}" checked onchange="cambioAdjuntosMail()" style="width:auto; margin:0;"> 📎 ${esc(a.nombre)}</label>`).join('') : '<span style="color:#95a5a6;">Este vencimiento no tiene archivos cargados. Podés adjuntar desde acá abajo.</span>';
+            aplicarPlantillaMail();
+            document.getElementById('mailModal').style.display = 'flex';
+        }
+        window.aplicarPlantillaMail = function() {
+            const t = mailCtx.tareaId ? tareasActuales.find(x => x.id === mailCtx.tareaId) : null;
+            const c = clientesActivos.find(x => x.id === mailCtx.clienteId);
+            const p = plantilla(document.getElementById('mailPlantilla').value);
+            const ctx = ctxMensaje(t, c);
+            // La lista {archivos} refleja solo los adjuntos tildados
+            const marcados = Array.from(document.querySelectorAll('.mail-adj')).filter(cb => cb.checked).map(cb => (t ? archivosDe(t) : [])[+cb.dataset.i]).filter(Boolean);
+            const extras = Array.from(document.getElementById('mailExtra').files).map(x => ({ nombre: x.name }));
+            const todos = [...(document.querySelectorAll('.mail-adj').length ? marcados : (t ? archivosDe(t) : [])), ...extras];
+            ctx.archivos = todos.length ? todos.map(a => '• ' + a.nombre).join('\n') : '(sin archivos)';
+            document.getElementById('mailAsunto').value = aplicarPlantilla(p.asunto, ctx).replace(/\s+/g, ' ').trim();
+            document.getElementById('mailCuerpo').value = aplicarPlantilla(p.cuerpo, ctx);
+            mailEditado = false;
+        }
+        let mailEditado = false;
+        window.cambioAdjuntosMail = function() {
+            if (mailEditado && !confirm("Editaste el texto del mail. ¿Actualizarlo con la nueva lista de adjuntos? (Se pierden tus cambios)")) return;
+            aplicarPlantillaMail();
+        }
+        window.cerrarMail = function() { document.getElementById('mailModal').style.display = 'none'; mailCtx = null; }
+        window.confirmarEnvioMail = async function() {
+            const para = document.getElementById('mailPara').value.trim(), cc = document.getElementById('mailCc').value.trim();
+            const asunto = document.getElementById('mailAsunto').value.trim(), cuerpo = document.getElementById('mailCuerpo').value;
+            if (!para) return alert("Completá el destinatario (el cliente no tiene email cargado).");
+            const malos = (para + (cc ? ',' + cc : '')).split(',').map(x => x.trim()).filter(Boolean).filter(x => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));
+            if (malos.length) return alert("Revisá estos emails: " + malos.join(', '));
+            if (!asunto) return alert("Escribí el asunto.");
+            const t = mailCtx.tareaId ? tareasActuales.find(x => x.id === mailCtx.tareaId) : null;
+            const arch = t ? archivosDe(t) : [];
+            const adjuntos = Array.from(document.querySelectorAll('.mail-adj:checked')).map(cb => arch[+cb.dataset.i]);
+            const extras = Array.from(document.getElementById('mailExtra').files);
+            if (extras.reduce((s, x) => s + x.size, 0) > 24 * 1024 * 1024) return alert("Los archivos superan los 25 MB.");
+            const btn = document.getElementById('btnEnviarMail'); btn.disabled = true; btn.innerText = 'Enviando...';
+            try {
+                for (const x of extras) adjuntos.push({ nombre: x.name, url: await subirArchivo(x) });
+                await enviarMailReal({ para, cc, asunto, cuerpo, adjuntos }, mailCtx.tareaId, mailCtx.clienteId, document.getElementById('mailPlantilla').selectedOptions[0].textContent);
+                cerrarMail();
+                if (editingTaskId && t && editingTaskId === t.id) { const tt = tareasActuales.find(x => x.id === t.id); setTimeout(() => { document.getElementById('editAvisosEstado').innerHTML = estadoAvisos(tareasActuales.find(x => x.id === t.id) || tt); }, 500); }
+                alert("✅ Mail enviado a " + para);
+            } catch (e) { alert("❌ No se pudo enviar el mail:\n" + e.message); }
+            btn.disabled = false; btn.innerText = '✉️ Enviar';
+        }
+        async function enviarMailReal(msg, tareaId, clienteId, nombrePlantilla) {
+            await llamarScript({ accion: 'enviar', ...msg });
+            const c = clientesActivos.find(x => x.id === clienteId);
+            if (tareaId) await updateDoc(doc(db, "tareas", tareaId), { avisoMail: { fecha: new Date().toISOString(), para: msg.para, plantilla: nombrePlantilla || '', por: currentUserEmail } });
+            registrar('Mail enviado', `${c ? c.nombre : msg.para} · ${msg.asunto}${msg.adjuntos.length ? ` · ${msg.adjuntos.length} adjunto(s)` : ''}`);
+        }
+        window.mailDesdeTarea = function() {
+            if (document.getElementById('editTaskFile').files.length) return alert('Tenés archivos nuevos sin guardar. Tocá "Guardar" primero y volvé a abrir el vencimiento para enviarlos.');
+            abrirMail(editingTaskId);
+        }
+
+        // ---------- WHATSAPP (con plantilla, desde cualquier lado) ----------
+        let wppCtx = null;
+        window.abrirWpp = function(tareaId, clienteId, plantillaId) {
+            const t = tareaId ? tareasActuales.find(x => x.id === tareaId) : null;
+            const c = clientesActivos.find(x => x.id === (clienteId || (t && t.clienteId)));
+            wppCtx = { tareaId: t ? t.id : null, clienteId: c ? c.id : null };
+            document.getElementById('wppContexto').innerText = [c ? c.nombre : '', t ? (t.tipo === 'vencimiento' ? grupoDe(t) : t.titulo) : ''].filter(Boolean).join(' · ');
+            document.getElementById('wppTel').value = c && c.telefono ? c.telefono : '';
+            const sel = document.getElementById('wppPlantilla');
+            sel.innerHTML = plantillas().filter(p => p.canal === 'wpp').map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
+            sel.value = plantillaId || (!t ? 'wpp_libre' : ((t.tipoObligacion === 'pago' || t.monto) ? 'wpp_pago' : 'wpp_presentacion'));
+            if (!sel.value) sel.selectedIndex = 0;
+            aplicarPlantillaWpp();
+            document.getElementById('wppModal').style.display = 'flex';
+        }
+        window.aplicarPlantillaWpp = function() {
+            const t = wppCtx.tareaId ? tareasActuales.find(x => x.id === wppCtx.tareaId) : null;
+            const c = clientesActivos.find(x => x.id === wppCtx.clienteId);
+            document.getElementById('wppTexto').value = aplicarPlantilla(plantilla(document.getElementById('wppPlantilla').value).cuerpo, ctxMensaje(t, c));
+        }
+        window.cerrarWpp = function() { document.getElementById('wppModal').style.display = 'none'; wppCtx = null; }
+        window.abrirWppModal = function() {
+            const tel = document.getElementById('wppTel').value.replace(/\D/g, '');
+            if (tel.length < 8) return alert("Cargá un teléfono válido (con código de país y área, ej: 5491112345678).");
+            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(document.getElementById('wppTexto').value)}`, '_blank');
+            if (wppCtx.tareaId) marcarWpp(wppCtx.tareaId);
+            else { const c = clientesActivos.find(x => x.id === wppCtx.clienteId); registrar('WhatsApp enviado', c ? c.nombre : tel); }
+            cerrarWpp();
+        }
+        window.wppDesdeTarea = function() { abrirWpp(editingTaskId); }
+        window.marcarWpp = function(tareaId) {
+            const t = tareasActuales.find(x => x.id === tareaId); if (!t) return;
+            updateDoc(doc(db, "tareas", tareaId), { avisoWpp: { fecha: new Date().toISOString(), por: currentUserEmail } }).catch(() => {});
+            registrar('WhatsApp enviado', t.titulo);
+        }
+
+        cargasExtra.push(() => {
+            listeners.push(onSnapshot(collection(db, "plantillas"), snap => {
+                plantillasDB = {}; snap.forEach(d => plantillasDB[d.id] = d.data());
+                if (document.getElementById('plantillas').classList.contains('active')) renderPlantillas();
+            }, e => console.warn("plantillas:", e)));
+            listeners.push(onSnapshot(doc(db, "config", "correo"), snap => {
+                cfgCorreo = snap.exists() ? snap.data() : {};
+                pintarCfgMail();
+            }, e => console.warn("config:", e)));
+        });
+
         // ---------- COPIA DE SEGURIDAD ----------
         window.descargarBackup = async function() {
             if (!confirm("Se va a descargar una copia completa de la base (clientes con sus claves fiscales, vencimientos, honorarios, etc.).\n\nGuardala en un lugar seguro y no la compartas. ¿Continuar?")) return;
@@ -2012,7 +2384,7 @@
             const digits = term.replace(/\D/g, '');
             const res = clientesActivos.filter(c => (c.nombre || '').toLowerCase().includes(term) || (digits.length >= 3 && (c.cuit || '').includes(digits))).slice(0, 8);
             box.innerHTML = res.length ? '<div class="buscador-res">' + res.map(c => `<div class="fila" style="padding:9px 12px;"><div class="grow"><b>${esc(c.nombre)}</b><small>CUIT ${esc(c.cuit)}${c.activo ? '' : ' · Inactivo'}</small></div>
-                <button class="btn-sec" onclick="abrirFicha('${c.id}')">📂 Ficha</button>${c.telefono ? `<a class="mini" style="background:#25D366; color:white;" target="_blank" href="https://wa.me/${String(c.telefono).replace(/\D/g, '')}">💬</a>` : ''}</div>`).join('') + '</div>'
+                <button class="btn-sec" onclick="abrirFicha('${c.id}')">📂 Ficha</button><button style="background:#25D366; color:white;" onclick="abrirWpp(null, '${c.id}')" title="WhatsApp">💬</button><button style="background:#2980b9; color:white;" onclick="abrirMail(null, '${c.id}')" title="Mail">✉️</button></div>`).join('') + '</div>'
                 : '<div class="buscador-res"><div class="vacio-mini" style="padding:10px 12px;">Sin resultados.</div></div>';
         }
 
@@ -2103,9 +2475,9 @@
         }
         window.exportarVencimientosMes = function() {
             const y = currentCalDate.getFullYear(), m = String(currentCalDate.getMonth() + 1).padStart(2, '0');
-            const filas = [['Vencimiento', 'Obligación', 'Cliente', 'Tipo', 'Estado', 'Monto', 'Pago informado por cliente', 'Archivo']];
+            const filas = [['Vencimiento', 'Obligación', 'Cliente', 'Tipo', 'Estado', 'Monto', 'Pago informado por cliente', 'Archivos', 'Mail enviado', 'WhatsApp enviado']];
             tareasActuales.filter(t => t.tipo === 'vencimiento' && (t.vencimiento || '').startsWith(`${y}-${m}`)).sort((a, b) => (a.vencimiento + a.titulo).localeCompare(b.vencimiento + b.titulo))
-                .forEach(t => filas.push([fmtFecha(t.vencimiento), grupoDe(t), nombreDe(t), t.tipoObligacion === 'pago' ? 'Pago' : 'Presentación', { pendientes: 'Pendiente', proceso: 'En proceso', listas: 'Finalizada' }[t.estado] || t.estado, num(t.monto), t.auditoriaPago || '', t.archivoUrl ? 'Sí' : '']));
+                .forEach(t => filas.push([fmtFecha(t.vencimiento), grupoDe(t), nombreDe(t), t.tipoObligacion === 'pago' ? 'Pago' : 'Presentación', { pendientes: 'Pendiente', proceso: 'En proceso', listas: 'Finalizada' }[t.estado] || t.estado, num(t.monto), t.auditoriaPago || '', archivosDe(t).length || '', t.avisoMail ? new Date(t.avisoMail.fecha).toLocaleDateString('es-AR') : '', t.avisoWpp ? new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR') : '']));
             descargarCSV(`vencimientos_${y}-${m}.csv`, filas);
         }
         window.exportarHonorarios = function() {
@@ -2140,6 +2512,7 @@
             window.alCambiarDatos = (que) => { if (prev) prev(que); if (fichaId) renderFicha(); };
         });
         window.alMostrarSeccion = function(id) {
+            if (id === 'plantillas') { renderPlantillas(); pintarCfgMail(); }
             if (id === 'honorarios') renderHonorarios();
             if (id === 'historial') renderHistorial();
         };
@@ -2242,7 +2615,7 @@
                 let badgeTipo = t.tipoObligacion === 'pago' ? '<span class="task-badge badge-pago">💰 Pago</span>' : '<span class="task-badge badge-pres">📁 Tarea Interna</span>';
                 const descPreview = t.descripcion ? (t.descripcion.length > 40 ? t.descripcion.substring(0, 40) + '...' : t.descripcion) : '';
                 const descHtml = descPreview ? `<div style="font-size:12px; color:#7f8c8d; margin-bottom:5px; padding-left:5px; border-left: 2px solid #bdc3c7;"><i>${esc(descPreview)}</i></div>` : '';
-                const fileHtml = t.archivoUrl ? `<a href="${t.archivoUrl}" target="_blank" style="font-size:12px; color:#2980b9; text-decoration:none; display:block; margin-bottom:10px;">📎 Archivo adjunto</a>` : '<div style="margin-bottom:10px;"></div>';
+                const fileHtml = archivosDe(t).length ? `<div style="margin-bottom:8px;">${listaArchivosHtml(archivosDe(t), true)}</div>` : '<div style="margin-bottom:10px;"></div>';
                 
                 const card = `<div class="task-card" draggable="true" ondragstart="drag(event, '${t.id}')">
                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
@@ -2254,6 +2627,7 @@
                     ${fileHtml}
                     <div style="display:flex; gap:5px; margin-top:auto;">
                         <button style="background:#3498db; color:white; border:none; cursor:pointer; padding:6px 12px; font-size:12px; border-radius:4px; font-weight:bold; width:100%;" onclick="openTaskModal('${t.id}')">👁️ Abrir Tarea</button>
+                        ${t.clienteId ? `<button title="WhatsApp al cliente" style="background:#25D366; color:white; border:none; cursor:pointer; padding:6px 9px; border-radius:4px;" onclick="abrirWpp('${t.id}')">💬</button><button title="Mail al cliente" style="background:#2980b9; color:white; border:none; cursor:pointer; padding:6px 9px; border-radius:4px;" onclick="abrirMail('${t.id}')">✉️</button>` : ''}
                     </div>
                     <select class="card-move" onchange="moverTarea('${t.id}', this.value)" title="Cambiar estado">
                         <option value="pendientes" ${t.estado === 'pendientes' ? 'selected' : ''}>Estado: Pendiente</option>
@@ -2273,12 +2647,13 @@
             if(!t) return alert("El título es obligatorio.");
             const btn = document.getElementById('btnCreateTask'); btn.innerText = "Subiendo..."; btn.disabled = true;
             try {
-            const fileInput = document.getElementById('taskFile'); let archivoUrl = "";
-            if (fileInput.files.length > 0) archivoUrl = await subirArchivo(fileInput.files[0]);
+            const fileInput = document.getElementById('taskFile');
+            const archivosNuevos = fileInput.files.length ? await subirArchivos(Array.from(fileInput.files)) : [];
+            const archivoUrl = archivosNuevos.length ? archivosNuevos[0].url : "";
             let nombreParaTitulo = ""; if(clientId) { const clienteData = clientesActivos.find(x => x.id === clientId); nombreParaTitulo = clienteData ? ` - ${clienteData.nombre}` : ""; }
 
             await addDoc(collection(db, "tareas"), { 
-                titulo: t + nombreParaTitulo, tipo: 'tarea', tipoObligacion: document.getElementById('taskTipoOb').value, responsable: document.getElementById('taskResponsible').value, vencimiento: document.getElementById('taskDueDate').value, descripcion: document.getElementById('taskDesc').value, monto: "", posicion: "", archivoUrl: archivoUrl, clienteId: clientId, estado: "pendientes", fechaCreacion: new Date().toISOString() 
+                titulo: t + nombreParaTitulo, tipo: 'tarea', tipoObligacion: document.getElementById('taskTipoOb').value, responsable: document.getElementById('taskResponsible').value, vencimiento: document.getElementById('taskDueDate').value, descripcion: document.getElementById('taskDesc').value, monto: "", posicion: "", archivoUrl: archivoUrl, archivos: archivosNuevos, clienteId: clientId, estado: "pendientes", fechaCreacion: new Date().toISOString() 
             }); 
             
             registrar('Tarea creada', t + nombreParaTitulo);
@@ -2295,12 +2670,13 @@
               if (c && tareasActuales.some(x => x.tipo === 'vencimiento' && x.clienteId === c.id && x.titulo === titulo) && !confirm("Este cliente ya tiene un vencimiento con el mismo título. ¿Crearlo igual?")) return; }
             const btn = document.getElementById('btnCreateVenc'); btn.innerText = "Subiendo..."; btn.disabled = true;
             try {
-            const fileInput = document.getElementById('vencFile'); let archivoUrl = "";
-            if (fileInput.files.length > 0) archivoUrl = await subirArchivo(fileInput.files[0]);
+            const fileInput = document.getElementById('vencFile');
+            const archivosNuevos = fileInput.files.length ? await subirArchivos(Array.from(fileInput.files)) : [];
+            const archivoUrl = archivosNuevos.length ? archivosNuevos[0].url : "";
             let nombreParaTitulo = ""; if(clientId) { const clienteData = clientesActivos.find(x => x.id === clientId); nombreParaTitulo = clienteData ? ` - ${clienteData.nombre}` : ""; }
 
             await addDoc(collection(db, "tareas"), { 
-                titulo: t + nombreParaTitulo, tipo: 'vencimiento', tipoObligacion: document.getElementById('vencTipoOb').value, monto: document.getElementById('vencMonto').value, responsable: document.getElementById('vencResp').value, vencimiento: document.getElementById('vencDate').value, descripcion: document.getElementById('vencDesc').value, posicion: "", archivoUrl: archivoUrl, clienteId: clientId, estado: "pendientes", fechaCreacion: new Date().toISOString() 
+                titulo: t + nombreParaTitulo, tipo: 'vencimiento', tipoObligacion: document.getElementById('vencTipoOb').value, monto: document.getElementById('vencMonto').value, responsable: document.getElementById('vencResp').value, vencimiento: document.getElementById('vencDate').value, descripcion: document.getElementById('vencDesc').value, posicion: "", archivoUrl: archivoUrl, archivos: archivosNuevos, clienteId: clientId, estado: "pendientes", fechaCreacion: new Date().toISOString() 
             }); 
             
             registrar('Vencimiento manual creado', t + nombreParaTitulo);
