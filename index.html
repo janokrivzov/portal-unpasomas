@@ -388,6 +388,21 @@
         </div>
     </div>
 
+    <!-- MODAL CAMBIO DE CONTRASEÑA (primer ingreso del cliente) -->
+    <div id="claveModal" class="modal-overlay" style="z-index:3000;">
+        <div class="modal-content" style="width:440px;">
+            <h3 style="border:none; margin-bottom:6px;">🔒 Elegí tu contraseña</h3>
+            <p style="font-size:13px; color:#555; margin-top:0;">Estás ingresando con una contraseña provisoria. Elegí una propia para seguir (mínimo 8 caracteres).</p>
+            <label style="font-size:12px; font-weight:bold;">Nueva contraseña</label>
+            <input type="password" id="claveNueva1" autocomplete="new-password" style="margin:4px 0 10px 0;">
+            <label style="font-size:12px; font-weight:bold;">Repetila</label>
+            <input type="password" id="claveNueva2" autocomplete="new-password" style="margin:4px 0 6px 0;" onkeydown="if(event.key==='Enter') guardarClaveNueva()">
+            <label style="display:flex; gap:6px; align-items:center; font-size:12px; font-weight:normal; margin:4px 0 12px 0;"><input type="checkbox" onchange="document.getElementById('claveNueva1').type = document.getElementById('claveNueva2').type = this.checked ? 'text' : 'password'" style="width:auto; margin:0;"> Mostrar</label>
+            <p id="claveError" style="display:none; color:#c0392b; font-size:13px; margin:0 0 10px 0;"></p>
+            <button id="btnClaveNueva" onclick="guardarClaveNueva()" style="background:#27ae60; color:white; border:none; padding:11px; border-radius:6px; cursor:pointer; width:100%; font-weight:bold;">Guardar y entrar</button>
+        </div>
+    </div>
+
     <!-- MODAL ENVIAR MAIL -->
     <div id="mailModal" class="modal-overlay" style="z-index:2100;" onclick="if(event.target === this) cerrarMail()">
         <div class="modal-content" style="width:720px;">
@@ -887,7 +902,7 @@
                             <button class="btn-sec" onclick="nuevaPlantilla('wpp')" style="width:auto; margin:0; padding:8px 12px;">+ Plantilla de WhatsApp</button>
                         </div>
                     </div>
-                    <p style="font-size:12px; color:#7f8c8d;">Datos que se completan solos: <code>{firma}</code> <code>{cliente}</code> <code>{obligacion}</code> <code>{periodo}</code> <code>{fecha}</code> <code>{monto}</code> <code>{monto_txt}</code> <code>{que_vence}</code> <code>{detalle_pago}</code> <code>{archivos}</code>. En WhatsApp, el texto entre *asteriscos* sale en negrita.</p>
+                    <p style="font-size:12px; color:#7f8c8d;">Datos que se completan solos: <code>{firma}</code> <code>{portal}</code> <code>{usuario}</code> <code>{cliente}</code> <code>{obligacion}</code> <code>{periodo}</code> <code>{fecha}</code> <code>{monto}</code> <code>{monto_txt}</code> <code>{que_vence}</code> <code>{detalle_pago}</code> <code>{archivos}</code>. En WhatsApp, el texto entre *asteriscos* sale en negrita.</p>
                     <div id="listaPlantillas"></div>
                 </div>
             </div>
@@ -1028,7 +1043,7 @@
     <!-- SCRIPT FIREBASE Y LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendPasswordResetEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, deleteDoc, doc, where, writeBatch, setDoc, getDoc, getDocs, arrayUnion, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
@@ -1114,6 +1129,7 @@
                 listeners.forEach(unsub => unsub());
                 listeners = [];
                 pcCliente = null; window._pcDocsSub = false;
+                document.getElementById('claveModal').style.display = 'none';
             }
         });
 
@@ -1143,21 +1159,53 @@
         }
 
         // Crea (si no existe) el usuario del portal con una contraseña aleatoria y le envía un mail para que elija la suya
-        async function enviarAccesoPortal(email) {
+        // Contraseña provisoria fácil de leer y dictar (sin 0/O, 1/l)
+        function claveProvisoria() {
+            const L = 'ABCDEFGHJKMNPQRSTUVWXYZ', N = '23456789';
+            const r = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+            let s = 'UPM-'; for (let i = 0; i < 4; i++) s += L[r(L.length)]; s += '-'; for (let i = 0; i < 4; i++) s += N[r(N.length)];
+            return s;
+        }
+
+        // Envía el acceso al portal:
+        //  - Cuenta nueva + correo conectado: mail de bienvenida desde el Gmail del estudio, con contraseña provisoria
+        //    (al primer ingreso el portal le pide elegir la suya).
+        //  - Cuenta que ya existía (o correo sin conectar): mail de Firebase para establecer la contraseña.
+        // Devuelve { ok, metodo } o { ok:false }
+        async function enviarAccesoPortal(email, silencioso) {
+            const c = clientesActivos.find(x => (x.emailPortal || '') === email);
+            let cuentaNueva = false, clave = '';
+            const usarGmail = !!cfgCorreo.url;
             try {
-                const rnd = Array.from(crypto.getRandomValues(new Uint8Array(24)), b => b.toString(16).padStart(2,'0')).join('');
-                await createUserWithEmailAndPassword(secondaryAuth, email, rnd);
+                clave = usarGmail ? claveProvisoria() : Array.from(crypto.getRandomValues(new Uint8Array(24)), b => b.toString(16).padStart(2,'0')).join('');
+                await createUserWithEmailAndPassword(secondaryAuth, email, clave);
                 await signOut(secondaryAuth);
+                cuentaNueva = true;
             } catch(e) {
-                if (e.code !== 'auth/email-already-in-use') { alert("No se pudo crear el acceso al portal: " + e.message); return false; }
+                if (e.code !== 'auth/email-already-in-use') { if (!silencioso) alert("No se pudo crear el acceso al portal: " + e.message); return { ok: false }; }
+            }
+            if (cuentaNueva && usarGmail) {
+                const p = plantilla('mail_acceso');
+                const ctx = { ...ctxMensaje(null, c || { nombre: email, emailPortal: email }), usuario: email, clave_provisoria: clave };
+                try {
+                    await llamarScript({ accion: 'enviar', para: email, cc: '', asunto: aplicarPlantilla(p.asunto, ctx).replace(/\s+/g, ' ').trim(), cuerpo: aplicarPlantilla(p.cuerpo, ctx), adjuntos: [], firmaGmail: usaFirmaGmail() });
+                } catch (e) {
+                    // La cuenta quedó creada: le mostramos la clave para que se la pasen por otro medio
+                    if (c && isUserAdmin) updateDoc(doc(db, "clientes", c.id), { debeCambiarClave: true }).catch(() => {});
+                    alert(`La cuenta del portal se creó, pero no se pudo enviar el mail (${e.message}).\n\nPasale estos datos al cliente por otro medio:\nUsuario: ${email}\nContraseña provisoria: ${clave}\n\n(Al ingresar le va a pedir que elija su propia contraseña.)`);
+                    return { ok: false };
+                }
+                if (c && isUserAdmin) updateDoc(doc(db, "clientes", c.id), { accesoEnviado: hoyStr(), accesoMetodo: 'gmail', debeCambiarClave: true }).catch(() => {});
+                registrar('Acceso al portal enviado', `${c ? c.nombre : email} (mail de bienvenida desde el estudio)`);
+                return { ok: true, metodo: 'gmail' };
             }
             try {
                 await enviarMailClave(email);
-                const c = clientesActivos.find(x => (x.emailPortal || '') === email);
-                if (c && isUserAdmin) updateDoc(doc(db, "clientes", c.id), { accesoEnviado: hoyStr() }).catch(() => {});
-                return true;
+                if (c && isUserAdmin) updateDoc(doc(db, "clientes", c.id), { accesoEnviado: hoyStr(), accesoMetodo: 'firebase' }).catch(() => {});
+                registrar('Acceso al portal enviado', `${c ? c.nombre : email} (mail de Firebase para establecer contraseña)`);
+                return { ok: true, metodo: 'firebase' };
             }
-            catch(e) { alert("No se pudo enviar el mail de acceso: " + e.message); return false; }
+            catch(e) { if (!silencioso) alert("No se pudo enviar el mail de acceso: " + e.message); return { ok: false }; }
         }
 
         window.enviarAccesosMasivo = async function() {
@@ -1165,16 +1213,25 @@
             const sinMail = clientesActivos.filter(c => c.activo && !c.emailPortal).length;
             if (!pend.length) return alert(`No hay accesos pendientes de enviar.${sinMail ? `\n\n${sinMail} clientes activos no tienen "Email (Acceso al Portal)" cargado.` : ''}`);
             if (!confirm(`Se va a enviar el mail de acceso al portal a ${pend.length} clientes que todavía no lo recibieron.${sinMail ? `\n(${sinMail} clientes activos no tienen email cargado y no se incluyen.)` : ''}\n\n¿Continuar?`)) return;
-            let ok = 0, err = [];
-            for (const c of pend) { if (await enviarAccesoPortal(c.emailPortal)) ok++; else err.push(c.nombre); await new Promise(r => setTimeout(r, 400)); }
-            registrar('Accesos al portal enviados', `${ok} clientes`);
-            alert(`Listo: se enviaron ${ok} accesos.${err.length ? '\nNo se pudo enviar a: ' + err.join(', ') : ''}`);
+            let ok = 0, porFirebase = [], err = [];
+            for (const c of pend) {
+                const r = await enviarAccesoPortal(c.emailPortal, true);
+                if (r.ok) { ok++; if (r.metodo === 'firebase') porFirebase.push(c.nombre); } else err.push(c.nombre);
+                await new Promise(r => setTimeout(r, 400));
+            }
+            alert(`Listo: se enviaron ${ok} accesos.${porFirebase.length ? `\n\nEstos ya tenían cuenta, así que les llegó el mail de Firebase para establecer la contraseña: ${porFirebase.join(', ')}` : ''}${err.length ? '\n\nNo se pudo enviar a: ' + err.join(', ') : ''}`);
         }
 
         window.enviarAcceso = async function(id) {
             const c = clientesActivos.find(x => x.id === id); if(!c || !c.emailPortal) return;
-            if(!confirm(`¿Enviar a ${c.emailPortal} un mail para crear su contraseña del portal?`)) return;
-            if(await enviarAccesoPortal(c.emailPortal)) alert(`Listo. Se envió el mail de acceso a ${c.emailPortal}.`);
+            if(!confirm(`¿Enviar el acceso al portal a ${c.emailPortal}?`)) return;
+            const r = await enviarAccesoPortal(c.emailPortal);
+            if (!r.ok) return;
+            const msg = r.metodo === 'gmail'
+                ? `✅ Listo. A ${c.emailPortal} le llegó el mail de bienvenida desde el estudio, con su usuario y una contraseña provisoria.`
+                : `✅ Listo. Como ${c.nombre} ya tenía cuenta, le llegó el mail de Firebase para establecer su contraseña.`;
+            if (c.telefono && confirm(msg + `\n\n¿Querés avisarle también por WhatsApp?`)) abrirWpp(null, c.id, 'wpp_acceso');
+            else if (!c.telefono) alert(msg);
         }
         window.toggleSidebar = function(abrir) {
             const sb = document.getElementById('adminSidebar');
@@ -1388,11 +1445,15 @@
             mail_pago: { orden: 2, canal: 'mail', nombre: 'Aviso de pago (con boleta)', asunto: 'Vencimiento {obligacion} {periodo} - {fecha}',
                 cuerpo: `Hola {cliente},\n\nTe recordamos que el {fecha} vence {que_vence} de {obligacion} correspondiente al período {periodo}{monto_txt}.\n\nTe adjuntamos la boleta / VEP para realizar el pago:\n{archivos}\n\nUna vez abonado, por favor envianos el comprobante.\n\n${FIRMA}` },
             mail_libre: { orden: 3, canal: 'mail', nombre: 'Mail en blanco', asunto: '', cuerpo: `Hola {cliente},\n\n\n\n${FIRMA}` },
+            mail_acceso: { orden: 4, canal: 'mail', nombre: 'Acceso al Portal de Clientes', asunto: 'Tu acceso al Portal de Clientes - Un Paso Más',
+                cuerpo: `Hola {cliente},\n\n¡Te damos la bienvenida al Portal de Clientes de Un Paso Más! Desde ahí vas a poder ver tus vencimientos, descargar boletas y comprobantes, enviarnos documentación y avisarnos cuando realizás un pago.\n\nPara ingresar:\n• Portal: {portal}\n• Usuario: {usuario}\n• Contraseña provisoria: {clave_provisoria}\n\nLa primera vez que ingreses te vamos a pedir que elijas tu propia contraseña.\n\nTe recomendamos guardar el portal en favoritos (o en la pantalla de inicio del celular). Cualquier duda, escribinos por WhatsApp o respondé este mail.\n\n${FIRMA}` },
             wpp_pago: { orden: 10, canal: 'wpp', nombre: 'Aviso de pago (WhatsApp)', asunto: '',
                 cuerpo: `{cliente}\nTe recordamos que el día *{fecha}* vence {que_vence} de *{obligacion}* correspondiente al período *{periodo}*{monto_txt}.\n\nTe recomendamos abonarlo en tiempo y forma. Cualquier consulta estamos a disposición.\n\nSaludos, el equipo de Un Paso Más` },
             wpp_presentacion: { orden: 11, canal: 'wpp', nombre: 'Aviso de presentación (WhatsApp)', asunto: '',
                 cuerpo: `{cliente}\nTe recordamos que el día *{fecha}* vence la presentación de *{obligacion}* correspondiente al período *{periodo}*.\n\nDe la presentación nos encargamos nosotros. Cualquier consulta estamos a disposición.\n\nSaludos, el equipo de Un Paso Más` },
-            wpp_libre: { orden: 12, canal: 'wpp', nombre: 'Mensaje libre (WhatsApp)', asunto: '', cuerpo: `Hola {cliente}! ` }
+            wpp_libre: { orden: 12, canal: 'wpp', nombre: 'Mensaje libre (WhatsApp)', asunto: '', cuerpo: `Hola {cliente}! ` },
+            wpp_acceso: { orden: 13, canal: 'wpp', nombre: 'Aviso de acceso al portal (WhatsApp)', asunto: '',
+                cuerpo: `Hola {cliente}! 👋 Desde Un Paso Más estrenamos el *Portal de Clientes*: ahí vas a ver tus vencimientos, descargar boletas y comprobantes y enviarnos documentación.\n\nTe acabamos de mandar un mail con tu usuario y una contraseña provisoria (si no lo ves, revisá Spam). La primera vez que entres te va a pedir que elijas tu propia contraseña.\n\nPortal: {portal}\n\nCualquier duda nos escribís por acá 😊` }
         };
         let plantillasDB = {};
         function plantillas() {
@@ -1405,7 +1466,7 @@
 
         // Datos para completar las variables de una plantilla
         function ctxMensaje(t, c) {
-            const ctx = { firma: usaFirmaGmail() ? '' : FIRMA_TEXTO, cliente: c ? c.nombre : (t ? nombreDe(t) : ''), obligacion: '', periodo: '', fecha: '', monto: '', monto_txt: '', que_vence: 'la presentación', detalle_pago: '', archivos: '' };
+            const ctx = { portal: PORTAL_URL, usuario: c ? (c.emailPortal || '') : '', clave_provisoria: '', firma: usaFirmaGmail() ? '' : FIRMA_TEXTO, cliente: c ? c.nombre : (t ? nombreDe(t) : ''), obligacion: '', periodo: '', fecha: '', monto: '', monto_txt: '', que_vence: 'la presentación', detalle_pago: '', archivos: '' };
             if (t) {
                 let ob = t.tipo === 'vencimiento' ? grupoDe(t) : (t.titulo || '');
                 const m = ob.match(/(.*)\s\((.*)\)\s*$/);
@@ -1684,6 +1745,7 @@
                 const primeraVez = !pcCliente;
                 pcCliente = { id: snapCliente.docs[0].id, ...snapCliente.docs[0].data() };
                 renderEncabezadoCliente();
+                document.getElementById('claveModal').style.display = pcCliente.debeCambiarClave === true ? 'flex' : 'none';
                 if (!primeraVez) return;   // ya estamos escuchando sus vencimientos y documentos
                 mostrarBienvenida();
                 const unsubTareas = onSnapshot(query(collection(db, "tareas"), where("clienteId", "==", pcCliente.id), where("tipo", "==", "vencimiento")), (snapTareas) => {
@@ -1811,6 +1873,28 @@
                 document.getElementById('mdOk').style.display = 'block';
                 addDoc(collection(db, "historial"), { fecha: new Date().toISOString(), usuario: currentUserEmail, nombre: pcCliente.nombre || currentUserEmail, accion: 'Cliente actualizó sus datos', detalle: `Tel: ${data.telefono || '—'} · Email: ${data.emailContacto || '—'}` }).catch(() => {});
             } catch (e) { alert("No se pudieron guardar los datos: " + e.message); }
+        }
+
+        window.guardarClaveNueva = async function() {
+            const a = document.getElementById('claveNueva1').value, b = document.getElementById('claveNueva2').value;
+            const err = document.getElementById('claveError');
+            const mostrar = m => { err.innerText = m; err.style.display = 'block'; };
+            if (a.length < 8) return mostrar('La contraseña tiene que tener al menos 8 caracteres.');
+            if (a !== b) return mostrar('Las dos contraseñas no coinciden.');
+            if (/^UPM-/i.test(a)) return mostrar('Elegí una contraseña distinta a la provisoria.');
+            const btn = document.getElementById('btnClaveNueva'); btn.disabled = true; btn.innerText = 'Guardando...';
+            try {
+                await updatePassword(auth.currentUser, a);
+                await updateDoc(doc(db, "clientes", pcCliente.id), { debeCambiarClave: false });
+                addDoc(collection(db, "historial"), { fecha: new Date().toISOString(), usuario: currentUserEmail, nombre: pcCliente.nombre || currentUserEmail, accion: 'Cliente eligió su contraseña', detalle: 'Primer ingreso al portal' }).catch(() => {});
+                document.getElementById('claveModal').style.display = 'none';
+                err.style.display = 'none';
+            } catch (e) {
+                if (e.code === 'auth/requires-recent-login') mostrar('Por seguridad, cerrá sesión y volvé a entrar con la contraseña provisoria.');
+                else if (e.code === 'auth/weak-password') mostrar('Esa contraseña es muy débil. Probá con una más larga.');
+                else mostrar('No se pudo guardar: ' + e.message);
+            }
+            btn.disabled = false; btn.innerText = 'Guardar y entrar';
         }
 
         window.pcFiltro = function(f) {
@@ -2734,7 +2818,7 @@
                 let condTags = '';
                 if(c.condIva) condTags += `<span style="font-size:10px; background:#f39c12; color:white; padding:2px 5px; border-radius:3px; margin-right:3px; font-weight:bold;">${esc(c.condIva)}</span>`;
                 if(c.condGanancias) condTags += `<span style="font-size:10px; background:#8e44ad; color:white; padding:2px 5px; border-radius:3px; font-weight:bold;">Gcias: ${esc(c.condGanancias)}</span>`;
-                const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${esc(c.emailPortal)}</span><span style="display:block; font-size:11px; margin-top:3px; color:${c.accesoEnviado ? '#27ae60' : '#e67e22'};">${c.accesoEnviado ? '✉️ Acceso enviado el ' + fmtFecha(c.accesoEnviado) : '⏳ Acceso sin enviar'}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso Portal</span>';
+                const portalTag = c.emailPortal ? `<span style="font-size:11px; background:#3498db; color:white; padding:3px 6px; border-radius:4px;">${esc(c.emailPortal)}</span><span style="display:block; font-size:11px; margin-top:3px; color:${c.accesoEnviado ? '#27ae60' : '#e67e22'};">${c.accesoEnviado ? '✉️ Acceso enviado el ' + fmtFecha(c.accesoEnviado) + (c.debeCambiarClave ? ' · aún no ingresó' : (c.accesoMetodo === 'gmail' ? ' · ya ingresó ✓' : '')) : '⏳ Acceso sin enviar'}</span>` : '<span style="font-size:11px; color:#95a5a6;">Sin Acceso Portal</span>';
                 const telTag = c.telefono ? `<span style="font-size:11px; color:#27ae60; font-weight:bold; display:block; margin-top:3px;">📱 ${esc(c.telefono)}</span>` : '';
 
                 tbodyHtml += `
