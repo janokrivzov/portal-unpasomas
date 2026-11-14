@@ -1347,8 +1347,8 @@
 
         // GENERADOR DE LINK WHATSAPP
         // ---------- PLANTILLAS DE MENSAJES ----------
-        const FIRMA = `Saludos,\n{firma}`;
-        const FIRMA_TEXTO = `Equipo de Un Paso Más\nWhatsApp: +54 9 11 5718-2388`;
+        const FIRMA = `{firma}`;
+        const FIRMA_TEXTO = `Saludos,\nEquipo de Un Paso Más\nWhatsApp: +54 9 11 5718-2388`;
         const PLANTILLAS_BASE = {
             mail_presentacion: { orden: 1, canal: 'mail', nombre: 'Presentación realizada', asunto: '{obligacion} {periodo} - Presentación realizada',
                 cuerpo: `Hola {cliente},\n\nTe informamos que realizamos la presentación de {obligacion} correspondiente al período {periodo}.\n\n{detalle_pago}Te adjuntamos la documentación:\n{archivos}\n\nCualquier consulta estamos a disposición.\n\n${FIRMA}` },
