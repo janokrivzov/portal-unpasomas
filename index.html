@@ -239,6 +239,7 @@
         .pc-badge { display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:12px; margin-right:6px; }
         .b-pago { background:#fdebd0; color:#a04000; }
         .b-pres { background:#e8daef; color:#6c3483; }
+        .b-mixto { background:#fdebd0; color:#7e5109; }
         .b-ok { background:#d5f5e3; color:#1e8449; }
         .b-venc { background:#fadbd8; color:#922b21; }
         .b-urg { background:#fdebd0; color:#a04000; }
@@ -347,8 +348,9 @@
                 <div><label style="font-size:12px; font-weight:bold;">Título</label><input type="text" id="editTaskTitle" style="margin:0;"></div>
                 <div><label style="font-size:12px; font-weight:bold;">Tipo de Obligación</label>
                     <select id="editTaskTipoOb" style="margin:0;">
-                        <option value="presentacion">📁 Presentación / Mixto</option>
-                        <option value="pago">💰 Solo Pago</option>
+                        <option value="mixto">📁💰 Presentación y pago</option>
+                        <option value="presentacion">📁 Presentación</option>
+                        <option value="pago">💰 Pago</option>
                     </select>
                 </div>
             </div>
@@ -530,8 +532,9 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <div><label style="font-size:12px; font-weight:bold;">Tipo</label>
                     <select id="vencTipoOb" style="margin:0;">
-                        <option value="pago">💰 Solo Pago</option>
-                        <option value="presentacion">📁 Presentación / Mixto</option>
+                        <option value="mixto">📁💰 Presentación y pago</option>
+                        <option value="presentacion">📁 Presentación</option>
+                        <option value="pago">💰 Pago</option>
                     </select>
                 </div>
                 <div><label style="font-size:12px; font-weight:bold;">Monto ($)</label><input type="number" id="vencMonto" placeholder="Opcional" style="margin:0;"></div>
@@ -669,7 +672,7 @@
                             <ol style="margin:10px 0 0 0; padding-left:18px; color:#555; line-height:1.5;">
                                 <li><b>Revisá tus vencimientos.</b> Arriba ves cuántos tenés pendientes y cuál es el próximo. Los colores te indican la urgencia.</li>
                                 <li><b>Presentaciones:</b> las hacemos nosotros. No tenés que hacer nada; cuando estén listas pasan a "Finalizados" con su comprobante.</li>
-                                <li><b>Pagos:</b> cuando cargamos la boleta o VEP, aparece el botón <b>"📥 Descargar boleta"</b>. Pagala antes de la fecha indicada.</li>
+                                <li><b>Pagos</b> y <b>Presentación y pago</b>: cuando cargamos la boleta o VEP, aparece el botón <b>"📥 Descargar boleta"</b> con el importe. Pagala antes de la fecha indicada.</li>
                                 <li><b>Avisanos que pagaste</b> con el botón <b>"✔ Ya lo pagué"</b>. Así lo controlamos y queda registrado.</li>
                                 <li>En <b>"Finalizados"</b> encontrás el historial y los comprobantes para descargar cuando quieras.</li>
                                 <li>¿Dudas? Escribinos por WhatsApp o email desde el recuadro de abajo.</li>
@@ -687,7 +690,7 @@
                             <div><span class="pc-dot" style="background:#e67e22"></span> Vence en los próximos 3 días</div>
                             <div><span class="pc-dot" style="background:#3498db"></span> Próximo vencimiento</div>
                             <div><span class="pc-dot" style="background:#27ae60"></span> Finalizado</div>
-                            <p style="margin:10px 0 0 0; color:#7f8c8d; font-size:12px;"><b>Pago:</b> lo abonás vos; cuando lo hagas, tocá "Ya lo pagué".<br><b>Presentación:</b> la realiza el estudio; no tenés que hacer nada.</p>
+                            <p style="margin:10px 0 0 0; color:#7f8c8d; font-size:12px;"><b>Pago:</b> lo abonás vos; cuando lo hagas, tocá "Ya lo pagué".<br><b>Presentación y pago:</b> la presentamos nosotros y vos abonás el saldo, si lo hay.<br><b>Presentación:</b> la realiza el estudio; no tenés que hacer nada.</p>
                         </div>
                     </div>
                 </div>
@@ -1492,7 +1495,7 @@
                     tasksHtml += `<div class="cal-group-title" data-group="${esc(g)}" onclick="openGroupModal(this.dataset.group, '${dateString}')" title="Ver clientes y opciones"><span>${esc(g)} <span style="font-weight:normal; color:#7f8c8d;">(${listos}/${lst.length})</span></span> <span>⚙️</span></div>`;
                     lst.forEach(t => {
                         const pillClass = t.estado === 'listas' ? 'cal-listas' : (t.estado === 'proceso' ? 'cal-proceso' : 'cal-pendientes');
-                        const ico = t.tipoObligacion === 'pago' ? '💰 ' : '📁 ';
+                        const ico = t.tipoObligacion === 'pago' ? '💰 ' : (t.tipoObligacion === 'mixto' ? '📁💰 ' : '📁 ');
                         tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${esc(nombreDe(t))}">${ico}${esc(nombreDe(t))}</div>`;
                     });
                 }
@@ -1548,7 +1551,7 @@
                 ctx.fecha = t.vencimiento ? fmtFecha(t.vencimiento) : '';
                 const esPago = t.tipoObligacion === 'pago';
                 if (t.monto) { ctx.monto = pesos(t.monto); ctx.monto_txt = ` por un monto de ${pesos(t.monto)}`; }
-                ctx.que_vence = esPago ? 'el pago' : (t.monto ? 'la presentación y el pago' : 'la presentación');
+                ctx.que_vence = esPago ? 'el pago' : ((t.tipoObligacion === 'mixto' || t.monto) ? 'la presentación y el pago' : 'la presentación');
                 if (t.monto) ctx.detalle_pago = `${esPago ? 'El importe a pagar' : 'El saldo a pagar'} es de ${pesos(t.monto)}${t.vencimiento ? `, con vencimiento el ${fmtFecha(t.vencimiento)}` : ''}.\n\n`;
                 const arch = archivosDe(t);
                 ctx.archivos = arch.length ? arch.map(a => '• ' + a.nombre).join('\n') : '(sin archivos)';
@@ -1564,7 +1567,7 @@
             const telLimpio = String(telefono).replace(/\D/g,'');
             const t = { titulo: tituloCompleto, tipo: 'vencimiento', monto, vencimiento: fecha, tipoObligacion };
             const c = { nombre: nombreDe(t) };
-            const p = plantilla((tipoObligacion === 'pago' || monto) ? 'wpp_pago' : 'wpp_presentacion');
+            const p = plantilla((tipoObligacion === 'pago' || tipoObligacion === 'mixto' || monto) ? 'wpp_pago' : 'wpp_presentacion');
             const mensaje = aplicarPlantilla(p.cuerpo, ctxMensaje(t, c));
             const url = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
             if (soloUrl) return url;
@@ -1609,7 +1612,7 @@
             const base = mesVencimientoDe(ob, pm, pa);
             const mes = base ? `${String(base.getMonth() + 1).padStart(2, '0')}-${base.getFullYear()}` : null;
             document.getElementById('vencTitle').value = `${nombre} (${base ? calcPeriodo(ob, base.getMonth() + 1, base.getFullYear()) : 'Período ' + pa})`;
-            document.getElementById('vencTipoOb').value = SOLO_PAGOS.includes(ob) ? 'pago' : 'presentacion';
+            document.getElementById('vencTipoOb').value = tipoDeObligacion(ob);
             const { c, titulo } = tituloManual();
             const r = mes ? fechasPara(mes, ob) : null;
             let msgs = [];
@@ -1646,7 +1649,7 @@
                 const wppBtn = generarLinkWpp(tel, t.titulo, t.monto, t.vencimiento, t.tipoObligacion, false, t.id) || '<span style="font-size:11px; color:#bdc3c7;">sin WhatsApp</span>';
                 const mailBtn = `<button onclick="abrirMail('${t.id}')" title="Enviar mail" style="width:auto; margin:0; padding:5px 8px; border:none; border-radius:4px; background:#2980b9; color:white; cursor:pointer; font-size:12px; font-weight:bold;">✉️</button>`;
                 const avisos = [t.avisoMail ? `✉️ ${new Date(t.avisoMail.fecha).toLocaleDateString('es-AR').slice(0, 5)}` : '', t.avisoWpp ? `💬 ${new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR').slice(0, 5)}` : ''].filter(Boolean).join(' ');
-                const badge = t.tipoObligacion === 'pago' ? '<span style="background:#e74c3c; color:white; padding:1px 5px; border-radius:3px; font-size:9px;">PAGO</span>' : '<span style="background:#8e44ad; color:white; padding:1px 5px; border-radius:3px; font-size:9px;">PRES</span>';
+                const badge = t.tipoObligacion === 'pago' ? '<span style="background:#e74c3c; color:white; padding:1px 5px; border-radius:3px; font-size:9px;">PAGO</span>' : t.tipoObligacion === 'mixto' ? '<span style="background:#d35400; color:white; padding:1px 5px; border-radius:3px; font-size:9px;" title="Presentación y pago">PRES+PAGO</span>' : '<span style="background:#8e44ad; color:white; padding:1px 5px; border-radius:3px; font-size:9px;">PRES</span>';
                 const pagoInf = t.auditoriaPago ? ' <span title="' + esc(t.auditoriaPago) + '">💳</span>' : '';
                 html += `<div class="grp-row" data-id="${t.id}">
                     <div class="nom" title="${esc(nombreDe(t))}">${badge} ${esc(nombreDe(t))}${pagoInf}</div>
@@ -2036,7 +2039,7 @@
             const pendientes = pcTareas.filter(t => t.estado !== 'listas');
             const finalizados = pcTareas.filter(t => t.estado === 'listas');
             const vencidos = pendientes.filter(t => { const d = diasHasta(t.vencimiento); return d !== null && d < 0; });
-            const pagosPend = pendientes.filter(t => t.tipoObligacion === 'pago');
+            const pagosPend = pendientes.filter(t => t.tipoObligacion === 'pago' || (t.tipoObligacion === 'mixto' && t.monto));
             const totalPagos = pagosPend.reduce((s, t) => s + (parseFloat(String(t.monto).replace(',', '.')) || 0), 0);
             const proximo = pendientes.filter(t => t.vencimiento && diasHasta(t.vencimiento) >= 0).sort((a, b) => a.vencimiento.localeCompare(b.vencimiento))[0];
 
@@ -2082,15 +2085,20 @@
             const hecho = t.estado === 'listas';
             const d = diasHasta(t.vencimiento);
             const esPago = t.tipoObligacion === 'pago';
+            const esMixto = t.tipoObligacion === 'mixto';
             let clase = '', estado = '';
-            if (hecho) { clase = 'hecho'; estado = `<span class="pc-badge b-ok">✓ ${esPago ? 'Pagado' : 'Presentado'}</span>`; }
+            if (hecho) { clase = 'hecho'; estado = `<span class="pc-badge b-ok">✓ ${esPago ? 'Pagado' : (esMixto ? (t.auditoriaPago ? 'Presentado y pagado' : 'Finalizado') : 'Presentado')}</span>`; }
             else if (d !== null && d < 0) { clase = 'vencido'; estado = `<span class="pc-badge b-venc">Venció hace ${-d} ${-d === 1 ? 'día' : 'días'}</span>`; }
             else if (d !== null && d <= 3) { clase = 'urgente'; estado = `<span class="pc-badge b-urg">${d === 0 ? 'Vence hoy' : (d === 1 ? 'Vence mañana' : `Vence en ${d} días`)}</span>`; }
             else if (d !== null) { estado = `<span class="pc-badge b-prox">Faltan ${d} días</span>`; }
 
-            const tipo = esPago ? '<span class="pc-badge b-pago">💰 Pago</span>' : '<span class="pc-badge b-pres">📁 Presentación</span>';
+            const tipo = esPago ? '<span class="pc-badge b-pago">💰 Pago</span>' : (esMixto ? '<span class="pc-badge b-mixto">📁💰 Presentación y pago</span>' : '<span class="pc-badge b-pres">📁 Presentación</span>');
             let detalle = '';
-            if (!hecho) detalle = esPago ? 'Lo abonás vos. Cuando lo pagues, avisanos.' : (t.monto ? 'La presenta el estudio. Te avisaremos cómo abonar el saldo.' : 'La realiza el estudio. No tenés que hacer nada.');
+            if (!hecho) {
+                if (esPago) detalle = 'Lo abonás vos. Cuando lo pagues, avisanos.';
+                else if (esMixto) detalle = t.monto ? 'La presentamos nosotros y el saldo lo abonás vos. Cuando lo pagues, avisanos.' : 'La presentamos nosotros. Si queda saldo a pagar, te enviamos el importe y la boleta.';
+                else detalle = t.monto ? 'La presenta el estudio. Te avisaremos cómo abonar el saldo.' : 'La realiza el estudio. No tenés que hacer nada.';
+            }
             else if (t.auditoriaPago) detalle = 'Informaste el pago desde el portal.';
             if (t.posicion) detalle += `${detalle ? '<br>' : ''}<i>${esc(t.posicion)}</i>`;
 
@@ -2099,8 +2107,8 @@
 
             let acciones = '';
             const arch = archivosPortal(t);
-            arch.forEach(a => { acciones += `<a class="pc-btn pc-btn-azul" href="${esc(a.url)}" target="_blank" title="${esc(a.nombre)}" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;">📥 ${arch.length === 1 ? (hecho ? 'Comprobante' : (esPago ? 'Descargar boleta' : 'Descargar')) : esc(a.nombre)}</a>`; });
-            if (esPago && !hecho) acciones += `<button class="pc-btn pc-btn-verde" onclick="marcarPagadoCliente('${t.id}')">✔ Ya lo pagué</button>`;
+            arch.forEach(a => { acciones += `<a class="pc-btn pc-btn-azul" href="${esc(a.url)}" target="_blank" title="${esc(a.nombre)}" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;">📥 ${arch.length === 1 ? (hecho ? 'Comprobante' : ((esPago || esMixto) ? 'Descargar boleta' : 'Descargar')) : esc(a.nombre)}</a>`; });
+            if ((esPago || (esMixto && t.monto)) && !hecho) acciones += `<button class="pc-btn pc-btn-verde" onclick="marcarPagadoCliente('${t.id}')">✔ Ya lo pagué</button>`;
             if (!acciones && !hecho) acciones = '<div class="pc-nota">El estudio está trabajando en esto</div>';
 
             return `<div class="pc-item ${clase}">
@@ -2167,7 +2175,7 @@
             const t = tareasActuales.find(x => x.id === id); if(!t) return;
             editingTaskId = id;
             document.getElementById('editTaskTitle').value = t.titulo || '';
-            document.getElementById('editTaskTipoOb').value = t.tipoObligacion || 'presentacion';
+            document.getElementById('editTaskTipoOb').value = ['pago', 'mixto', 'presentacion'].includes(t.tipoObligacion) ? t.tipoObligacion : 'presentacion';
             document.getElementById('editTaskResp').value = t.responsable || 'Un Paso Mas';
             document.getElementById('editTaskDate').value = t.vencimiento || '';
             document.getElementById('editTaskEstado').value = t.estado || 'pendientes';
@@ -2698,7 +2706,7 @@
             document.getElementById('wppTel').value = c && c.telefono ? c.telefono : '';
             const sel = document.getElementById('wppPlantilla');
             sel.innerHTML = plantillas().filter(p => p.canal === 'wpp').map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
-            sel.value = plantillaId || (!t ? 'wpp_libre' : ((t.tipoObligacion === 'pago' || t.monto) ? 'wpp_pago' : 'wpp_presentacion'));
+            sel.value = plantillaId || (!t ? 'wpp_libre' : ((t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto' || t.monto) ? 'wpp_pago' : 'wpp_presentacion'));
             if (!sel.value) sel.selectedIndex = 0;
             aplicarPlantillaWpp();
             document.getElementById('wppModal').style.display = 'flex';
@@ -2892,7 +2900,7 @@
             const y = currentCalDate.getFullYear(), m = String(currentCalDate.getMonth() + 1).padStart(2, '0');
             const filas = [['Vencimiento', 'Obligación', 'Cliente', 'Tipo', 'Estado', 'Monto', 'Pago informado por cliente', 'Archivos', 'Mail enviado', 'WhatsApp enviado']];
             tareasActuales.filter(t => t.tipo === 'vencimiento' && (t.vencimiento || '').startsWith(`${y}-${m}`)).sort((a, b) => (a.vencimiento + a.titulo).localeCompare(b.vencimiento + b.titulo))
-                .forEach(t => filas.push([fmtFecha(t.vencimiento), grupoDe(t), nombreDe(t), t.tipoObligacion === 'pago' ? 'Pago' : 'Presentación', { pendientes: 'Pendiente', proceso: 'En proceso', listas: 'Finalizada' }[t.estado] || t.estado, num(t.monto), t.auditoriaPago || '', archivosDe(t).length || '', t.avisoMail ? new Date(t.avisoMail.fecha).toLocaleDateString('es-AR') : '', t.avisoWpp ? new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR') : '']));
+                .forEach(t => filas.push([fmtFecha(t.vencimiento), grupoDe(t), nombreDe(t), ({ pago: 'Pago', mixto: 'Presentación y pago' })[t.tipoObligacion] || 'Presentación', { pendientes: 'Pendiente', proceso: 'En proceso', listas: 'Finalizada' }[t.estado] || t.estado, num(t.monto), t.auditoriaPago || '', archivosDe(t).length || '', t.avisoMail ? new Date(t.avisoMail.fecha).toLocaleDateString('es-AR') : '', t.avisoWpp ? new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR') : '']));
             descargarCSV(`vencimientos_${y}-${m}.csv`, filas);
         }
         window.exportarHonorarios = function() {
@@ -2937,6 +2945,19 @@
         let tiposCorregidos = false;
         async function corregirTiposPago() {
             if (tiposCorregidos) return; tiposCorregidos = true;
+            try {
+                const mig = await getDoc(doc(db, "config", "migraciones"));
+                if (!(mig.exists() && mig.data().mixto)) {
+                    const sel = document.getElementById('masivoObligacion');
+                    const nombres = PRESENTACION_Y_PAGO.map(v => { const o = sel.querySelector(`option[value="${v}"]`); return o ? o.textContent.trim() : null; }).filter(Boolean);
+                    const aCambiar = tareasActuales.filter(t => t.tipo === 'vencimiento' && t.tipoObligacion === 'presentacion' && nombres.some(n => grupoDe(t).startsWith(n + ' (')));
+                    for (let i = 0; i < aCambiar.length; i += 400) {
+                        const batch = writeBatch(db); aCambiar.slice(i, i + 400).forEach(t => batch.update(doc(db, "tareas", t.id), { tipoObligacion: 'mixto' })); await batch.commit();
+                    }
+                    await setDoc(doc(db, "config", "migraciones"), { mixto: true, mixtoFecha: new Date().toISOString(), mixtoCantidad: aCambiar.length }, { merge: true });
+                    if (aCambiar.length) registrar('Corrección automática', `${aCambiar.length} vencimientos pasados a "Presentación y pago" (IVA, IIBB, 931, DJ...)`);
+                }
+            } catch (e) { console.warn("migración mixto:", e); }
             const malos = tareasActuales.filter(t => t.tipo === 'vencimiento' && t.tipoObligacion !== 'pago' && grupoDe(t).startsWith('Autónomos ('));
             if (!malos.length) return;
             try {
@@ -3290,6 +3311,8 @@
             return new Date(pa, pm - 1 + off, 1);
         }
         const SOLO_PAGOS = ['autonomos', 'iva_diferido', 'monotributo', 'pago_sicore', 'anticipo_ganancias_pf', 'anticipo_ganancias_soc', 'anticipo_bienes_pf', 'anticipo_bienes_soc'];
+        const PRESENTACION_Y_PAGO = ['iva', 'iibb_agip', 'iibb_arba', 'iibb_cm', '931', 'dj_sicore', 'dj_ganancias_pf', 'dj_ganancias_soc', 'dj_bienes_pf', 'dj_bienes_soc'];
+        function tipoDeObligacion(ob) { return SOLO_PAGOS.includes(ob) ? 'pago' : (PRESENTACION_Y_PAGO.includes(ob) ? 'mixto' : 'presentacion'); }
 
         window.autoCompletarFechas = function() {
             const ob = document.getElementById('masivoObligacion').value;
@@ -3311,7 +3334,7 @@
             const ob = obSelect.value; 
             if(!ob) return alert("Selecciona la obligación fiscal a generar.");
             
-            const tipoOb = SOLO_PAGOS.includes(ob) ? 'pago' : 'presentacion';
+            const tipoOb = tipoDeObligacion(ob);
             const mesValue = document.getElementById('masivoMes').value;
             const [mesStr, anioStr] = mesValue.split('-');
             const mesNum = parseInt(mesStr, 10), anioNum = parseInt(anioStr, 10);
