@@ -85,7 +85,7 @@
         .inicio-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
         .panel { background:white; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
         .panel h3 { margin:0 0 12px 0; font-size:15px; color:#1d2025; }
-        .grp-row { display:grid; grid-template-columns: minmax(0,1.5fr) 100px minmax(0,1.4fr) 115px auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid #ecf0f1; font-size:13px; }
+        .grp-row { display:grid; grid-template-columns: minmax(0,1.4fr) 95px minmax(0,1.3fr) 112px 108px auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid #ecf0f1; font-size:13px; }
         .grp-row:last-child { border-bottom:none; }
         .grp-row input, .grp-row select { margin:0; padding:6px; font-size:12px; }
         .grp-row .nom { font-weight:600; overflow:hidden; text-overflow:ellipsis; }
@@ -371,8 +371,10 @@
                     </select>
                 </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-bottom: 10px;">
-                <div><label style="font-size:12px; font-weight:bold;">Monto ($)</label><input type="number" id="editTaskMonto" placeholder="Ej: 15000" style="margin:0;"></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 10px; margin-bottom: 10px;">
+                <div><label style="font-size:12px; font-weight:bold;">Monto ($) <span style="font-weight:normal; color:#95a5a6;">0 = sin saldo</span></label><input type="number" id="editTaskMonto" placeholder="Ej: 15000" style="margin:0;"></div>
+                <div id="editTaskPagoBox"><label style="font-size:12px; font-weight:bold;">Pago del cliente</label>
+                    <select id="editTaskPago" style="margin:0;"><option value="no">💸 Falta pagar</option><option value="si">✅ Pagado</option></select></div>
                 <div><label style="font-size:12px; font-weight:bold;">Posición / Detalles extra</label><input type="text" id="editTaskPosicion" placeholder="Ej: Saldo a favor $2000" style="margin:0;"></div>
             </div>
             <label style="font-size:12px; font-weight:bold;">Descripción</label>
@@ -803,6 +805,7 @@
                 </div>
                 
                 <div style="font-size:12px; color:#7f8c8d; margin:-8px 0 12px 2px;">
+                    💸 Presentada, falta el pago del cliente &nbsp;
                     <span class="cal-dot" style="background:#e74c3c"></span>Hay vencidos sin terminar &nbsp;
                     <span class="cal-dot" style="background:#e67e22"></span>Pendientes &nbsp;
                     <span class="cal-dot" style="background:#27ae60"></span>Todo listo
@@ -1437,10 +1440,10 @@
         window.revisarPago = async function(id, ok) {
             const t = tareasActuales.find(x => x.id === id); if (!t) return;
             try {
-                if (ok) { await updateDoc(doc(db, "tareas", id), { pagoRevisado: true }); registrar('Pago controlado', `${t.titulo}`); }
+                if (ok) { await updateDoc(doc(db, "tareas", id), { pagoRevisado: true, pagado: true }); registrar('Pago controlado', `${t.titulo}`); }
                 else {
-                    if (!confirm("¿Volver este vencimiento a 'Pendiente'? (por ejemplo, si el pago no se acreditó)")) return;
-                    await updateDoc(doc(db, "tareas", id), { estado: 'pendientes', pagoRevisado: true, auditoriaPago: '' });
+                    if (!confirm("¿Marcar que este pago NO se hizo? Al cliente le vuelve a figurar como pendiente de pago (por ejemplo, si no se acreditó).")) return;
+                    await updateDoc(doc(db, "tareas", id), { pagado: false, pagoRevisado: true, auditoriaPago: '' });
                     registrar('Pago rechazado', `${t.titulo}`);
                 }
             } catch (e) { alert("No se pudo actualizar: " + e.message); }
@@ -1492,11 +1495,13 @@
                 for (const g in grupos) {
                     const lst = grupos[g];
                     const listos = lst.filter(t => t.estado === 'listas').length;
-                    tasksHtml += `<div class="cal-group-title" data-group="${esc(g)}" onclick="openGroupModal(this.dataset.group, '${dateString}')" title="Ver clientes y opciones"><span>${esc(g)} <span style="font-weight:normal; color:#7f8c8d;">(${listos}/${lst.length})</span></span> <span>⚙️</span></div>`;
+                    const impagas = lst.filter(t => t.estado === 'listas' && faltaPago(t)).length;
+                    tasksHtml += `<div class="cal-group-title" data-group="${esc(g)}" onclick="openGroupModal(this.dataset.group, '${dateString}')" title="Ver clientes y opciones"><span>${esc(g)} <span style="font-weight:normal; color:#7f8c8d;">(${listos}/${lst.length}${impagas ? ` · ${impagas} 💸` : ''})</span></span> <span>⚙️</span></div>`;
                     lst.forEach(t => {
                         const pillClass = t.estado === 'listas' ? 'cal-listas' : (t.estado === 'proceso' ? 'cal-proceso' : 'cal-pendientes');
                         const ico = t.tipoObligacion === 'pago' ? '💰 ' : (t.tipoObligacion === 'mixto' ? '📁💰 ' : '📁 ');
-                        tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${esc(nombreDe(t))}">${ico}${esc(nombreDe(t))}</div>`;
+                        const impaga = t.estado === 'listas' && faltaPago(t);
+                        tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${esc(nombreDe(t))}${impaga ? ' · presentada, falta el pago del cliente' : ''}">${ico}${esc(nombreDe(t))}${impaga ? ' 💸' : ''}</div>`;
                     });
                 }
                 if (movil) {
@@ -1660,6 +1665,10 @@
                         <option value="proceso" ${t.estado === 'proceso' ? 'selected' : ''}>⏳ En proceso</option>
                         <option value="listas" ${t.estado === 'listas' ? 'selected' : ''}>✅ Finalizada</option>
                     </select>
+                    ${(t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto') ? `<select class="g-pago" title="Pago del cliente">
+                        <option value="no" ${!pagoHecho(t) ? 'selected' : ''}>💸 Falta pagar</option>
+                        <option value="si" ${pagoHecho(t) ? 'selected' : ''}>✅ Pagado</option>
+                    </select>` : '<span style="font-size:11px; color:#bdc3c7; text-align:center;">sin pago</span>'}
                     <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">${mailBtn}${wppBtn}${avisos ? `<span class="aviso-tag" style="width:100%;">${avisos}</span>` : ''}</div>
                 </div>`;
             });
@@ -1679,6 +1688,8 @@
                 const file = fila.querySelector('.g-file').files.length ? Array.from(fila.querySelector('.g-file').files) : null;
                 if (String(monto) !== String(t.monto || '')) upd.monto = monto;
                 if (estado !== t.estado) upd.estado = estado;
+                const selPago = fila.querySelector('.g-pago');
+                if (selPago && (selPago.value === 'si') !== pagoHecho(t)) { upd.pagado = selPago.value === 'si'; if (upd.pagado) upd.pagoRevisado = true; }
                 if (file || Object.keys(upd).length) cambios.push({ t, upd, file });
             }
             if (!cambios.length) return alert("No hay cambios para guardar.");
@@ -2036,10 +2047,10 @@
         }
 
         function renderPortalCliente() {
-            const pendientes = pcTareas.filter(t => t.estado !== 'listas');
-            const finalizados = pcTareas.filter(t => t.estado === 'listas');
+            const pendientes = pcTareas.filter(t => !finalCliente(t));
+            const finalizados = pcTareas.filter(t => finalCliente(t));
             const vencidos = pendientes.filter(t => { const d = diasHasta(t.vencimiento); return d !== null && d < 0; });
-            const pagosPend = pendientes.filter(t => t.tipoObligacion === 'pago' || (t.tipoObligacion === 'mixto' && t.monto));
+            const pagosPend = pendientes.filter(t => faltaPago(t) && (t.tipoObligacion === 'pago' || t.estado === 'listas' || t.monto));
             const totalPagos = pagosPend.reduce((s, t) => s + (parseFloat(String(t.monto).replace(',', '.')) || 0), 0);
             const proximo = pendientes.filter(t => t.vencimiento && diasHasta(t.vencimiento) >= 0).sort((a, b) => a.vencimiento.localeCompare(b.vencimiento))[0];
 
@@ -2082,20 +2093,32 @@
         }
 
         function itemPortal(t) {
-            const hecho = t.estado === 'listas';
+            const hecho = finalCliente(t);
+            const presentada = t.estado === 'listas';
             const d = diasHasta(t.vencimiento);
             const esPago = t.tipoObligacion === 'pago';
             const esMixto = t.tipoObligacion === 'mixto';
+            const debePagar = faltaPago(t);
             let clase = '', estado = '';
-            if (hecho) { clase = 'hecho'; estado = `<span class="pc-badge b-ok">✓ ${esPago ? 'Pagado' : (esMixto ? (t.auditoriaPago ? 'Presentado y pagado' : 'Finalizado') : 'Presentado')}</span>`; }
-            else if (d !== null && d < 0) { clase = 'vencido'; estado = `<span class="pc-badge b-venc">Venció hace ${-d} ${-d === 1 ? 'día' : 'días'}</span>`; }
-            else if (d !== null && d <= 3) { clase = 'urgente'; estado = `<span class="pc-badge b-urg">${d === 0 ? 'Vence hoy' : (d === 1 ? 'Vence mañana' : `Vence en ${d} días`)}</span>`; }
-            else if (d !== null) { estado = `<span class="pc-badge b-prox">Faltan ${d} días</span>`; }
+            if (hecho) {
+                clase = 'hecho';
+                const txt = esPago ? 'Pagado' : (esMixto ? (sinSaldo(t) ? 'Presentado · sin saldo a pagar' : 'Presentado y pagado') : 'Presentado');
+                estado = `<span class="pc-badge b-ok">✓ ${txt}</span>`;
+            } else {
+                if (esMixto && presentada) estado += '<span class="pc-badge b-ok">✓ Presentado</span>';
+                if (esMixto && !presentada && pagoHecho(t)) estado += '<span class="pc-badge b-ok">✓ Pago informado</span>';
+                const queFalta = (esMixto && presentada) || esPago ? 'el pago' : '';
+                if (d !== null && d < 0) { clase = 'vencido'; estado += `<span class="pc-badge b-venc">${queFalta ? 'Falta ' + queFalta + ' · ' : ''}Venció hace ${-d} ${-d === 1 ? 'día' : 'días'}</span>`; }
+                else if (d !== null && d <= 3) { clase = 'urgente'; estado += `<span class="pc-badge b-urg">${d === 0 ? 'Vence hoy' : (d === 1 ? 'Vence mañana' : `Vence en ${d} días`)}</span>`; }
+                else if (d !== null) { estado += `<span class="pc-badge b-prox">Faltan ${d} días</span>`; }
+            }
 
             const tipo = esPago ? '<span class="pc-badge b-pago">💰 Pago</span>' : (esMixto ? '<span class="pc-badge b-mixto">📁💰 Presentación y pago</span>' : '<span class="pc-badge b-pres">📁 Presentación</span>');
             let detalle = '';
             if (!hecho) {
-                if (esPago) detalle = 'Lo abonás vos. Cuando lo pagues, avisanos.';
+                if (esPago) detalle = 'Lo abonás vos. Cuando lo pagues, avisanos con "Ya lo pagué".';
+                else if (esMixto && presentada) detalle = t.monto ? `Ya presentamos la declaración. Falta que abones el saldo${montoNum(t) ? ' de ' + pesos(t.monto) : ''}; cuando lo pagues, avisanos con "Ya lo pagué".` : 'Ya presentamos la declaración. Te enviamos la boleta para abonar el saldo.';
+                else if (esMixto && pagoHecho(t)) detalle = 'Recibimos el aviso de tu pago. Estamos terminando la presentación.';
                 else if (esMixto) detalle = t.monto ? 'La presentamos nosotros y el saldo lo abonás vos. Cuando lo pagues, avisanos.' : 'La presentamos nosotros. Si queda saldo a pagar, te enviamos el importe y la boleta.';
                 else detalle = t.monto ? 'La presenta el estudio. Te avisaremos cómo abonar el saldo.' : 'La realiza el estudio. No tenés que hacer nada.';
             }
@@ -2108,7 +2131,7 @@
             let acciones = '';
             const arch = archivosPortal(t);
             arch.forEach(a => { acciones += `<a class="pc-btn pc-btn-azul" href="${esc(a.url)}" target="_blank" title="${esc(a.nombre)}" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;">📥 ${arch.length === 1 ? (hecho ? 'Comprobante' : ((esPago || esMixto) ? 'Descargar boleta' : 'Descargar')) : esc(a.nombre)}</a>`; });
-            if ((esPago || (esMixto && t.monto)) && !hecho) acciones += `<button class="pc-btn pc-btn-verde" onclick="marcarPagadoCliente('${t.id}')">✔ Ya lo pagué</button>`;
+            if (debePagar && (esPago || presentada || t.monto)) acciones += `<button class="pc-btn pc-btn-verde" onclick="marcarPagadoCliente('${t.id}')">✔ Ya lo pagué</button>`;
             if (!acciones && !hecho) acciones = '<div class="pc-nota">El estudio está trabajando en esto</div>';
 
             return `<div class="pc-item ${clase}">
@@ -2127,7 +2150,7 @@
             if(confirm("¿Confirmás que ya realizaste este pago? Le vamos a avisar al estudio.")) {
                 const auditText = `Marcado como pagado por el cliente (${currentUserEmail}) el ${new Date().toLocaleDateString('es-AR')} a las ${new Date().toLocaleTimeString('es-AR')}`;
                 try {
-                    await updateDoc(doc(db, "tareas", id), { estado: 'listas', auditoriaPago: auditText });
+                    await updateDoc(doc(db, "tareas", id), { pagado: true, auditoriaPago: auditText });
                     const tt = pcTareas.find(x => x.id === id);
                     addDoc(collection(db, "historial"), { fecha: new Date().toISOString(), usuario: currentUserEmail, nombre: (pcCliente && pcCliente.nombre) || currentUserEmail, accion: 'Cliente informó un pago', detalle: tt ? tt.titulo : id }).catch(() => {});
                     alert("¡Gracias! Registramos tu pago.");
@@ -2147,6 +2170,21 @@
         window.drop = async function(ev, estadoDestino) {
             ev.preventDefault(); const id = ev.dataTransfer.getData("text");
             if(id) moverTarea(id, estadoDestino);
+        }
+
+        // ---------- PAGO DEL CLIENTE (independiente del estado de la presentación) ----------
+        // estado (pendientes / proceso / listas) = trabajo del ESTUDIO
+        // pagado = el CLIENTE ya pagó (lo informa con "Ya lo pagué" o lo marca el estudio)
+        function montoNum(t) { const n = parseFloat(String(t.monto ?? '').replace(',', '.')); return isNaN(n) ? null : n; }
+        function sinSaldo(t) { return String(t.monto ?? '').trim() !== '' && montoNum(t) === 0; }      // monto 0 = no hay nada que pagar
+        function requierePago(t) { return (t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto') && !sinSaldo(t); }
+        function pagoHecho(t) { return t.pagado === true || (!!t.auditoriaPago && t.pagado !== false); }
+        function faltaPago(t) { return requierePago(t) && !pagoHecho(t); }
+        // ¿Está terminado desde el punto de vista del cliente?
+        function finalCliente(t) {
+            if (t.tipoObligacion === 'pago') return !faltaPago(t);
+            if (t.tipoObligacion === 'mixto') return t.estado === 'listas' && !faltaPago(t);
+            return t.estado === 'listas';
         }
 
         // Archivos de un vencimiento/tarea: lista nueva "archivos" (compatible con el campo viejo "archivoUrl")
@@ -2176,10 +2214,14 @@
             editingTaskId = id;
             document.getElementById('editTaskTitle').value = t.titulo || '';
             document.getElementById('editTaskTipoOb').value = ['pago', 'mixto', 'presentacion'].includes(t.tipoObligacion) ? t.tipoObligacion : 'presentacion';
+            setTimeout(() => { const ev = document.getElementById('editTaskTipoOb').onchange; if (ev) ev(); }, 0);
             document.getElementById('editTaskResp').value = t.responsable || 'Un Paso Mas';
             document.getElementById('editTaskDate').value = t.vencimiento || '';
             document.getElementById('editTaskEstado').value = t.estado || 'pendientes';
-            document.getElementById('editTaskMonto').value = t.monto || '';
+            document.getElementById('editTaskMonto').value = t.monto ?? '';
+            document.getElementById('editTaskPago').value = pagoHecho(t) ? 'si' : 'no';
+            const mostrarPago = () => { const tp = document.getElementById('editTaskTipoOb').value; document.getElementById('editTaskPagoBox').style.visibility = (t.tipo === 'vencimiento' && (tp === 'pago' || tp === 'mixto')) ? 'visible' : 'hidden'; };
+            document.getElementById('editTaskTipoOb').onchange = mostrarPago;
             document.getElementById('editTaskPosicion').value = t.posicion || '';
             document.getElementById('editTaskDesc').value = t.descripcion || '';
             
@@ -2244,7 +2286,8 @@
             let updateData = {
                 titulo: titulo, tipoObligacion: document.getElementById('editTaskTipoOb').value, responsable: document.getElementById('editTaskResp').value,
                 vencimiento: document.getElementById('editTaskDate').value, estado: document.getElementById('editTaskEstado').value,
-                monto: document.getElementById('editTaskMonto').value, posicion: document.getElementById('editTaskPosicion').value, descripcion: document.getElementById('editTaskDesc').value
+                monto: document.getElementById('editTaskMonto').value, posicion: document.getElementById('editTaskPosicion').value, descripcion: document.getElementById('editTaskDesc').value,
+                pagado: document.getElementById('editTaskPago').value === 'si' 
             };
 
             btn.disabled = true;
@@ -2336,6 +2379,7 @@
 
         // ---------- Estado visual de un vencimiento/tarea ----------
         function estadoTag(t) {
+            if (t.estado === 'listas' && t.tipo === 'vencimiento' && faltaPago(t)) return '<span class="est est-proc">Presentada · falta pago 💸</span>';
             if (t.estado === 'listas') return '<span class="est est-ok">Finalizada</span>';
             if (t.vencimiento && t.vencimiento < hoyStr()) return '<span class="est est-venc">Vencida</span>';
             if (t.estado === 'proceso') return '<span class="est est-proc">En proceso</span>';
@@ -2898,9 +2942,9 @@
         }
         window.exportarVencimientosMes = function() {
             const y = currentCalDate.getFullYear(), m = String(currentCalDate.getMonth() + 1).padStart(2, '0');
-            const filas = [['Vencimiento', 'Obligación', 'Cliente', 'Tipo', 'Estado', 'Monto', 'Pago informado por cliente', 'Archivos', 'Mail enviado', 'WhatsApp enviado']];
+            const filas = [['Vencimiento', 'Obligación', 'Cliente', 'Tipo', 'Estado', 'Monto', 'Pago del cliente', 'Pago informado por cliente', 'Archivos', 'Mail enviado', 'WhatsApp enviado']];
             tareasActuales.filter(t => t.tipo === 'vencimiento' && (t.vencimiento || '').startsWith(`${y}-${m}`)).sort((a, b) => (a.vencimiento + a.titulo).localeCompare(b.vencimiento + b.titulo))
-                .forEach(t => filas.push([fmtFecha(t.vencimiento), grupoDe(t), nombreDe(t), ({ pago: 'Pago', mixto: 'Presentación y pago' })[t.tipoObligacion] || 'Presentación', { pendientes: 'Pendiente', proceso: 'En proceso', listas: 'Finalizada' }[t.estado] || t.estado, num(t.monto), t.auditoriaPago || '', archivosDe(t).length || '', t.avisoMail ? new Date(t.avisoMail.fecha).toLocaleDateString('es-AR') : '', t.avisoWpp ? new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR') : '']));
+                .forEach(t => filas.push([fmtFecha(t.vencimiento), grupoDe(t), nombreDe(t), ({ pago: 'Pago', mixto: 'Presentación y pago' })[t.tipoObligacion] || 'Presentación', { pendientes: 'Pendiente', proceso: 'En proceso', listas: 'Finalizada' }[t.estado] || t.estado, num(t.monto), !requierePago(t) ? '' : (pagoHecho(t) ? 'Pagado' : 'Falta pagar'), t.auditoriaPago || '', archivosDe(t).length || '', t.avisoMail ? new Date(t.avisoMail.fecha).toLocaleDateString('es-AR') : '', t.avisoWpp ? new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR') : '']));
             descargarCSV(`vencimientos_${y}-${m}.csv`, filas);
         }
         window.exportarHonorarios = function() {
@@ -2956,6 +3000,17 @@
                     }
                     await setDoc(doc(db, "config", "migraciones"), { mixto: true, mixtoFecha: new Date().toISOString(), mixtoCantidad: aCambiar.length }, { merge: true });
                     if (aCambiar.length) registrar('Corrección automática', `${aCambiar.length} vencimientos pasados a "Presentación y pago" (IVA, IIBB, 931, DJ...)`);
+                }
+                // Antes "Finalizada" también significaba "pagado". Los finalizados cuyo vencimiento ya pasó se marcan como pagados;
+                // los que vencen de hoy en adelante quedan pendientes de pago para el cliente.
+                if (!(mig.exists() && mig.data().pagado)) {
+                    const hoy = hoyStr();
+                    const pasados = tareasActuales.filter(t => t.tipo === 'vencimiento' && t.estado === 'listas' && t.pagado === undefined && (t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto') && t.vencimiento && t.vencimiento < hoy);
+                    for (let i = 0; i < pasados.length; i += 400) {
+                        const batch = writeBatch(db); pasados.slice(i, i + 400).forEach(t => batch.update(doc(db, "tareas", t.id), { pagado: true })); await batch.commit();
+                    }
+                    await setDoc(doc(db, "config", "migraciones"), { pagado: true, pagadoFecha: new Date().toISOString(), pagadoCantidad: pasados.length }, { merge: true });
+                    if (pasados.length) registrar('Corrección automática', `${pasados.length} vencimientos finalizados y ya vencidos marcados como pagados`);
                 }
             } catch (e) { console.warn("migración mixto:", e); }
             const malos = tareasActuales.filter(t => t.tipo === 'vencimiento' && t.tipoObligacion !== 'pago' && grupoDe(t).startsWith('Autónomos ('));
