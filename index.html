@@ -1501,7 +1501,7 @@
                         const pillClass = t.estado === 'listas' ? 'cal-listas' : (t.estado === 'proceso' ? 'cal-proceso' : 'cal-pendientes');
                         const ico = t.tipoObligacion === 'pago' ? '💰 ' : (t.tipoObligacion === 'mixto' ? '📁💰 ' : '📁 ');
                         const impaga = t.estado === 'listas' && faltaPago(t);
-                        tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${esc(nombreDe(t))}${impaga ? ' · presentada, falta el pago del cliente' : ''}">${ico}${esc(nombreDe(t))}${impaga ? ' 💸' : ''}</div>`;
+                        tasksHtml += `<div class="cal-task-pill ${pillClass}" onclick="openTaskModal('${t.id}')" title="${esc(nombreDe(t))}${impaga ? ' · presentada, falta el pago del cliente' : ''}${t.fechaEstimada ? ' · fecha estimada, se confirma al cargar el calendario del mes' : ''}">${t.fechaEstimada ? '≈ ' : ''}${ico}${esc(nombreDe(t))}${impaga ? ' 💸' : ''}${t.diferido ? ' ⏩' : ''}</div>`;
                     });
                 }
                 if (movil) {
@@ -1557,7 +1557,8 @@
                 const esPago = t.tipoObligacion === 'pago';
                 if (t.monto) { ctx.monto = pesos(t.monto); ctx.monto_txt = ` por un monto de ${pesos(t.monto)}`; }
                 ctx.que_vence = esPago ? 'el pago' : (((t.tipoObligacion === 'mixto' || t.monto) && !sinSaldo(t)) ? 'la presentación y el pago' : 'la presentación');
-                if (sinSaldo(t)) { const mf = (t.posicion || '').match(/saldo a favor\s*(?:de\s*)?(.*)$/i);
+                if (t.diferido) { ctx.detalle_pago = `El saldo de ${pesos(t.monto)} se paga de forma diferida (IVA pago diferido), con vencimiento ${(t.posicion || '').match(/diferido a ([^(]+)/i) ? 'en ' + (t.posicion.match(/diferido a ([^(]+)/i)[1].trim()) : 'más adelante'}. Te lo vamos a recordar.\n\n`; ctx.monto_txt = ''; ctx.monto = ''; }
+                else if (sinSaldo(t)) { const mf = (t.posicion || '').match(/saldo a favor\s*(?:de\s*)?(.*)$/i);
                     ctx.detalle_pago = saldoAFavor(t) ? `Quedó un saldo a favor${mf && mf[1] ? ' de ' + mf[1].trim() : ''}, por lo que no hay importe a pagar.\n\n` : 'No quedó saldo a pagar.\n\n'; ctx.monto_txt = ''; ctx.monto = ''; }
                 else if (t.monto) ctx.detalle_pago = `${esPago ? 'El importe a pagar' : 'El saldo a pagar'} es de ${pesos(t.monto)}${t.vencimiento ? `, con vencimiento el ${fmtFecha(t.vencimiento)}` : ''}.\n\n`;
                 const arch = archivosDe(t);
@@ -1668,7 +1669,7 @@
                         <option value="proceso" ${t.estado === 'proceso' ? 'selected' : ''}>⏳ En proceso</option>
                         <option value="listas" ${t.estado === 'listas' ? 'selected' : ''}>✅ Finalizada</option>
                     </select>
-                    ${(t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto') ? `<div><select class="g-pago" title="Pago del cliente" onchange="cambioPagoGrupo(this)">${OPCIONES_PAGO(estadoPagoValor(t))}</select>${t.posicion ? `<div class="g-pos" style="font-size:10px; color:#7f8c8d; margin-top:2px;">${esc(t.posicion)}</div>` : '<div class="g-pos" style="font-size:10px; color:#7f8c8d; margin-top:2px;"></div>'}</div>` : '<span style="font-size:11px; color:#bdc3c7; text-align:center;">sin pago</span>'}
+                    ${t.diferido ? `<div style="font-size:11px; color:#7e5109; background:#fdebd0; border-radius:4px; padding:4px 6px; text-align:center;" title="${esc(t.posicion || '')}">⏩ Saldo diferido</div>` : (t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto') ? `<div><select class="g-pago" title="Pago del cliente" onchange="cambioPagoGrupo(this)">${OPCIONES_PAGO(estadoPagoValor(t))}</select>${t.posicion ? `<div class="g-pos" style="font-size:10px; color:#7f8c8d; margin-top:2px;">${esc(t.posicion)}</div>` : '<div class="g-pos" style="font-size:10px; color:#7f8c8d; margin-top:2px;"></div>'}</div>` : '<span style="font-size:11px; color:#bdc3c7; text-align:center;">sin pago</span>'}
                     <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">${mailBtn}${wppBtn}${avisos ? `<span class="aviso-tag" style="width:100%;">${avisos}</span>` : ''}</div>
                 </div>`;
             });
@@ -1715,6 +1716,7 @@
                     btn.innerText = `Guardando ${++n} de ${cambios.length}...`;
                     if (c.file) { c.upd.archivos = [...archivosDe(c.t), ...(await subirArchivos(c.file))]; c.upd.archivoUrl = (c.upd.archivos.find(a => !a.driveId) || {}).url || ''; }
                     await updateDoc(doc(db, "tareas", c.t.id), c.upd);
+                    if ('monto' in c.upd) try { await sincronizarDiferido({ ...c.t, ...c.upd }); } catch (e) { console.warn('diferido:', e); }
                 }
                 registrar('Carga masiva en vencimiento', `${grupoAbierto.groupName} (${fmtFecha(grupoAbierto.dateString)}): ${cambios.length} clientes actualizados`);
                 alert(`Listo, se actualizaron ${cambios.length} clientes.`);
@@ -2117,7 +2119,7 @@
             let clase = '', estado = '';
             if (hecho) {
                 clase = 'hecho';
-                const txt = esPago ? (sinSaldo(t) ? 'Sin importe a pagar' : 'Pagado') : (esMixto ? (sinSaldo(t) ? (saldoAFavor(t) ? 'Presentado · saldo a favor' : 'Presentado · sin saldo a pagar') : 'Presentado y pagado') : 'Presentado');
+                const txt = esPago ? (sinSaldo(t) ? 'Sin importe a pagar' : 'Pagado') : (esMixto ? (t.diferido ? 'Presentado · saldo diferido' : sinSaldo(t) ? (saldoAFavor(t) ? 'Presentado · saldo a favor' : 'Presentado · sin saldo a pagar') : 'Presentado y pagado') : 'Presentado');
                 estado = `<span class="pc-badge b-ok">✓ ${txt}</span>`;
             } else {
                 if (esMixto && presentada) estado += '<span class="pc-badge b-ok">✓ Presentado</span>';
@@ -2137,12 +2139,14 @@
                 else if (esMixto) detalle = t.monto ? 'La presentamos nosotros y el saldo lo abonás vos. Cuando lo pagues, avisanos.' : 'La presentamos nosotros. Si queda saldo a pagar, te enviamos el importe y la boleta.';
                 else detalle = t.monto ? 'La presenta el estudio. Te avisaremos cómo abonar el saldo.' : 'La realiza el estudio. No tenés que hacer nada.';
             }
+            else if (t.diferido) detalle = `Presentamos la declaración. ${esc(t.posicion || 'El saldo se paga de forma diferida')}: lo vas a ver más adelante como "IVA Pago Diferido".`;
             else if (sinSaldo(t) && esMixto) detalle = saldoAFavor(t) ? 'Presentamos la declaración y te quedó saldo a favor: no tenés que pagar nada.' : 'Presentamos la declaración y no quedó saldo a pagar.';
             else if (t.auditoriaPago) detalle = 'Informaste el pago desde el portal.';
-            if (t.posicion) detalle += `${detalle ? '<br>' : ''}<i>${esc(t.posicion)}</i>`;
+            if (t.posicion && !t.diferido) detalle += `${detalle ? '<br>' : ''}<i>${esc(t.posicion)}</i>`;
+            if (t.fechaEstimada && !hecho) detalle += `${detalle ? '<br>' : ''}<small>📅 Fecha aproximada: la confirmamos cuando se publique el calendario de vencimientos.</small>`;
 
             let fecha = '<div class="pc-fecha"><div class="d">—</div></div>';
-            if (t.vencimiento) { const [a, m, dd] = t.vencimiento.split('-'); fecha = `<div class="pc-fecha"><div class="d">${dd}</div><div class="m">${MESES[parseInt(m, 10) - 1].substring(0, 3)}</div></div>`; }
+            if (t.vencimiento) { const [a, m, dd] = t.vencimiento.split('-'); fecha = `<div class="pc-fecha" ${t.fechaEstimada ? 'title="Fecha estimada: la confirmamos cuando se publique el calendario"' : ''}><div class="d">${t.fechaEstimada ? '≈' : ''}${dd}</div><div class="m">${MESES[parseInt(m, 10) - 1].substring(0, 3)}</div>${t.fechaEstimada ? '<div class="m" style="font-size:9px; text-transform:none;">aprox.</div>' : ''}</div>`; }
 
             let acciones = '';
             const arch = archivosPortal(t);
@@ -2188,11 +2192,88 @@
             if(id) moverTarea(id, estadoDestino);
         }
 
+        // ---------- IVA PAGO DIFERIDO AUTOMÁTICO ----------
+        // Al cargar el saldo de la IVA DJ de un cliente con "IVA Pago Diferido" en su ficha, se crea (o actualiza)
+        // el vencimiento del diferido: mismo período, vence 3 meses después. La DJ queda sin pago ahora ("saldo diferido").
+        function nombreObligacion(v) { const o = document.querySelector(`#masivoObligacion option[value="${v}"]`); return o ? o.textContent.trim() : v; }
+        function esIvaDJ(t) { return t && t.tipo === 'vencimiento' && grupoDe(t).startsWith(nombreObligacion('iva') + ' ('); }
+        function diaHabil(d) { if (d.getDay() === 6) d.setDate(d.getDate() + 2); if (d.getDay() === 0) d.setDate(d.getDate() + 1); return d; }
+        const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+        async function sincronizarDiferido(t) {
+            if (!esIvaDJ(t)) return;
+            const c = clientesActivos.find(x => x.id === t.clienteId);
+            if (!c || !(c.obligaciones || []).includes('iva_diferido')) return;
+            const per = periodoDeTarea(t);
+            if (!per.periodo) return;
+            const pa = parseInt(per.periodo.slice(0, 4), 10), pm = parseInt(per.periodo.slice(4, 6), 10);
+            const base = mesVencimientoDe('iva_diferido', pm, pa);               // período + 3 meses
+            const mesBase = `${String(base.getMonth() + 1).padStart(2, '0')}-${base.getFullYear()}`;
+            const textoMes = `${MESES_N[base.getMonth()].toLowerCase()} ${base.getFullYear()}`;
+            const titulo = `${nombreObligacion('iva_diferido')} (${MESES_N[pm - 1]} ${pa}) - ${c.nombre}`;
+            const existente = tareasActuales.find(x => x.origenDJ === t.id) || tareasActuales.find(x => x.tipo === 'vencimiento' && x.clienteId === c.id && x.titulo === titulo);
+            const n = montoNum(t);
+
+            // Sin saldo (vacío o 0): se saca el diferido creado automáticamente, si todavía no se pagó
+            if (!n || n <= 0) {
+                if (t.diferido) await updateDoc(doc(db, "tareas", t.id), { diferido: false, posicion: '' });
+                if (existente && existente.origenDJ === t.id && !pagoHecho(existente)) {
+                    await deleteDoc(doc(db, "tareas", existente.id));
+                    registrar('IVA diferido eliminado', `${titulo} (la DJ quedó sin saldo)`);
+                }
+                return;
+            }
+
+            // Fecha: la del calendario del mes del diferido; si todavía no está, se estima y queda "a confirmar"
+            const r = fechasPara(mesBase, 'iva_diferido');
+            const dig = parseInt(String(c.cuit || '').replace(/\D/g, '').slice(-1), 10);
+            let fecha = r && r.fechas[dig] ? r.fechas[dig] : '', estimada = false;
+            if (!fecha) {
+                const diaRef = t.vencimiento ? parseInt(t.vencimiento.slice(8, 10), 10) : 20;
+                const d = new Date(base.getFullYear(), base.getMonth(), Math.min(diaRef, new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate()));
+                fecha = ymd(diaHabil(d)); estimada = true;
+            }
+
+            const datos = { monto: String(n), origenDJ: t.id, titulo };
+            // Si el diferido ya tiene una fecha confirmada (no estimada), no se toca; si no, se pone la calculada
+            const fechaConfirmada = existente && existente.vencimiento && existente.fechaEstimada !== true;
+            if (!fechaConfirmada) { datos.vencimiento = fecha; datos.fechaEstimada = estimada; }
+            if (existente) {
+                if (String(existente.monto) !== String(n) || (datos.vencimiento && datos.vencimiento !== existente.vencimiento) || existente.origenDJ !== t.id) {
+                    await updateDoc(doc(db, "tareas", existente.id), datos);
+                    registrar('IVA diferido actualizado', `${titulo}: ${pesos(n)}`);
+                }
+            } else {
+                await setDoc(doc(db, "tareas", `dif_${t.id}`), {
+                    ...datos, tipo: 'vencimiento', tipoObligacion: 'pago', clienteId: c.id, estado: 'pendientes', responsable: 'Un Paso Mas',
+                    descripcion: 'Creado automáticamente desde la IVA DJ', posicion: '', archivos: [], archivoUrl: '', fechaCreacion: new Date().toISOString()
+                });
+                registrar('IVA diferido creado', `${titulo}: ${pesos(n)}, vence ${estimada ? 'aprox. ' : ''}${fmtFecha(datos.vencimiento)}`);
+            }
+            // La DJ queda sin pago ahora: el saldo se paga en el diferido
+            const pos = `Saldo de ${pesos(n)} diferido a ${textoMes} (IVA pago diferido)`;
+            if (!t.diferido || t.posicion !== pos) await updateDoc(doc(db, "tareas", t.id), { diferido: true, posicion: pos });
+        }
+
+        // Cuando se cargan las fechas reales de un mes, se corrigen los diferidos con fecha estimada
+        async function corregirFechasEstimadas(mes, ob, fechas) {
+            if (ob !== 'iva_diferido') return 0;
+            const [m, a] = mes.split('-');
+            const lst = tareasActuales.filter(t => t.fechaEstimada === true && (t.vencimiento || '').startsWith(`${a}-${m}`));
+            for (const t of lst) {
+                const c = clientesActivos.find(x => x.id === t.clienteId); if (!c) continue;
+                const f = fechas[parseInt(String(c.cuit || '').replace(/\D/g, '').slice(-1), 10)];
+                if (f) await updateDoc(doc(db, "tareas", t.id), { vencimiento: f, fechaEstimada: false });
+            }
+            if (lst.length) registrar('Fechas de IVA diferido confirmadas', `${lst.length} vencimientos de ${mes}`);
+            return lst.length;
+        }
+
         // ---------- PAGO DEL CLIENTE (independiente del estado de la presentación) ----------
         // estado (pendientes / proceso / listas) = trabajo del ESTUDIO
         // pagado = el CLIENTE ya pagó (lo informa con "Ya lo pagué" o lo marca el estudio)
         function montoNum(t) { const n = parseFloat(String(t.monto ?? '').replace(',', '.')); return isNaN(n) ? null : n; }
-        function sinSaldo(t) { return t.sinPago === true || (String(t.monto ?? '').trim() !== '' && montoNum(t) === 0); }   // sin saldo / saldo a favor (o monto 0)
+        function sinSaldo(t) { return t.diferido === true || t.sinPago === true || (String(t.monto ?? '').trim() !== '' && montoNum(t) === 0); }   // sin saldo / saldo a favor (o monto 0)
         function saldoAFavor(t) { return sinSaldo(t) && /favor/i.test(t.posicion || ''); }
         function estadoPagoValor(t) { return sinSaldo(t) ? 'nada' : (pagoHecho(t) ? 'si' : 'no'); }
         const OPCIONES_PAGO = (v) => `<option value="no" ${v === 'no' ? 'selected' : ''}>💸 Falta pagar</option><option value="si" ${v === 'si' ? 'selected' : ''}>✅ Pagado</option><option value="nada" ${v === 'nada' ? 'selected' : ''}>🟢 Sin saldo / a favor</option>`;
@@ -2316,7 +2397,9 @@
                 const nuevos = fileInput.files.length ? await subirArchivos(Array.from(fileInput.files)) : [];
                 updateData.archivos = [...archivosEdit, ...nuevos];
                 updateData.archivoUrl = (updateData.archivos.find(a => !a.driveId) || {}).url || '';
+                const antes = { ...(tareasActuales.find(x => x.id === editingTaskId) || {}) };
                 await updateDoc(doc(db, "tareas", editingTaskId), updateData);
+                if (String(antes.monto ?? '') !== String(updateData.monto ?? '')) try { await sincronizarDiferido({ ...antes, ...updateData, id: editingTaskId }); } catch (e) { console.warn('diferido:', e); }
                 registrar('Tarea/vencimiento editado', updateData.titulo);
                 closeTaskModal();
             } catch(e) { alert("No se pudo guardar: " + e.message); }
@@ -3305,7 +3388,8 @@
             try {
                 await setDoc(doc(db, "calendarioVenc", mes), { [ob]: fechas }, { merge: true });
                 calVencDB[mes] = { ...(calVencDB[mes] || {}), [ob]: fechas };
-                if (!silencioso) { mostrarFuenteFechas('📌 Fechas guardadas en el CRM.', 'ok'); registrar('Fechas de vencimiento guardadas', `${ob} · ${mes}`); }
+                const corregidas = await corregirFechasEstimadas(mes, ob, fechas);
+                if (!silencioso) { mostrarFuenteFechas('📌 Fechas guardadas en el CRM.' + (corregidas ? ` Se confirmó la fecha de ${corregidas} IVA diferidos que estaban estimados.` : ''), 'ok'); registrar('Fechas de vencimiento guardadas', `${ob} · ${mes}`); }
             } catch (e) { if (!silencioso) alert("No se pudieron guardar: " + e.message); }
         }
 
