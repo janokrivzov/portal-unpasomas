@@ -374,7 +374,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 10px; margin-bottom: 10px;">
                 <div><label style="font-size:12px; font-weight:bold;">Monto ($) <span style="font-weight:normal; color:#95a5a6;">0 = sin saldo</span></label><input type="number" id="editTaskMonto" placeholder="Ej: 15000" style="margin:0;"></div>
                 <div id="editTaskPagoBox"><label style="font-size:12px; font-weight:bold;">Pago del cliente</label>
-                    <select id="editTaskPago" style="margin:0;"><option value="no">💸 Falta pagar</option><option value="si">✅ Pagado</option></select></div>
+                    <select id="editTaskPago" style="margin:0;" onchange="if(this.value==='nada' && !document.getElementById('editTaskPosicion').value) document.getElementById('editTaskPosicion').placeholder='Ej: Saldo a favor $ 35.000 (lo ve el cliente)';"><option value="no">💸 Falta pagar</option><option value="si">✅ Pagado</option><option value="nada">🟢 Sin saldo / a favor</option></select></div>
                 <div><label style="font-size:12px; font-weight:bold;">Posición / Detalles extra</label><input type="text" id="editTaskPosicion" placeholder="Ej: Saldo a favor $2000" style="margin:0;"></div>
             </div>
             <label style="font-size:12px; font-weight:bold;">Descripción</label>
@@ -1556,8 +1556,10 @@
                 ctx.fecha = t.vencimiento ? fmtFecha(t.vencimiento) : '';
                 const esPago = t.tipoObligacion === 'pago';
                 if (t.monto) { ctx.monto = pesos(t.monto); ctx.monto_txt = ` por un monto de ${pesos(t.monto)}`; }
-                ctx.que_vence = esPago ? 'el pago' : ((t.tipoObligacion === 'mixto' || t.monto) ? 'la presentación y el pago' : 'la presentación');
-                if (t.monto) ctx.detalle_pago = `${esPago ? 'El importe a pagar' : 'El saldo a pagar'} es de ${pesos(t.monto)}${t.vencimiento ? `, con vencimiento el ${fmtFecha(t.vencimiento)}` : ''}.\n\n`;
+                ctx.que_vence = esPago ? 'el pago' : (((t.tipoObligacion === 'mixto' || t.monto) && !sinSaldo(t)) ? 'la presentación y el pago' : 'la presentación');
+                if (sinSaldo(t)) { const mf = (t.posicion || '').match(/saldo a favor\s*(?:de\s*)?(.*)$/i);
+                    ctx.detalle_pago = saldoAFavor(t) ? `Quedó un saldo a favor${mf && mf[1] ? ' de ' + mf[1].trim() : ''}, por lo que no hay importe a pagar.\n\n` : 'No quedó saldo a pagar.\n\n'; ctx.monto_txt = ''; ctx.monto = ''; }
+                else if (t.monto) ctx.detalle_pago = `${esPago ? 'El importe a pagar' : 'El saldo a pagar'} es de ${pesos(t.monto)}${t.vencimiento ? `, con vencimiento el ${fmtFecha(t.vencimiento)}` : ''}.\n\n`;
                 const arch = archivosDe(t);
                 ctx.archivos = arch.length ? arch.map(a => '• ' + a.nombre).join('\n') : '(sin archivos)';
             }
@@ -1572,8 +1574,9 @@
             const telLimpio = String(telefono).replace(/\D/g,'');
             const t = { titulo: tituloCompleto, tipo: 'vencimiento', monto, vencimiento: fecha, tipoObligacion };
             const c = { nombre: nombreDe(t) };
-            const p = plantilla((tipoObligacion === 'pago' || tipoObligacion === 'mixto' || monto) ? 'wpp_pago' : 'wpp_presentacion');
-            const mensaje = aplicarPlantilla(p.cuerpo, ctxMensaje(t, c));
+            const tReal = tareaId ? tareasActuales.find(x => x.id === tareaId) : null;
+            const p = plantilla(!(tReal && sinSaldo(tReal)) && (tipoObligacion === 'pago' || tipoObligacion === 'mixto' || monto) ? 'wpp_pago' : 'wpp_presentacion');
+            const mensaje = aplicarPlantilla(p.cuerpo, ctxMensaje(tReal ? { ...tReal } : t, c));
             const url = `https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`;
             if (soloUrl) return url;
             return `<a href="${url}" target="_blank" class="btn-wpp" title="Enviar aviso" ${tareaId ? `onclick="marcarWpp('${tareaId}')"` : ''}>💬 Avisar</a>`;
@@ -1665,15 +1668,23 @@
                         <option value="proceso" ${t.estado === 'proceso' ? 'selected' : ''}>⏳ En proceso</option>
                         <option value="listas" ${t.estado === 'listas' ? 'selected' : ''}>✅ Finalizada</option>
                     </select>
-                    ${(t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto') ? `<select class="g-pago" title="Pago del cliente">
-                        <option value="no" ${!pagoHecho(t) ? 'selected' : ''}>💸 Falta pagar</option>
-                        <option value="si" ${pagoHecho(t) ? 'selected' : ''}>✅ Pagado</option>
-                    </select>` : '<span style="font-size:11px; color:#bdc3c7; text-align:center;">sin pago</span>'}
+                    ${(t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto') ? `<div><select class="g-pago" title="Pago del cliente" onchange="cambioPagoGrupo(this)">${OPCIONES_PAGO(estadoPagoValor(t))}</select>${t.posicion ? `<div class="g-pos" style="font-size:10px; color:#7f8c8d; margin-top:2px;">${esc(t.posicion)}</div>` : '<div class="g-pos" style="font-size:10px; color:#7f8c8d; margin-top:2px;"></div>'}</div>` : '<span style="font-size:11px; color:#bdc3c7; text-align:center;">sin pago</span>'}
                     <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">${mailBtn}${wppBtn}${avisos ? `<span class="aviso-tag" style="width:100%;">${avisos}</span>` : ''}</div>
                 </div>`;
             });
             document.getElementById('groupModalList').innerHTML = html || '<div class="vacio-mini">No hay clientes en este vencimiento.</div>';
             document.getElementById('groupModal').style.display = 'flex';
+        }
+
+        // Al marcar "Sin saldo / a favor" en el grupo, preguntar el saldo a favor (lo ve el cliente)
+        window.cambioPagoGrupo = function(sel) {
+            if (sel.value !== 'nada') return;
+            const v = prompt("¿Quedó saldo a favor? Escribí el importe (o dejalo vacío si el saldo es cero):", "");
+            if (v === null) return;
+            const n = parseFloat(String(v).replace(/\./g, '').replace(',', '.'));
+            const txt = v.trim() && !isNaN(n) && n > 0 ? `Saldo a favor ${pesos(n)}` : 'Sin saldo a pagar';
+            sel.dataset.posicion = txt;
+            const pos = sel.parentElement.querySelector('.g-pos'); if (pos) pos.innerText = txt;
         }
 
         window.guardarGrupo = async function() {
@@ -1689,7 +1700,11 @@
                 if (String(monto) !== String(t.monto || '')) upd.monto = monto;
                 if (estado !== t.estado) upd.estado = estado;
                 const selPago = fila.querySelector('.g-pago');
-                if (selPago && (selPago.value === 'si') !== pagoHecho(t)) { upd.pagado = selPago.value === 'si'; if (upd.pagado) upd.pagoRevisado = true; }
+                if (selPago && selPago.value !== estadoPagoValor(t)) {
+                    upd.pagado = selPago.value === 'si'; upd.sinPago = selPago.value === 'nada';
+                    if (upd.pagado) upd.pagoRevisado = true;
+                }
+                if (selPago && selPago.dataset.posicion !== undefined) upd.posicion = selPago.dataset.posicion;
                 if (file || Object.keys(upd).length) cambios.push({ t, upd, file });
             }
             if (!cambios.length) return alert("No hay cambios para guardar.");
@@ -1755,7 +1770,7 @@
             colaWpp = []; const sinTel = [];
             pend.forEach(t => {
                 const cli = clientesActivos.find(c => c.id === t.clienteId);
-                const url = cli && cli.telefono ? generarLinkWpp(cli.telefono, t.titulo, t.monto, t.vencimiento, t.tipoObligacion, true) : '';
+                const url = cli && cli.telefono ? generarLinkWpp(cli.telefono, t.titulo, t.monto, t.vencimiento, t.tipoObligacion, true, t.id) : '';
                 if (url) colaWpp.push({ nombre: nombreDe(t), url, id: t.id }); else sinTel.push(nombreDe(t));
             });
             posWpp = 0;
@@ -2102,7 +2117,7 @@
             let clase = '', estado = '';
             if (hecho) {
                 clase = 'hecho';
-                const txt = esPago ? 'Pagado' : (esMixto ? (sinSaldo(t) ? 'Presentado · sin saldo a pagar' : 'Presentado y pagado') : 'Presentado');
+                const txt = esPago ? (sinSaldo(t) ? 'Sin importe a pagar' : 'Pagado') : (esMixto ? (sinSaldo(t) ? (saldoAFavor(t) ? 'Presentado · saldo a favor' : 'Presentado · sin saldo a pagar') : 'Presentado y pagado') : 'Presentado');
                 estado = `<span class="pc-badge b-ok">✓ ${txt}</span>`;
             } else {
                 if (esMixto && presentada) estado += '<span class="pc-badge b-ok">✓ Presentado</span>';
@@ -2122,6 +2137,7 @@
                 else if (esMixto) detalle = t.monto ? 'La presentamos nosotros y el saldo lo abonás vos. Cuando lo pagues, avisanos.' : 'La presentamos nosotros. Si queda saldo a pagar, te enviamos el importe y la boleta.';
                 else detalle = t.monto ? 'La presenta el estudio. Te avisaremos cómo abonar el saldo.' : 'La realiza el estudio. No tenés que hacer nada.';
             }
+            else if (sinSaldo(t) && esMixto) detalle = saldoAFavor(t) ? 'Presentamos la declaración y te quedó saldo a favor: no tenés que pagar nada.' : 'Presentamos la declaración y no quedó saldo a pagar.';
             else if (t.auditoriaPago) detalle = 'Informaste el pago desde el portal.';
             if (t.posicion) detalle += `${detalle ? '<br>' : ''}<i>${esc(t.posicion)}</i>`;
 
@@ -2141,7 +2157,7 @@
                     <div style="margin-bottom:5px;">${tipo}${estado}</div>
                     <div class="det">${detalle}</div>
                 </div>
-                ${t.monto ? `<div class="pc-monto">${pesos(t.monto)}</div>` : ''}
+                ${t.monto && !sinSaldo(t) ? `<div class="pc-monto">${pesos(t.monto)}</div>` : ''}
                 ${acciones ? `<div class="pc-acciones">${acciones}</div>` : ''}
             </div>`;
         }
@@ -2176,7 +2192,10 @@
         // estado (pendientes / proceso / listas) = trabajo del ESTUDIO
         // pagado = el CLIENTE ya pagó (lo informa con "Ya lo pagué" o lo marca el estudio)
         function montoNum(t) { const n = parseFloat(String(t.monto ?? '').replace(',', '.')); return isNaN(n) ? null : n; }
-        function sinSaldo(t) { return String(t.monto ?? '').trim() !== '' && montoNum(t) === 0; }      // monto 0 = no hay nada que pagar
+        function sinSaldo(t) { return t.sinPago === true || (String(t.monto ?? '').trim() !== '' && montoNum(t) === 0); }   // sin saldo / saldo a favor (o monto 0)
+        function saldoAFavor(t) { return sinSaldo(t) && /favor/i.test(t.posicion || ''); }
+        function estadoPagoValor(t) { return sinSaldo(t) ? 'nada' : (pagoHecho(t) ? 'si' : 'no'); }
+        const OPCIONES_PAGO = (v) => `<option value="no" ${v === 'no' ? 'selected' : ''}>💸 Falta pagar</option><option value="si" ${v === 'si' ? 'selected' : ''}>✅ Pagado</option><option value="nada" ${v === 'nada' ? 'selected' : ''}>🟢 Sin saldo / a favor</option>`;
         function requierePago(t) { return (t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto') && !sinSaldo(t); }
         function pagoHecho(t) { return t.pagado === true || (!!t.auditoriaPago && t.pagado !== false); }
         function faltaPago(t) { return requierePago(t) && !pagoHecho(t); }
@@ -2219,7 +2238,7 @@
             document.getElementById('editTaskDate').value = t.vencimiento || '';
             document.getElementById('editTaskEstado').value = t.estado || 'pendientes';
             document.getElementById('editTaskMonto').value = t.monto ?? '';
-            document.getElementById('editTaskPago').value = pagoHecho(t) ? 'si' : 'no';
+            document.getElementById('editTaskPago').value = estadoPagoValor(t);
             const mostrarPago = () => { const tp = document.getElementById('editTaskTipoOb').value; document.getElementById('editTaskPagoBox').style.visibility = (t.tipo === 'vencimiento' && (tp === 'pago' || tp === 'mixto')) ? 'visible' : 'hidden'; };
             document.getElementById('editTaskTipoOb').onchange = mostrarPago;
             document.getElementById('editTaskPosicion').value = t.posicion || '';
@@ -2287,7 +2306,8 @@
                 titulo: titulo, tipoObligacion: document.getElementById('editTaskTipoOb').value, responsable: document.getElementById('editTaskResp').value,
                 vencimiento: document.getElementById('editTaskDate').value, estado: document.getElementById('editTaskEstado').value,
                 monto: document.getElementById('editTaskMonto').value, posicion: document.getElementById('editTaskPosicion').value, descripcion: document.getElementById('editTaskDesc').value,
-                pagado: document.getElementById('editTaskPago').value === 'si' 
+                pagado: document.getElementById('editTaskPago').value === 'si',
+                sinPago: document.getElementById('editTaskPago').value === 'nada' 
             };
 
             btn.disabled = true;
@@ -2750,7 +2770,7 @@
             document.getElementById('wppTel').value = c && c.telefono ? c.telefono : '';
             const sel = document.getElementById('wppPlantilla');
             sel.innerHTML = plantillas().filter(p => p.canal === 'wpp').map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
-            sel.value = plantillaId || (!t ? 'wpp_libre' : ((t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto' || t.monto) ? 'wpp_pago' : 'wpp_presentacion'));
+            sel.value = plantillaId || (!t ? 'wpp_libre' : (!sinSaldo(t) && (t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto' || t.monto) ? 'wpp_pago' : 'wpp_presentacion'));
             if (!sel.value) sel.selectedIndex = 0;
             aplicarPlantillaWpp();
             document.getElementById('wppModal').style.display = 'flex';
@@ -2944,7 +2964,7 @@
             const y = currentCalDate.getFullYear(), m = String(currentCalDate.getMonth() + 1).padStart(2, '0');
             const filas = [['Vencimiento', 'Obligación', 'Cliente', 'Tipo', 'Estado', 'Monto', 'Pago del cliente', 'Pago informado por cliente', 'Archivos', 'Mail enviado', 'WhatsApp enviado']];
             tareasActuales.filter(t => t.tipo === 'vencimiento' && (t.vencimiento || '').startsWith(`${y}-${m}`)).sort((a, b) => (a.vencimiento + a.titulo).localeCompare(b.vencimiento + b.titulo))
-                .forEach(t => filas.push([fmtFecha(t.vencimiento), grupoDe(t), nombreDe(t), ({ pago: 'Pago', mixto: 'Presentación y pago' })[t.tipoObligacion] || 'Presentación', { pendientes: 'Pendiente', proceso: 'En proceso', listas: 'Finalizada' }[t.estado] || t.estado, num(t.monto), !requierePago(t) ? '' : (pagoHecho(t) ? 'Pagado' : 'Falta pagar'), t.auditoriaPago || '', archivosDe(t).length || '', t.avisoMail ? new Date(t.avisoMail.fecha).toLocaleDateString('es-AR') : '', t.avisoWpp ? new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR') : '']));
+                .forEach(t => filas.push([fmtFecha(t.vencimiento), grupoDe(t), nombreDe(t), ({ pago: 'Pago', mixto: 'Presentación y pago' })[t.tipoObligacion] || 'Presentación', { pendientes: 'Pendiente', proceso: 'En proceso', listas: 'Finalizada' }[t.estado] || t.estado, num(t.monto), !(t.tipoObligacion === 'pago' || t.tipoObligacion === 'mixto') ? '' : (sinSaldo(t) ? (saldoAFavor(t) ? 'Saldo a favor' : 'Sin saldo') : (pagoHecho(t) ? 'Pagado' : 'Falta pagar')), t.auditoriaPago || '', archivosDe(t).length || '', t.avisoMail ? new Date(t.avisoMail.fecha).toLocaleDateString('es-AR') : '', t.avisoWpp ? new Date(t.avisoWpp.fecha).toLocaleDateString('es-AR') : '']));
             descargarCSV(`vencimientos_${y}-${m}.csv`, filas);
         }
         window.exportarHonorarios = function() {
